@@ -6,6 +6,8 @@ import SignIn from './sign-in/SignIn.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SignIn />
+    <div style={{ width: '100vw', display: 'flex', justifyContent: 'center', backgroundColor: '#141926' }}>
+      <SignIn  />
+    </div>
   </StrictMode>,
 )
