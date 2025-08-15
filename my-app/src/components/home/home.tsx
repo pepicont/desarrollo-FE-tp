@@ -1,73 +1,12 @@
 import * as React from "react"
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  
-  Avatar,
-  Menu,
-  MenuItem,
-  TextField,
-  InputAdornment,
-  
-  Container,
-  Chip,
-  Button,
-  Paper,
-  Fade,
-} from "@mui/material"
-import {
-  Menu as MenuIcon,
-  Search as SearchIcon,
-
-  Person as PersonIcon,
-  SportsEsports as SportsEsportsIcon, // Cambiado de Gamepad2 a SportsEsportsIcon
-  ShoppingBag as ShoppingBagIcon,
-  RateReview as ReviewIcon,
-  ContactMail as ContactIcon,
-  Logout as LogoutIcon,
-  Close as CloseIcon,
-  ArrowBackIos,
-  ArrowForwardIos,
-  
-} from "@mui/icons-material"
+import { Container, Typography, Box, Button, Chip, Paper, IconButton } from "@mui/material"
 import { styled } from "@mui/material/styles"
-
-// Styled components siguiendo el estilo del login
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-  borderBottom: `1px solid ${theme.palette.divider}`,
-}))
-
-const SearchContainer = styled(Box)(({ theme }) => ({
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
-  zIndex: theme.zIndex.modal,
-  display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "center",
-  paddingTop: theme.spacing(8),
-}))
-
-const SearchBox = styled(Paper)(({ theme }) => ({
-  width: "90%",
-  maxWidth: 600,
-  padding: theme.spacing(2),
-  borderRadius: theme.spacing(1),
-}))
+import ArrowBackIos from "@mui/icons-material/ArrowBackIos"
+import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos"
+import NavBar from "../navBar/navBar"
+import mw3Img from "../../assets/mw3.jpg"
+import fifa24Img from "../../assets/fifa24.jpg"
+import cyberpunkImg from "../../assets/cyberpunk.jpg"
 
 const CarouselContainer = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -85,74 +24,39 @@ const CarouselSlide = styled(Box)({
   transition: "transform 0.5s ease-in-out",
 })
 
-
-
-// Datos de ejemplo para el carousel
 const carouselItems = [
   {
     id: 1,
     title: "Cyberpunk 2077: Phantom Liberty",
-    image: "/cyberpunk-game-screenshot.png",
+    image: cyberpunkImg,
     description: "La nueva expansión ya disponible",
     badge: "NUEVO",
   },
   {
     id: 2,
     title: "FIFA 24",
-    image: "/soccer-game-screenshot.png",
+    image: fifa24Img,
     description: "La experiencia futbolística más realista",
     badge: "POPULAR",
   },
   {
     id: 3,
     title: "Call of Duty: Modern Warfare III",
-    image: "/generic-fps-screenshot.png",
+    image: mw3Img,
     description: "La guerra nunca cambia",
     badge: "OFERTA",
   },
 ]
 
-// Datos de ejemplo para productos destacados
-
-
 export default function Home() {
-  const [drawerOpen, setDrawerOpen] = React.useState(false)
-  const [searchOpen, setSearchOpen] = React.useState(false)
-  const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
   const [currentSlide, setCurrentSlide] = React.useState(0)
-  
 
-  // Auto-advance carousel
   React.useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length)
     }, 5000)
     return () => clearInterval(timer)
   }, [])
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen)
-  }
-
-  const handleSearchToggle = () => {
-    setSearchOpen(!searchOpen)
-  }
-
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setProfileMenuAnchor(event.currentTarget)
-  }
-
-  const handleProfileMenuClose = () => {
-    setProfileMenuAnchor(null)
-  }
-
-  const handleLogout = () => {
-    // Lógica de logout
-    localStorage.removeItem("authToken")
-    localStorage.removeItem("user")
-    handleProfileMenuClose()
-    // Redirigir al login
-  }
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % carouselItems.length)
@@ -162,120 +66,13 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length)
   }
 
-  const menuItems = [
-    { text: "Productos", icon: <SportsEsportsIcon />, action: () => console.log("Productos") }, // Actualizado el icono
-    { text: "Mis Compras", icon: <ShoppingBagIcon />, action: () => console.log("Mis Compras") },
-    { text: "Mis Reseñas", icon: <ReviewIcon />, action: () => console.log("Mis Reseñas") },
-    { text: "Contáctenos", icon: <ContactIcon />, action: () => console.log("Contáctenos") },
-    { text: "Cerrar Sesión", icon: <LogoutIcon />, action: handleLogout },
-  ]
-
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      {/* Navigation Bar */}
-      <StyledAppBar position="fixed">
-        <Toolbar>
-          {/* Menu Hamburguesa */}
-          <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-
-          {/* Lupa de Búsqueda */}
-          <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle} sx={{ mr: 2 }}>
-            <SearchIcon />
-          </IconButton>
-
-          {/* Logo Placeholder */}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "center" }}>
-            GAMING PORTAL
-          </Typography>
-
-          
-
-          {/* Perfil */}
-          <IconButton color="inherit" onClick={handleProfileMenuOpen}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
-              <PersonIcon />
-            </Avatar>
-          </IconButton>
-        </Toolbar>
-      </StyledAppBar>
-
-      {/* Drawer Menu */}
-      <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
-        <Box sx={{ width: 280, pt: 2 }}>
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem
-                key={index}
-                onClick={() => {
-                  item.action()
-                  setDrawerOpen(false)
-                }}
-                sx={{
-                  cursor: "pointer",
-                  "&:hover": { backgroundColor: "action.hover" },
-                }}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
-
-      {/* Search Overlay */}
-      {searchOpen && (
-        <SearchContainer onClick={handleSearchToggle}>
-          <Fade in={searchOpen}>
-            <SearchBox onClick={(e) => e.stopPropagation()}>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                  Buscar Juegos
-                </Typography>
-                <IconButton onClick={handleSearchToggle}>
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              <TextField
-                fullWidth
-                placeholder="Buscar videojuegos, DLC, membresías..."
-                variant="outlined"
-                autoFocus
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </SearchBox>
-          </Fade>
-        </SearchContainer>
-      )}
-
-      {/* Profile Menu */}
-      <Menu
-        anchorEl={profileMenuAnchor}
-        open={Boolean(profileMenuAnchor)}
-        onClose={handleProfileMenuClose}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-      >
-        <MenuItem onClick={handleProfileMenuClose}>Mi Perfil</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
-        <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
-      </Menu>
-
-      {/* Main Content */}
+    <>
+      <NavBar />
       <Container maxWidth="lg" sx={{ mt: 10, mb: 4 }}>
-        {/* Carousel de Novedades */}
         <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold" }}>
-          Novedades
+          Productos Destacados
         </Typography>
-
         <CarouselContainer>
           {carouselItems.map((item, index) => (
             <CarouselSlide
@@ -313,8 +110,6 @@ export default function Home() {
               </Box>
             </CarouselSlide>
           ))}
-
-          {/* Carousel Controls */}
           <IconButton
             sx={{
               position: "absolute",
@@ -342,15 +137,6 @@ export default function Home() {
             <ArrowForwardIos />
           </IconButton>
         </CarouselContainer>
-
-        {/* Productos Destacados */}
-        <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold" }}>
-          Productos Destacados
-        </Typography>
-
-      
-
-        {/* About Us Section */}
         <Paper elevation={2} sx={{ p: 4, textAlign: "center", bgcolor: "background.paper" }}>
           <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
             Sobre Nosotros
@@ -367,6 +153,8 @@ export default function Home() {
           </Button>
         </Paper>
       </Container>
-    </Box>
+    </>
   )
 }
+
+
