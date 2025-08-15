@@ -44,7 +44,7 @@ const carouselItems = [
     title: "Call of Duty: Modern Warfare III",
     image: mw3Img,
     description: "La guerra nunca cambia",
-    badge: "OFERTA",
+    badge: "CLÁSICO",
   },
 ]
 
@@ -148,7 +148,7 @@ export default function Home() {
             auténticas para ayudarte a tomar las mejores decisiones. Únete a miles de gamers que ya confían en nosotros
             para vivir las mejores experiencias de juego.
           </Typography>
-          <Button variant="outlined" size="large" sx={{ mt: 3, textTransform: "none" }}>
+          <Button onClick={() => window.location.href = '/about'} variant="outlined" size="large" sx={{ mt: 3, textTransform: "none" }}>
             Conoce Más
           </Button>
         </Paper>
