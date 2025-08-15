@@ -134,8 +134,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       setLoginSuccess(true);
       setLoginError('');
       
-      // Aquí puedes redirigir o actualizar estado global
-      alert(`¡Bienvenido ${response.user.nombre}!`);
+      // Redirigir al home después de login exitoso
+      window.location.href = '/';
       
     } catch (error: unknown) {
       console.error('Error en login completo:', error);
