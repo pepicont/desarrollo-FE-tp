@@ -1,4 +1,3 @@
-import logoImg from "../../assets/logo.jpg"
 import * as React from "react"
 import {
   AppBar,
@@ -30,6 +29,7 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
+import imgLogo from "../../assets/logo.jpg"
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -92,11 +92,17 @@ export default function NavBar() {
             <SearchIcon />
           </IconButton>
             <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-            <img
-              src={logoImg}
-              alt="Gaming Portal Logo"
-              style={{ height: 40, objectFit: "contain" }}
-            />
+              <IconButton
+                onClick={() => window.location.href = "/"}
+                sx={{ p: 0 }}
+                aria-label="Ir al inicio"
+              >
+                <img
+                  src={imgLogo}
+                  alt="Gaming Portal Logo"
+                  style={{ height: 40, objectFit: "contain" }}
+                />
+              </IconButton>
             </Box>
           <IconButton color="inherit" onClick={handleProfileMenuOpen}>
             <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
