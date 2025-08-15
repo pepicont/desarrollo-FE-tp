@@ -1,3 +1,4 @@
+import logoImg from "../../assets/logo.jpg"
 import * as React from "react"
 import {
   AppBar,
@@ -90,9 +91,13 @@ export default function NavBar() {
           <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle} sx={{ mr: 2 }}>
             <SearchIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "center" }}>
-            GAMING PORTAL
-          </Typography>
+            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+            <img
+              src={logoImg}
+              alt="Gaming Portal Logo"
+              style={{ height: 40, objectFit: "contain" }}
+            />
+            </Box>
           <IconButton color="inherit" onClick={handleProfileMenuOpen}>
             <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
               <PersonIcon />
