@@ -1,6 +1,6 @@
 
 //import SvgIcon from '@mui/material/SvgIcon';
-import logoImage from '../../assets/logo.jpg';
+import logoImage from '../../../assets/logo.jpg';
 
 export function SitemarkIcon() {
   return (

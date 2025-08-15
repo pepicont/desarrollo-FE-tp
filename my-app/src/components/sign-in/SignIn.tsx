@@ -18,7 +18,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './components/ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import { SitemarkIcon } from './components/CustomIcons';
-import { authService } from '../services/authService';
+import { authService } from '../../services/authService';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -144,7 +144,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       
       // Manejar diferentes tipos de errores
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { status: number; data?: any } };
+        const axiosError = error as { response?: { status: number; data?: unknown } };
         console.error('Error de Axios - Status:', axiosError.response?.status);
         console.error('Error de Axios - Data:', axiosError.response?.data);
         
@@ -310,18 +310,33 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </Link>
           </Box>
           <Divider>o</Divider>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Typography sx={{ textAlign: 'center' }}>
-              ¿No tienes una cuenta?{' '}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: 'center' }}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%',
+              }}
+            >
+              <Typography
+                sx={{
+                  textAlign: 'center',
+                  width: '100%',
+                  display: { xs: 'inline', sm: 'inline' }
+                }}
               >
-                Regístrate
-              </Link>
-            </Typography>
-          </Box>
+                ¿No tienes una cuenta?{' '}
+                <Link
+                  href="/material-ui/getting-started/templates/sign-in/"
+                  variant="body2"
+                  sx={{
+                  alignSelf: 'center',
+                  display: { xs: 'inline', sm: 'inline' }, // Asegura que siempre se muestre
+                  }}
+                >
+                  Regístrate
+                </Link>
+              </Typography>
+            </Box>
         </Card>
       </SignInContainer>
     </AppTheme>
