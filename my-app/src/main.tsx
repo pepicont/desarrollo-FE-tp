@@ -5,7 +5,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#37ff00ff' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#141926' }}>
       <App  />
     </div>
   </StrictMode>,

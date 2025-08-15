@@ -2,7 +2,7 @@
 
 function Home() {
   return (
-    <div>
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <h1>hola, soy home</h1>
     </div>
   );
