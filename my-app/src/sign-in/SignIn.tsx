@@ -12,10 +12,13 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './components/ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import { SitemarkIcon } from './components/CustomIcons';
+import { authService } from '../services/authService';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -65,6 +68,16 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  
+  // Nuevos estados para la autenticación
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [loginError, setLoginError] = React.useState('');
+  const [loginSuccess, setLoginSuccess] = React.useState(false);
+
+  // Debug: Verificar estado de isLoading
+  React.useEffect(() => {
+    console.log('isLoading estado:', isLoading);
+  }, [isLoading]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -74,16 +87,82 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     setOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
+  // Función para resetear todos los estados
+  const resetForm = () => {
+    setIsLoading(false);
+    setLoginError('');
+    setLoginSuccess(false);
+    setEmailError(false);
+    setEmailErrorMessage('');
+    setPasswordError(false);
+    setPasswordErrorMessage('');
+    console.log('Formulario reseteado');
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevenir reload de página
+    
+    // Validar inputs antes de enviar
+    if (!validateInputs()) {
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+
+    // Limpiar errores previos
+    setLoginError('');
+    setLoginSuccess(false);
+    setIsLoading(true);
+
+    try {
+      // Extraer datos del formulario
+      const data = new FormData(event.currentTarget);
+      const email = data.get('email') as string;
+      const password = data.get('password') as string;
+      
+      // Llamar al servicio de autenticación
+      const response = await authService.login({
+        mail: email,
+        contrasenia: password,
+      });
+
+      // Si llegamos aquí, el login fue exitoso
+      console.log('Login exitoso:', response);
+      
+      // Guardar token en localStorage
+      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      setLoginSuccess(true);
+      setLoginError('');
+      
+      // Aquí puedes redirigir o actualizar estado global
+      alert(`¡Bienvenido ${response.user.nombre}!`);
+      
+    } catch (error: unknown) {
+      console.error('Error en login completo:', error);
+      console.error('Tipo de error:', typeof error);
+      console.error('Error stringificado:', JSON.stringify(error, null, 2));
+      
+      // Manejar diferentes tipos de errores
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number; data?: any } };
+        console.error('Error de Axios - Status:', axiosError.response?.status);
+        console.error('Error de Axios - Data:', axiosError.response?.data);
+        
+        if (axiosError.response?.status === 401) {
+          setLoginError('Email o contraseña incorrectos');
+        } else if (axiosError.response?.status === 400) {
+          setLoginError('Por favor completa todos los campos');
+        } else {
+          setLoginError(`Error del servidor (${axiosError.response?.status}). Intenta nuevamente.`);
+        }
+      } else {
+        console.error('Error no es de tipo Axios:', error);
+        setLoginError('Error inesperado. Intenta nuevamente.');
+      }
+      
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const validateInputs = () => {
@@ -151,6 +230,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
+                disabled={isLoading}
                 color={emailError ? 'error' : 'primary'}
               />
             </FormControl>
@@ -164,10 +244,10 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                autoFocus
                 required
                 fullWidth
                 variant="outlined"
+                disabled={isLoading}
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
@@ -176,13 +256,48 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               label="Recordarme"
             />
             <ForgotPassword open={open} handleClose={handleClose} />
+            
+            {/* Mostrar errores de login */}
+            {loginError && (
+              <Alert severity="error" sx={{ width: '100%' }}>
+                {loginError}
+              </Alert>
+            )}
+            
+            {/* Mostrar éxito de login */}
+            {loginSuccess && (
+              <Alert severity="success" sx={{ width: '100%' }}>
+                ¡Login exitoso! Bienvenido
+              </Alert>
+            )}
+            
+            {/* Botón de debug - temporal */}
+            {isLoading && (
+              <Button 
+                onClick={resetForm}
+                variant="outlined" 
+                color="secondary"
+                size="small"
+              >
+                🔧 Reset (Debug)
+              </Button>
+            )}
+            
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              disabled={isLoading}
+              sx={{ mt: 1 }}
             >
-              Iniciar Sesión
+              {isLoading ? (
+                <>
+                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  Iniciando sesión...
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
             </Button>
             <Link
               component="button"
