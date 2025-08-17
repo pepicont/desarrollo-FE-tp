@@ -9,46 +9,67 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Badge,
   Avatar,
   Menu,
   MenuItem,
   TextField,
   InputAdornment,
+  Typography,
 } from "@mui/material"
 import {
   Menu as MenuIcon,
   Search as SearchIcon,
   Person as PersonIcon,
+  ShoppingCart as ShoppingCartIcon,
   ShoppingBag as ShoppingBagIcon,
   RateReview as ReviewIcon,
   ContactMail as ContactIcon,
   Logout as LogoutIcon,
   Close as CloseIcon,
+  SportsEsports as SportsEsportsIcon,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
 import imgLogo from "../../assets/logo.jpg"
 
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-  borderBottom: `1px solid ${theme.palette.divider}`,
+const StyledAppBar = styled(AppBar)(() => ({
+  backgroundColor: "#000000ff",
+  color: "#ffffff",
+  boxShadow: "none",
+  border: "none",
+}))
+
+const StyledListItem = styled(ListItem)<{ isActive?: boolean }>(() => ({
+  margin: "4px 8px",
+  borderRadius: 8,
+  cursor: "pointer",
+  transition: "background-color 0.2s ease",
+  "& .MuiListItemIcon-root": {
+    minWidth: 40,
+  },
 }))
 
 
 
-const menuItems = [
-  { text: "Mis Compras", icon: <ShoppingBagIcon />, action: () => console.log("Mis Compras") },
-  { text: "Mis Reseñas", icon: <ReviewIcon />, action: () => console.log("Mis Reseñas") },
-  { text: "Contáctenos", icon: <ContactIcon />, action: () => console.log("Contáctenos") },
-  { text: "Cerrar Sesión", icon: <LogoutIcon />, action: () => { localStorage.removeItem("authToken"); localStorage.removeItem("user"); } },
+const baseMenuItems = [
+  { text: "Productos", icon: <SportsEsportsIcon />, href: "/" },
+  { text: "Mis compras", icon: <ShoppingBagIcon />, href: "/mis-compras" },
+  { text: "Mis reseñas", icon: <ReviewIcon />, href: "/mis-resenas" },
+  { text: "Contáctenos", icon: <ContactIcon />, href: "/contacto" },
+  { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
-export default function NavBar() {
+type NavBarProps = {
+  onCartClick?: () => void
+  cartCount?: number
+}
+
+export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
+  const [activeItem, setActiveItem] = React.useState<string>("Productos")
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen)
   const handleSearchToggle = () => setSearchOpen(!searchOpen)
@@ -72,10 +93,23 @@ export default function NavBar() {
     }
   }
 
+  const handleMenuClick = (text: string, href?: string, isLogout?: boolean) => {
+    if (isLogout) {
+      handleLogout()
+      return
+    }
+    setActiveItem(text)
+    if (href) {
+      // Simple navigation without depending on router context
+      window.location.href = href
+    }
+    setDrawerOpen(false)
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <StyledAppBar position="fixed">
-        <Toolbar>
+        <Toolbar sx={{ minHeight: 72 }}>
           <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
@@ -116,18 +150,17 @@ export default function NavBar() {
             </Box>
           ) : (
             <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-              <IconButton
-                onClick={() => window.location.href = "/"}
-                sx={{ p: 0 }}
-                aria-label="Ir al inicio"
-              >
-                <img
-                  src={imgLogo}
-                  alt="Gaming Portal Logo"
-                  style={{ height: 40, objectFit: "contain" }}
-                />
+              <IconButton onClick={() => (window.location.href = "/")} sx={{ p: 0 }} aria-label="Ir al inicio">
+                <img src={imgLogo} alt="Gaming Portal Logo" style={{ height: 56, objectFit: "contain" }} />
               </IconButton>
             </Box>
+          )}
+          {onCartClick && (
+            <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
+              <Badge badgeContent={cartCount} color="error">
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
           )}
           <IconButton color="inherit" onClick={handleProfileMenuOpen}>
             <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
@@ -137,20 +170,39 @@ export default function NavBar() {
         </Toolbar>
       </StyledAppBar>
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
-        <Box sx={{ width: 280, pt: 2 }}>
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem
-                key={index}
-                onClick={() => {
-                  item.action()
-                  setDrawerOpen(false)
+        <Box sx={{ width: 280, pt: 2, backgroundColor: "#1E2A3A", height: "100%" }}>
+          <Box sx={{ p: 2, borderBottom: "1px solid #2A3441" }}>
+            <Typography variant="h6" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
+              Menú
+            </Typography>
+          </Box>
+          <List sx={{ pt: 1 }}>
+            {baseMenuItems.map((item) => (
+              <StyledListItem
+                key={item.text}
+                isActive={!item.isLogout && activeItem === item.text}
+                onClick={() => handleMenuClick(item.text, item.href, item.isLogout)}
+                sx={{
+                  backgroundColor: !item.isLogout && activeItem === item.text ? "#4A90E2" : "transparent",
+                  color: !item.isLogout && activeItem === item.text ? "#FFFFFF" : "#B0BEC5",
+                  "&:hover": {
+                    backgroundColor:
+                      !item.isLogout && activeItem === item.text ? "#4A90E2" : "rgba(74, 144, 226, 0.1)",
+                  },
+                  ...(item.isLogout && {
+                    color: "#FF5252",
+                    "& .MuiListItemIcon-root": {
+                      color: "#FF5252",
+                    },
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 82, 82, 0.1)",
+                    },
+                  }),
                 }}
-                sx={{ cursor: "pointer", "&:hover": { backgroundColor: "action.hover" } }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
-              </ListItem>
+              </StyledListItem>
             ))}
           </List>
         </Box>
