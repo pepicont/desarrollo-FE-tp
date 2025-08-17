@@ -3,7 +3,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Typography,
   Box,
   Drawer,
   List,
@@ -15,8 +14,6 @@ import {
   MenuItem,
   TextField,
   InputAdornment,
-  Paper,
-  Fade,
 } from "@mui/material"
 import {
   Menu as MenuIcon,
@@ -38,26 +35,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
 }))
 
-const SearchContainer = styled(Box)(({ theme }) => ({
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
-  zIndex: theme.zIndex.modal,
-  display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "center",
-  paddingTop: theme.spacing(8),
-}))
 
-const SearchBox = styled(Paper)(({ theme }) => ({
-  width: "90%",
-  maxWidth: 600,
-  padding: theme.spacing(2),
-  borderRadius: theme.spacing(1),
-}))
 
 const menuItems = [
   { text: "Mis Compras", icon: <ShoppingBagIcon />, action: () => console.log("Mis Compras") },
@@ -69,6 +47,7 @@ const menuItems = [
 export default function NavBar() {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState("")
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen)
@@ -81,6 +60,18 @@ export default function NavBar() {
     handleProfileMenuClose()
   }
 
+  const closeSearch = () => {
+    setSearchOpen(false)
+    setSearchQuery("")
+  }
+
+  const onSubmitSearch = () => {
+
+    if (searchQuery.trim()) {
+      console.log("Buscar:", searchQuery.trim())
+    }
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <StyledAppBar position="fixed">
@@ -88,9 +79,42 @@ export default function NavBar() {
           <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
-          <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle} sx={{ mr: 2 }}>
-            <SearchIcon />
-          </IconButton>
+          {!searchOpen && (
+            <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle} sx={{ mr: 2 }}>
+              <SearchIcon />
+            </IconButton>
+          )}
+          {searchOpen ? (
+            <Box sx={{ flexGrow: 1, mx: 2 }}>
+              <TextField
+                fullWidth
+                placeholder="Buscar videojuegos, DLC, membresías..."
+                variant="outlined"
+                autoFocus
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") closeSearch()
+                  if (e.key === "Enter") onSubmitSearch()
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton aria-label="Cerrar búsqueda" onClick={closeSearch} edge="end" size="small">
+                        <CloseIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+          ) : (
             <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
               <IconButton
                 onClick={() => window.location.href = "/"}
@@ -104,6 +128,7 @@ export default function NavBar() {
                 />
               </IconButton>
             </Box>
+          )}
           <IconButton color="inherit" onClick={handleProfileMenuOpen}>
             <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
               <PersonIcon />
@@ -130,35 +155,6 @@ export default function NavBar() {
           </List>
         </Box>
       </Drawer>
-      {searchOpen && (
-        <SearchContainer onClick={handleSearchToggle}>
-          <Fade in={searchOpen}>
-            <SearchBox onClick={e => e.stopPropagation()}>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                  Buscar Juegos
-                </Typography>
-                <IconButton onClick={handleSearchToggle}>
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              <TextField
-                fullWidth
-                placeholder="Buscar videojuegos, DLC, membresías..."
-                variant="outlined"
-                autoFocus
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </SearchBox>
-          </Fade>
-        </SearchContainer>
-      )}
       <Menu
         anchorEl={profileMenuAnchor}
         open={Boolean(profileMenuAnchor)}
