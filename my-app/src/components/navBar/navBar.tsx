@@ -28,6 +28,7 @@ import {
   Logout as LogoutIcon,
   Close as CloseIcon,
   SportsEsports as SportsEsportsIcon,
+  Home as HomeIcon,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
 import imgLogo from "../../assets/logo.jpg"
@@ -52,7 +53,8 @@ const StyledListItem = styled(ListItem)<{ isActive?: boolean }>(() => ({
 
 
 const baseMenuItems = [
-  { text: "Productos", icon: <SportsEsportsIcon />, href: "/" },
+  { text: "Home", icon: <HomeIcon />, href: "/" },
+  { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Mis compras", icon: <ShoppingBagIcon />, href: "/mis-compras" },
   { text: "Mis reseñas", icon: <ReviewIcon />, href: "/mis-resenas" },
   { text: "Contáctenos", icon: <ContactIcon />, href: "/contacto" },
@@ -69,7 +71,19 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
-  const [activeItem, setActiveItem] = React.useState<string>("Productos")
+  const [activeItem, setActiveItem] = React.useState<string>(() => {
+    try {
+      const path = window.location.pathname
+      const items = baseMenuItems.filter((i) => i.href && !i.isLogout)
+      const match = items
+        .slice()
+        .sort((a, b) => (b.href!.length - a.href!.length))
+        .find((i) => (i.href === "/" ? path === "/" : path.startsWith(i.href!)))
+      return match?.text ?? "Home"
+    } catch {
+      return "Home"
+    }
+  })
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen)
   const handleSearchToggle = () => setSearchOpen(!searchOpen)
@@ -109,19 +123,18 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <StyledAppBar position="fixed">
-        <Toolbar sx={{ minHeight: 72 }}>
-          <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-          {!searchOpen && (
-            <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle} sx={{ mr: 2 }}>
-              <SearchIcon />
+        <Toolbar sx={{ minHeight: 72, position: "relative" }}>
+          {/* Left: menu + search (or search field when open) */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
+              <MenuIcon />
             </IconButton>
-          )}
-          {searchOpen ? (
-            <Box sx={{ flexGrow: 1, mx: 2 }}>
+            {!searchOpen ? (
+              <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle}>
+                <SearchIcon />
+              </IconButton>
+            ) : (
               <TextField
-                fullWidth
                 placeholder="Buscar videojuegos, DLC, membresías..."
                 variant="outlined"
                 autoFocus
@@ -132,6 +145,7 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
                   if (e.key === "Escape") closeSearch()
                   if (e.key === "Enter") onSubmitSearch()
                 }}
+                sx={{ width: { xs: "60vw", sm: "45vw", md: 440 } }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -147,26 +161,31 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
                   ),
                 }}
               />
-            </Box>
-          ) : (
-            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-              <IconButton onClick={() => (window.location.href = "/")} sx={{ p: 0 }} aria-label="Ir al inicio">
-                <img src={imgLogo} alt="Gaming Portal Logo" style={{ height: 56, objectFit: "contain" }} />
-              </IconButton>
-            </Box>
-          )}
-          {onCartClick && (
-            <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
-              <Badge badgeContent={cartCount} color="error">
-                <ShoppingCartIcon />
-              </Badge>
+            )}
+          </Box>
+
+          {/* Center: logo stays centered regardless */}
+          <Box sx={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
+            <IconButton onClick={() => (window.location.href = "/")} sx={{ p: 0 }} aria-label="Ir al inicio">
+              <img src={imgLogo} alt="Gaming Portal Logo" style={{ height: 56, objectFit: "contain" }} />
             </IconButton>
-          )}
-          <IconButton color="inherit" onClick={handleProfileMenuOpen}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
-              <PersonIcon />
-            </Avatar>
-          </IconButton>
+          </Box>
+
+          {/* Right: cart (optional) + profile */}
+          <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+            {onCartClick && (
+              <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
+                <Badge badgeContent={cartCount} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+            )}
+            <IconButton color="inherit" onClick={handleProfileMenuOpen}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+                <PersonIcon />
+              </Avatar>
+            </IconButton>
+          </Box>
         </Toolbar>
       </StyledAppBar>
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
@@ -214,7 +233,22 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <MenuItem onClick={handleProfileMenuClose}>Mi Perfil</MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleProfileMenuClose()
+            window.location.href = "/perfil"
+          }}
+        >
+          Mi Perfil
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleProfileMenuClose()
+            window.location.href = "/productos"
+          }}
+        >
+          Productos
+        </MenuItem>
         <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
         <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
       </Menu>
