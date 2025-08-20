@@ -249,7 +249,6 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
         >
           Productos
         </MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
         <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
       </Menu>
     </Box>
