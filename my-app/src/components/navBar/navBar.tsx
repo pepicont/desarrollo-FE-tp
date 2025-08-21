@@ -2,6 +2,7 @@ import * as React from "react"
 import {
   AppBar,
   Toolbar,
+  Button,
   IconButton,
   Box,
   Drawer,
@@ -66,11 +67,18 @@ type NavBarProps = {
   cartCount?: number
 }
 
+
+
 export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
+  const [isLoggedIn, setIsLoggedIn] = React.useState(() => {
+    const user = localStorage.getItem("user");
+    const token = localStorage.getItem("authToken");
+    return !!user && !!token;
+  });
   const [activeItem, setActiveItem] = React.useState<string>(() => {
     try {
       const path = window.location.pathname
@@ -92,7 +100,10 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const handleLogout = () => {
     localStorage.removeItem("authToken")
     localStorage.removeItem("user")
+    setIsLoggedIn(false)
     handleProfileMenuClose()
+
+    
   }
 
   const closeSearch = () => {
@@ -172,7 +183,7 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
           </Box>
 
           {/* Right: cart (optional) + profile */}
-          <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+          {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
             {onCartClick && (
               <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
                 <Badge badgeContent={cartCount} color="error">
@@ -185,7 +196,17 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
                 <PersonIcon />
               </Avatar>
             </IconButton>
-          </Box>
+          </Box>}
+
+          {/* Acá debería ir un botón de iniciar sesión si no está logueado */}
+          {!isLoggedIn && (
+            <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+
+              <Button color="inherit" /*onClick={}*/>
+                Iniciar Sesión
+              </Button>
+            </Box>
+          )}
         </Toolbar>
       </StyledAppBar>
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
@@ -196,33 +217,35 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
             </Typography>
           </Box>
           <List sx={{ pt: 1 }}>
-            {baseMenuItems.map((item) => (
-              <StyledListItem
-                key={item.text}
-                isActive={!item.isLogout && activeItem === item.text}
-                onClick={() => handleMenuClick(item.text, item.href, item.isLogout)}
-                sx={{
-                  backgroundColor: !item.isLogout && activeItem === item.text ? "#4A90E2" : "transparent",
-                  color: !item.isLogout && activeItem === item.text ? "#FFFFFF" : "#B0BEC5",
-                  "&:hover": {
-                    backgroundColor:
-                      !item.isLogout && activeItem === item.text ? "#4A90E2" : "rgba(74, 144, 226, 0.1)",
-                  },
-                  ...(item.isLogout && {
-                    color: "#FF5252",
-                    "& .MuiListItemIcon-root": {
-                      color: "#FF5252",
-                    },
+            {baseMenuItems
+              .filter((item) => !item.isLogout || isLoggedIn)
+              .map((item) => (
+                <StyledListItem
+                  key={item.text}
+                  isActive={!item.isLogout && activeItem === item.text}
+                  onClick={() => handleMenuClick(item.text, item.href, item.isLogout)}
+                  sx={{
+                    backgroundColor: !item.isLogout && activeItem === item.text ? "#4A90E2" : "transparent",
+                    color: !item.isLogout && activeItem === item.text ? "#FFFFFF" : "#B0BEC5",
                     "&:hover": {
-                      backgroundColor: "rgba(255, 82, 82, 0.1)",
+                      backgroundColor:
+                        !item.isLogout && activeItem === item.text ? "#4A90E2" : "rgba(74, 144, 226, 0.1)",
                     },
-                  }),
-                }}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </StyledListItem>
-            ))}
+                    ...(item.isLogout && {
+                      color: "#FF5252",
+                      "& .MuiListItemIcon-root": {
+                        color: "#FF5252",
+                      },
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 82, 82, 0.1)",
+                      },
+                    }),
+                  }}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </StyledListItem>
+              ))}
           </List>
         </Box>
       </Drawer>
@@ -240,14 +263,6 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
           }}
         >
           Mi Perfil
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleProfileMenuClose()
-            window.location.href = "/productos"
-          }}
-        >
-          Productos
         </MenuItem>
         <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
       </Menu>

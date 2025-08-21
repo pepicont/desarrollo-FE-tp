@@ -177,6 +177,8 @@ const featuredProducts = [
   },
 ]
 
+
+
 export default function Home() {
   const [cartOpen, setCartOpen] = React.useState(false)
   const [currentSlide, setCurrentSlide] = React.useState(0)
