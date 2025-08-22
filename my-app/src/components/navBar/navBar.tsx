@@ -102,6 +102,8 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
     localStorage.removeItem("user")
     setIsLoggedIn(false)
     handleProfileMenuClose()
+    window.location.href = "/"  //manda al home cuando cierra sesión
+
 
     
   }
@@ -202,7 +204,8 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
           {!isLoggedIn && (
             <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
 
-              <Button color="inherit" /*onClick={}*/>
+              <Button color ="inherit" variant="contained"size="large"sx={{ textTransform: "none", borderColor: "#ffffffff", color: "#ffffffff", "&:hover": { backgroundColor: "#003e7cff" } }}
+               onClick={() => (window.location.href = "/login")}>
                 Iniciar Sesión
               </Button>
             </Box>
