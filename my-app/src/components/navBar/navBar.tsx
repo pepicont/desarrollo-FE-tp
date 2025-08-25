@@ -17,6 +17,7 @@ import {
   TextField,
   InputAdornment,
   Typography,
+  Modal,
 } from "@mui/material"
 import {
   Menu as MenuIcon,
@@ -30,9 +31,12 @@ import {
   Close as CloseIcon,
   SportsEsports as SportsEsportsIcon,
   Home as HomeIcon,
+  Close,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
 import imgLogo from "../../assets/logo.jpg"
+import { useState } from "react"
+
 
 const StyledAppBar = styled(AppBar)(() => ({
   backgroundColor: "#000000ff",
@@ -58,7 +62,7 @@ const baseMenuItems = [
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Mis compras", icon: <ShoppingBagIcon />, href: "/mis-compras" },
   { text: "Mis reseñas", icon: <ReviewIcon />, href: "/mis-resenas" },
-  { text: "Contáctenos", icon: <ContactIcon />, href: "/contacto" },
+  { text: "Contáctenos", icon: <ContactIcon /> },
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
@@ -132,6 +136,11 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
       handleLogout()
       return
     }
+    if (text === "Contáctenos") {
+      handleOpenModal()
+      setDrawerOpen(false)
+      return
+    }
     setActiveItem(text)
     if (href) {
       // Simple navigation without depending on router context
@@ -139,6 +148,41 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
     }
     setDrawerOpen(false)
   }
+
+  const [modalOpen, setModalOpen] = useState(false)
+    const [formData, setFormData] = useState({
+      email: "",
+      asunto: "",
+      descripcion: "",
+    })
+  
+    const handleOpenModal = () => setModalOpen(true)
+    const handleCloseModal = () => {
+      setModalOpen(false)
+      setFormData({ email: "", asunto: "", descripcion: "" })
+    }
+  
+    const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: event.target.value,
+      }))
+    }
+  
+    const handleSubmit = () => {
+      console.log("Formulario enviado:", formData)
+      //acá iría la lógica cuando tengamos un sistema de mails
+      handleCloseModal()
+    }
+
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
+    let userEmail = "";
+    if (user) {
+       try {
+    const parsed = JSON.parse(user);
+    userEmail = parsed.mail || parsed.email || "";
+  } catch {console.log("Error parsing user data")}
+            }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -276,6 +320,169 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
         </MenuItem>
         <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
       </Menu>
+      <Modal
+          open={modalOpen}
+          onClose={handleCloseModal}
+          aria-labelledby="modal-consulta-titulo"
+          aria-describedby="modal-consulta-descripcion"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "90%", sm: "500px" },
+              bgcolor: "#1e2532",
+              border: "1px solid #2A3441",
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            {/* Header del modal con X para cerrar */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+              <Typography
+                id="modal-consulta-titulo"
+                variant="h5"
+                component="h2"
+                sx={{ color: "#FFFFFF", fontWeight: "bold" }}
+              >
+                Enviar Consulta
+              </Typography>
+              <IconButton onClick={handleCloseModal} sx={{ color: "#B0BEC5", "&:hover": { color: "#FFFFFF" } }}>
+                <Close />
+              </IconButton>
+            </Box>
+
+            {/* Formulario */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                value={userEmail || formData.email}
+                onChange={handleInputChange("email")}
+                variant="outlined"
+                disabled={!!userEmail}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: "#FFFFFF",
+                    "& fieldset": {
+                      borderColor: "#2A3441",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "#B0BEC5",
+                    "&.Mui-focused": {
+                      color: "#4A90E2",
+                    },
+                  },
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Asunto de la consulta"
+                value={formData.asunto}
+                onChange={handleInputChange("asunto")}
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: "#FFFFFF",
+                    "& fieldset": {
+                      borderColor: "#2A3441",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "#B0BEC5",
+                    "&.Mui-focused": {
+                      color: "#4A90E2",
+                    },
+                  },
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Descripción"
+                multiline
+                rows={4}
+                value={formData.descripcion}
+                onChange={handleInputChange("descripcion")}
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: "#FFFFFF",
+                    "& fieldset": {
+                      borderColor: "#2A3441",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#4A90E2",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "#B0BEC5",
+                    "&.Mui-focused": {
+                      color: "#4A90E2",
+                    },
+                  },
+                }}
+              />
+
+              {/* Botones */}
+              <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  onClick={handleCloseModal}
+                  sx={{
+                    borderColor: "#2A3441",
+                    color: "#B0BEC5",
+                    "&:hover": {
+                      borderColor: "#B0BEC5",
+                      color: "#FFFFFF",
+                    },
+                  }}
+                >
+                  Cerrar
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={!formData.email || !formData.asunto || !formData.descripcion}
+                  sx={{
+                    backgroundColor: "#4A90E2",
+                    "&:hover": {
+                      backgroundColor: "#357ABD",
+                    },
+                    "&:disabled": {
+                      backgroundColor: "#2A3441",
+                      color: "#666",
+                    },
+                  }}
+                >
+                  Enviar
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Modal>
     </Box>
+    
   )
 }
