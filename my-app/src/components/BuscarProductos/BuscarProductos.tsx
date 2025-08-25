@@ -147,7 +147,7 @@ export default function BuscarProductos() {
     },
   ]
 
-  const categories = ["Juegos", "Complementos", "Servicios", "Explorar"]
+
 
   const clearFilters = () => {
     setPriceFilter("")
@@ -162,27 +162,7 @@ export default function BuscarProductos() {
       <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
         {/* NavBar compartida */}
         <NavBar />
-
-  {/* Eliminado Drawer/Menu locales: NavBar maneja navegación y perfil */}
-
-        <Box sx={{ backgroundColor: "#1a1f2e", borderBottom: "1px solid #374151", px: 2, py: 1 }}>
-          <Box sx={{ display: "flex", gap: 3, overflowX: "auto" }}>
-            {categories.map((category) => (
-              <Button
-                key={category}
-                sx={{
-                  color: "#9ca3af",
-                  "&:hover": { color: "white", backgroundColor: "#374151" },
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {category}
-              </Button>
-            ))}
-          </Box>
-        </Box>
-
-  <Container maxWidth="xl" sx={{ py: 4, mt: 8 }}>
+      <Container maxWidth="xl" sx={{ py: 4, mt: 8 }}>
           <Box sx={{ mb: 4 }}>
             <Box sx={{ maxWidth: "600px", mx: "auto" }}>
               <TextField
