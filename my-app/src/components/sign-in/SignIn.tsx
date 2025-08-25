@@ -117,7 +117,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       const data = new FormData(event.currentTarget);
       const email = data.get('email') as string;
       const password = data.get('password') as string;
-      
+      const remember = data.get('rememberMe') === 'remember'; // Nuevo campo "Recordarme"
+
       // Llamar al servicio de autenticación
       const response = await authService.login({
         mail: email,
@@ -127,10 +128,15 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       // Si llegamos aquí, el login fue exitoso
       console.log('Login exitoso:', response);
       
-      // Guardar token en localStorage
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
+      // Guardar token en localStorage si elige guardar sesión, sino en session
+      if (remember) {
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+      } else {
+        sessionStorage.setItem('authToken', response.token);
+        sessionStorage.setItem('user', JSON.stringify(response.user));
+      }
+
       setLoginSuccess(true);
       setLoginError('');
       
@@ -252,7 +258,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               />
             </FormControl>
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={<Checkbox value="remember" name="rememberMe" color="primary" />}
               label="Recordarme"
             />
             <ForgotPassword open={open} handleClose={handleClose} />

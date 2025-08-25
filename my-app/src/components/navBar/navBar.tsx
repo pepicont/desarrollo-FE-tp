@@ -77,6 +77,11 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const [isLoggedIn, setIsLoggedIn] = React.useState(() => {
     const user = localStorage.getItem("user");
     const token = localStorage.getItem("authToken");
+    if (!user || !token) {
+      const sessionUser = sessionStorage.getItem("user");
+      const sessionToken = sessionStorage.getItem("authToken");
+      return !!sessionUser && !!sessionToken;
+    }
     return !!user && !!token;
   });
   const [activeItem, setActiveItem] = React.useState<string>(() => {
@@ -100,6 +105,8 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const handleLogout = () => {
     localStorage.removeItem("authToken")
     localStorage.removeItem("user")
+    sessionStorage.removeItem("authToken")
+    sessionStorage.removeItem("user")
     setIsLoggedIn(false)
     handleProfileMenuClose()
     window.location.href = "/"  //manda al home cuando cierra sesión
