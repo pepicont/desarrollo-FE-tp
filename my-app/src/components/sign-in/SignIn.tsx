@@ -128,12 +128,13 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       // Si llegamos aquí, el login fue exitoso
       console.log('Login exitoso:', response);
       
-      // Guardar token en localStorage si elige guardar sesión, sino en session
+      // Guardar token usando el servicio de autenticación
+      authService.saveToken(response.token, remember);
+      
+      // Guardar usuario en localStorage o sessionStorage
       if (remember) {
-        localStorage.setItem('authToken', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
       } else {
-        sessionStorage.setItem('authToken', response.token);
         sessionStorage.setItem('user', JSON.stringify(response.user));
       }
 

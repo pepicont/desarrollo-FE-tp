@@ -62,4 +62,48 @@ export const authService = {
       throw error;
     }
   },
+
+  // Función para guardar token
+  saveToken(token: string, remember: boolean = false): void {
+    if (remember) {
+      localStorage.setItem('authToken', token);
+    } else {
+      sessionStorage.setItem('authToken', token);
+    }
+  },
+
+  // Función para obtener token
+  getToken(): string | null {
+    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  },
+
+  // Función para eliminar token
+  removeToken(): void {
+    localStorage.removeItem('authToken');
+    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+  },
+
+  // Función para verificar si el usuario está autenticado
+  async isAuthenticated(): Promise<boolean> {
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+
+    try {
+      await this.verifyToken(token);
+      return true;
+    } catch {
+      // Si el token no es válido, lo eliminamos
+      this.removeToken();
+      return false;
+    }
+  },
+
+  // Función para hacer logout
+  logout(): void {
+    this.removeToken();
+  },
 };
