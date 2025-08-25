@@ -156,7 +156,21 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
       descripcion: "",
     })
   
+     const [emailError, setEmailError] = useState(false);
+     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const handleOpenModal = () => setModalOpen(true)
+     // Función de validación de email
+     const validateEmail = (email: string) => {
+       if (!email || !/\S+@\S+\.\S+/.test(email)) {
+         setEmailError(true);
+         setEmailErrorMessage("Por favor ingresa una dirección de correo válida.");
+         return false;
+       } else {
+         setEmailError(false);
+         setEmailErrorMessage("");
+         return true;
+       }
+     };
     const handleCloseModal = () => {
       setModalOpen(false)
       setFormData({ email: "", asunto: "", descripcion: "" })
@@ -170,8 +184,9 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
     }
   
     const handleSubmit = () => {
+
       console.log("Formulario enviado:", formData)
-      //acá iría la lógica cuando tengamos un sistema de mails
+       if (!validateEmail(formData.email)) return;
       handleCloseModal()
     }
 
@@ -365,6 +380,8 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
                 onChange={handleInputChange("email")}
                 variant="outlined"
                 disabled={!!userEmail}
+                error={emailError}
+                helperText={emailErrorMessage}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     color: "#FFFFFF",
