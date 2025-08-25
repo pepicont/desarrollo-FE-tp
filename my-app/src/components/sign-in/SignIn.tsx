@@ -28,7 +28,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: 'auto',
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up('xl')]: {
     maxWidth: '450px',
   },
   boxShadow:
@@ -43,7 +43,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
   minHeight: '100%',
   padding: theme.spacing(2),
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up('xl')]: {
     padding: theme.spacing(4),
   },
   '&::before': {
