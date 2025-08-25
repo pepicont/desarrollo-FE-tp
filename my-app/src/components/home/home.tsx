@@ -454,6 +454,7 @@ export default function Home() {
               variant="outlined"
               size="large"
               sx={{ mt: 3, textTransform: "none", borderColor: "#4A90E2", color: "#4A90E2" }}
+              onClick={() => (window.location.href = "/about-us")}
             >
               Conoce Más
             </Button>
