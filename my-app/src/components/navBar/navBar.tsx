@@ -36,6 +36,7 @@ import {
 import { styled } from "@mui/material/styles"
 import imgLogo from "../../assets/logo.jpg"
 import { useState } from "react"
+import {authService} from "../../services/authService"
 
 
 const StyledAppBar = styled(AppBar)(() => ({
@@ -107,10 +108,7 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => setProfileMenuAnchor(event.currentTarget)
   const handleProfileMenuClose = () => setProfileMenuAnchor(null)
   const handleLogout = () => {
-    localStorage.removeItem("authToken")
-    localStorage.removeItem("user")
-    sessionStorage.removeItem("authToken")
-    sessionStorage.removeItem("user")
+    authService.logout();
     setIsLoggedIn(false)
     handleProfileMenuClose()
     window.location.href = "/"  //manda al home cuando cierra sesión
