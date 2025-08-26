@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Box,
   Container,
@@ -14,6 +14,13 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -26,6 +33,7 @@ import EditIcon from "@mui/icons-material/Edit"
 import avatar1 from "../../assets/cyberpunk.jpg"
 import avatar2 from "../../assets/fifa24.jpg"
 import avatar3 from "../../assets/mw3.jpg"
+import { authService } from "../../services/authService"
 
 const darkTheme = createTheme({
   palette: {
@@ -41,20 +49,157 @@ const preloadedAvatars = [avatar1, avatar2, avatar3]
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [selectedAvatar, setSelectedAvatar] = useState<string>(preloadedAvatars[0])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
+  const [showEmailWarning, setShowEmailWarning] = useState(false)
+  const [pendingEmailChange, setPendingEmailChange] = useState("")
 
   const [userData, setUserData] = useState({
-    username: "GamerPro2024",
-    realName: "Juan Carlos Pérez",
-    email: "juan.perez@email.com",
-    birthDate: "1995-03-15",
-    accountCreated: "2023-01-10",
+    username: "",
+    realName: "",
+    email: "",
+    birthDate: "",
+    accountCreated: "",
   })
 
   const [editData, setEditData] = useState(userData)
 
-  const handleSave = () => {
-    setUserData(editData)
-    setIsEditing(false)
+  // Cargar datos del perfil cuando el componente se monta
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = authService.getToken()
+        
+        if (!token) {
+          setError('No estás autenticado')
+          setLoading(false)
+          return
+        }
+
+        const response = await fetch('http://localhost:3000/api/auth/profile', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (response.ok) {
+          const profile = await response.json()
+          
+          // Función para formatear fechas UTC correctamente
+          const formatUTCDate = (dateString: string) => {
+            const date = new Date(dateString)
+            return date.toISOString().split('T')[0]
+          }
+          
+          // Actualizar userData con los datos reales
+          const updatedUserData = {
+            username: profile.nombreUsuario,
+            realName: profile.nombre,
+            email: profile.mail,
+            birthDate: formatUTCDate(profile.fechaNacimiento),
+            accountCreated: formatUTCDate(profile.fechaCreacion),
+          }
+          
+          setUserData(updatedUserData)
+          setEditData(updatedUserData)
+        } else {
+          setError('Error al cargar el perfil')
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+        setError('Error de conexión')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserProfile()
+  }, [])
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setError('')
+      setSuccessMessage('')
+      
+      // Validar campos obligatorios
+      if (!editData.realName.trim() || !editData.username.trim() || !editData.email.trim()) {
+        setError('Todos los campos son obligatorios')
+        return
+      }
+      
+      // Validar formato de email básico
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(editData.email)) {
+        setError('Por favor ingresa un email válido')
+        return
+      }
+      
+      const token = authService.getToken()
+      
+      if (!token) {
+        setError('No estás autenticado')
+        return
+      }
+
+      // Primero obtenemos el ID del usuario actual
+      const profileResponse = await fetch('http://localhost:3000/api/auth/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!profileResponse.ok) {
+        setError('Error al obtener perfil del usuario')
+        return
+      }
+      
+      const profileData = await profileResponse.json()
+      
+      // Preparar los datos para el backend (convertir de editData a formato del backend)
+      const updateData = {
+        nombre: editData.realName,
+        nombreUsuario: editData.username,
+        mail: editData.email,
+        fechaNacimiento: editData.birthDate,
+      }
+
+      // Actualizar el perfil del usuario
+      const updateResponse = await fetch(`http://localhost:3000/api/usuario/${profileData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      })
+
+      if (updateResponse.ok) {
+        // Si la actualización fue exitosa, actualizar el estado local
+        setUserData(editData)
+        setIsEditing(false)
+        setSuccessMessage('Perfil actualizado correctamente')
+        
+        // Limpiar el mensaje de éxito después de 3 segundos
+        setTimeout(() => {
+          setSuccessMessage('')
+        }, 3000)
+      } else {
+        const errorData = await updateResponse.json()
+        setError(errorData.message || 'Error al guardar los cambios')
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      setError('Error de conexión al guardar los cambios')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleCancel = () => {
@@ -62,8 +207,71 @@ export default function Profile() {
     setIsEditing(false)
   }
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
+  // Función para manejar el cambio de email con advertencia
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    if (newEmail !== userData.email && userData.email) {
+      // Si el email es diferente al actual, mostrar advertencia
+      setPendingEmailChange(newEmail)
+      setShowEmailWarning(true)
+    } else {
+      // Si es el mismo email o es la primera vez, permitir el cambio directo
+      setEditData({ ...editData, email: newEmail })
+    }
+  }
+
+  // Confirmar el cambio de email
+  const confirmEmailChange = () => {
+    setEditData({ ...editData, email: pendingEmailChange })
+    setShowEmailWarning(false)
+    setPendingEmailChange("")
+  }
+
+  // Cancelar el cambio de email
+  const cancelEmailChange = () => {
+    setShowEmailWarning(false)
+    setPendingEmailChange("")
+  }
+
+  const formatDate = (dateString: string) => {
+    // Crear fecha asegurándose de que se interprete correctamente
+    const date = new Date(dateString + 'T00:00:00')
+    return date.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
+  }
+
+  // Mostrar loading mientras se cargan los datos
+  if (loading) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+          <NavBar />
+          <Container maxWidth="lg" sx={{ py: 4, mt: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <CircularProgress size={60} />
+          </Container>
+        </Box>
+      </ThemeProvider>
+    )
+  }
+
+  // Mostrar error si ocurrió algún problema
+  if (error) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+          <NavBar />
+          <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 4 }}>
+                {error}
+              </Alert>
+            )}
+          </Container>
+        </Box>
+      </ThemeProvider>
+    )
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -74,6 +282,19 @@ export default function Profile() {
           <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 4 }}>
             Mi Perfil
           </Typography>
+
+          {/* Mensajes de error y éxito */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+          
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              {successMessage}
+            </Alert>
+          )}
 
           <Box
             sx={{
@@ -181,7 +402,7 @@ export default function Profile() {
                             fullWidth
                             type="email"
                             value={editData.email}
-                            onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                            onChange={handleEmailChange}
                           />
                         ) : (
                           <Typography sx={{ color: "white" }}>{userData.email}</Typography>
@@ -225,10 +446,22 @@ export default function Profile() {
                     {/* Botones de acción */}
                     {isEditing && (
                       <Box sx={{ display: "flex", gap: 2, pt: 2 }}>
-                        <Button variant="contained" color="success" onClick={handleSave} fullWidth>
-                          Guardar
+                        <Button 
+                          variant="contained" 
+                          color="success" 
+                          onClick={handleSave} 
+                          fullWidth
+                          disabled={saving}
+                        >
+                          {saving ? <CircularProgress size={20} /> : 'Guardar'}
                         </Button>
-                        <Button variant="outlined" color="inherit" onClick={handleCancel} fullWidth>
+                        <Button 
+                          variant="outlined" 
+                          color="inherit" 
+                          onClick={handleCancel} 
+                          fullWidth
+                          disabled={saving}
+                        >
                           Cancelar
                         </Button>
                       </Box>
@@ -240,6 +473,34 @@ export default function Profile() {
           </Box>
         </Container>
       </Box>
+
+      {/* Modal de confirmación para cambio de email */}
+      <Dialog
+        open={showEmailWarning}
+        onClose={cancelEmailChange}
+        aria-labelledby="email-warning-dialog-title"
+        aria-describedby="email-warning-dialog-description"
+      >
+        <DialogTitle id="email-warning-dialog-title">
+          ⚠️ Cambio de Email
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="email-warning-dialog-description">
+            Al cambiar tu dirección de email, también se modificarán tus credenciales de login. 
+            Tendrás que iniciar sesión con la nueva dirección de email.
+            <br /><br />
+            ¿Estás seguro de que quieres continuar?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelEmailChange} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={confirmEmailChange} color="warning" variant="contained">
+            Sí, cambiar email
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   )
 }

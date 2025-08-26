@@ -333,7 +333,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               >
                 ¿No tienes una cuenta?{' '}
                 <Link
-                  href="/material-ui/getting-started/templates/sign-in/"
+                  href="/register"
                   variant="body2"
                   sx={{
                   alignSelf: 'center',

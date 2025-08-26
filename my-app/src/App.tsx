@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css'
 import Home from './components/home/home.tsx';
 import SignIn from './components/sign-in/SignIn.tsx';
+import SignUp from './components/sing-up/SingUp.tsx';
 import MisCompras from './components/misCompras/misCompras.tsx'
 import Compra from './components/Compra/Compra.tsx'
 import Producto from './components/Producto/Producto.tsx'
@@ -16,6 +17,7 @@ function App() {
       <Router>
       <Routes>
         <Route path="/login" element={<SignIn />} />
+        <Route path="/register" element={<SignUp />} />
         <Route path="/" element={<Home />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/mis-compras" element={

@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Typography,
   Box,
@@ -17,12 +17,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Stack,
+  CircularProgress,
+  Alert,
 } from "@mui/material"
 import {
   Search as SearchIcon,
   FilterList as FilterListIcon,
-  Visibility as VisibilityIcon,
   CalendarToday as CalendarIcon,
 } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
@@ -31,6 +31,7 @@ import cyberpunkImg from "../../assets/cyberpunk.jpg"
 import fifaImg from "../../assets/fifa24.jpg"
 import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
+import { authService } from "../../services/authService"
 
 const darkTheme = createTheme({
   palette: {
@@ -70,213 +71,122 @@ const darkTheme = createTheme({
   },
 })
 
-type ProductThumb = { title: string; image: string }
-type PurchaseSingle = {
-  id: number
-  type: "single"
-  product: ProductThumb
-  date: string
-  amount: number
-  status: string
+// Interface para los datos del backend
+interface Venta {
+  id: number;
+  fecha: string;
+  idVenta: number;
+  codActivacion?: string;
+  usuario: {
+    id: number;
+    nombre: string;
+    nombreUsuario: string;
+  };
+  juego?: {
+    id: number;
+    titulo: string;
+    precio: number;
+  };
+  servicio?: {
+    id: number;
+    nombre: string;
+    precio: number;
+  };
+  complemento?: {
+    id: number;
+    nombre: string;
+    precio: number;
+  };
 }
-type PurchaseMultiple = {
-  id: number
-  type: "multiple"
-  products: ProductThumb[]
-  date: string
-  amount: number
-  status: string
-  itemCount: number
-}
-type Purchase = PurchaseSingle | PurchaseMultiple
-
-// Mock data para las compras (usando imágenes existentes)
-const mockPurchases: Purchase[] = [
-  {
-    id: 1,
-    type: "single",
-    product: {
-      title: "EA Sports FC™ 26",
-      image: fifaImg,
-    },
-    date: "2024-01-15",
-    amount: 59.99,
-    status: "Completada",
-  },
-  {
-    id: 2,
-    type: "multiple",
-    products: [
-      {
-        title: "Call of Duty: Modern Warfare III",
-        image: mw3Img,
-      },
-      {
-        title: "Cyberpunk 2077",
-        image: cyberpunkImg,
-      },
-      {
-        title: "The Witcher 3",
-        image: fifaImg,
-      },
-    ],
-    date: "2024-01-10",
-    amount: 149.97,
-    status: "Completada",
-    itemCount: 3,
-  },
-  {
-    id: 3,
-    type: "single",
-    product: {
-      title: "PlayStation Plus Premium - 12 meses",
-      image: fifaImg,
-    },
-    date: "2024-01-05",
-    amount: 119.99,
-    status: "Completada",
-  },
-  {
-    id: 4,
-    type: "multiple",
-    products: [
-      {
-        title: "Fortnite V-Bucks",
-        image: fifaImg,
-      },
-      {
-        title: "Apex Legends Coins",
-        image: mw3Img,
-      },
-    ],
-    date: "2023-12-28",
-    amount: 39.98,
-    status: "Completada",
-    itemCount: 2,
-  },
-]
 
 export default function MisComprasPage() {
+  // Estados para manejar los datos
+  const [ventas, setVentas] = useState<Venta[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   
   const [filterDialogOpen, setFilterDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [dateFilter, setDateFilter] = useState("")
 
+  // Cargar ventas del usuario autenticado
+  useEffect(() => {
+    const fetchUserPurchases = async () => {
+      try {
+        const token = authService.getToken()
+        
+        if (!token) {
+          setError('No estás autenticado')
+          setLoading(false)
+          return
+        }
+
+        // Ahora obtenemos directamente las ventas del usuario
+        const ventasResponse = await fetch('http://localhost:3000/api/venta/my-ventas', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (ventasResponse.ok) {
+          const ventasData = await ventasResponse.json()
+          
+          // Ya no necesitamos filtrar - el backend nos envía solo las del usuario
+          setVentas(ventasData.data)
+        } else {
+          setError('Error al cargar las compras')
+        }
+      } catch (error) {
+        console.error('Error fetching purchases:', error)
+        setError('Error de conexión')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserPurchases()
+  }, [])
 
 
-  const filteredPurchases = mockPurchases.filter((purchase: Purchase) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      (purchase.type === "single"
-        ? purchase.product.title.toLowerCase().includes(searchQuery.toLowerCase())
-        : purchase.products.some((p) => p.title.toLowerCase().includes(searchQuery.toLowerCase())))
 
-    const matchesDate = dateFilter === "" || purchase.date.includes(dateFilter)
+  const filteredVentas = ventas.filter((venta: Venta) => {
+    const productName = getProductName(venta)
+    const matchesSearch = searchQuery === "" || 
+      productName.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesDate = dateFilter === "" || venta.fecha.includes(dateFilter)
 
     return matchesSearch && matchesDate
   })
 
-  const renderPurchaseCard = (purchase: Purchase) => {
-    return (
-      <Card key={purchase.id} sx={{ mb: 2, p: 2 }}>
-        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "auto 1fr",
-                md: "auto 1fr auto",
-              },
-              columnGap: 2,
-              rowGap: 2,
-              alignItems: "center",
-            }}
-          >
-            {/* Imagen(es) del producto */}
-            <Box>
-              {purchase.type === "single" ? (
-                <Box
-                  component="img"
-                  src={purchase.product.image}
-                  alt={purchase.product.title}
-                  sx={{
-                    width: "100%",
-                    maxWidth: 120,
-                    height: 120,
-                    objectFit: "cover",
-                    borderRadius: 2,
-                  }}
-                />
-              ) : (
-                <Box sx={{ position: "relative" }}>
-                  <Stack direction="row" spacing={-2}>
-                    {purchase.products.slice(0, 3).map((product: ProductThumb, index: number) => (
-                      <Box
-                        key={index}
-                        component="img"
-                        src={product.image}
-                        alt={product.title}
-                        sx={{
-                          width: 80,
-                          height: 80,
-                          objectFit: "cover",
-                          borderRadius: 1,
-                          border: "2px solid #141926",
-                          zIndex: 3 - index,
-                        }}
-                      />
-                    ))}
-                  </Stack>
-                  <Chip label={`${purchase.itemCount} productos`} size="small" color="primary" sx={{ mt: 1 }} />
-                </Box>
-              )}
-            </Box>
+  // Funciones auxiliares
+  const getProductName = (venta: Venta) => {
+    if (venta.juego) return venta.juego.titulo
+    if (venta.servicio) return venta.servicio.nombre
+    if (venta.complemento) return venta.complemento.nombre
+    return "Producto desconocido"
+  }
 
-            {/* Detalles de la compra */}
-            <Box>
-              <Box>
-                <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                  {purchase.type === "single"
-                    ? purchase.product.title
-                    : `Compra múltiple - ${purchase.itemCount} productos`}
-                </Typography>
+  const getProductPrice = (venta: Venta) => {
+    if (venta.juego) return venta.juego.precio
+    if (venta.servicio) return venta.servicio.precio
+    if (venta.complemento) return venta.complemento.precio
+    return 0
+  }
 
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                  <CalendarIcon sx={{ fontSize: 16, mr: 1, color: "text.secondary" }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Fecha de compra: {new Date(purchase.date).toLocaleDateString("es-ES")}
-                  </Typography>
-                </Box>
+  const getProductImage = (venta: Venta) => {
+    // Por ahora usamos imágenes por defecto, más adelante se puede mejorar
+    if (venta.juego) return cyberpunkImg
+    if (venta.servicio) return mw3Img
+    if (venta.complemento) return fifaImg
+    return cyberpunkImg
+  }
 
-                <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
-                  US${purchase.amount.toFixed(2)}
-                </Typography>
-
-                <Chip label={purchase.status} color="success" size="small" sx={{ mt: 1 }} />
-              </Box>
-            </Box>
-
-            {/* Botón ver detalles */}
-            <Box sx={{ display: "flex", justifyContent: { xs: "flex-start", sm: "flex-end" } }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<VisibilityIcon />}
-                  sx={{
-                    minWidth: 140,
-                    py: 1.5,
-                    fontWeight: 600,
-                  }}
-                  onClick={() => console.log(`Ver detalles de compra ${purchase.id}`)}
-                >
-                  Ver detalles
-                </Button>
-              </Box>
-          </Box>
-        </CardContent>
-      </Card>
-    )
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("es-ES")
   }
 
   return (
@@ -288,8 +198,20 @@ export default function MisComprasPage() {
 
         {/* Contenido principal */}
         <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
-          {/* Barra de búsqueda */}
-          <Box sx={{ mb: 3 }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            </Box>
+          ) : (
+            <>
+              {/* Barra de búsqueda */}
+              <Box sx={{ mb: 3 }}>
             <TextField
               fullWidth
               placeholder="Buscar en mis compras..."
@@ -318,7 +240,7 @@ export default function MisComprasPage() {
                 Mis compras
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Mostrando {filteredPurchases.length} de {mockPurchases.length} compras
+                Mostrando {filteredVentas.length} de {ventas.length} compras
               </Typography>
             </Box>
 
@@ -341,17 +263,81 @@ export default function MisComprasPage() {
           </Box>
 
           {/* Lista de compras */}
-          <Box>{filteredPurchases.map(renderPurchaseCard)}</Box>
-
-          {filteredPurchases.length === 0 && (
-            <Box sx={{ textAlign: "center", py: 8 }}>
-              <Typography variant="h6" color="text.secondary">
-                No se encontraron compras
+          {filteredVentas.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="h6" sx={{ color: "text.secondary", mb: 2 }}>
+                No tienes compras aún
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Intenta ajustar los filtros de búsqueda
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                ¡Explora nuestro catálogo y realiza tu primera compra!
               </Typography>
             </Box>
+          ) : (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {filteredVentas.map((venta) => (
+                <Card
+                  key={venta.id}
+                  sx={{
+                    bgcolor: "#1e2532",
+                    borderRadius: 2,
+                    p: 2,
+                  }}
+                >
+                  <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <img
+                          src={getProductImage(venta)}
+                          alt={getProductName(venta)}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                          {getProductName(venta)}
+                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                          <CalendarIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                            {formatDate(venta.fecha)}
+                          </Typography>
+                        </Box>
+                        <Typography variant="h6" sx={{ color: "primary.main", fontWeight: "bold" }}>
+                          ${getProductPrice(venta).toFixed(2)}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: "right" }}>
+                        <Chip
+                          label="Completada"
+                          color="success"
+                          size="small"
+                          sx={{ mb: 1 }}
+                        />
+                        {venta.codActivacion && (
+                          <Typography variant="caption" sx={{ display: "block", color: "text.secondary" }}>
+                            Código: {venta.codActivacion}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          )}
+            </>
           )}
         </Container>
 
