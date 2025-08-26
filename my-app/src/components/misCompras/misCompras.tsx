@@ -327,13 +327,9 @@ export default function MisComprasPage() {
               startIcon={<FilterListIcon />}
               onClick={() => setFilterDialogOpen(true)}
               sx={{
-                borderColor: "primary.main",
-                color: "primary.main",
-                "&:hover": {
-                  borderColor: "primary.light",
-                  bgcolor: "primary.main",
-                  color: "white",
-                },
+                borderColor: "#4b5563",
+                color: "white",
+                "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
               FILTROS
