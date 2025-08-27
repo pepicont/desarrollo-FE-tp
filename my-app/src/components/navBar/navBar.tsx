@@ -10,7 +10,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Badge,
+  /*Badge,*/
   Avatar,
   Menu,
   MenuItem,
@@ -23,7 +23,7 @@ import {
   Menu as MenuIcon,
   Search as SearchIcon,
   Person as PersonIcon,
-  ShoppingCart as ShoppingCartIcon,
+  /*ShoppingCart as ShoppingCartIcon,*/
   ShoppingBag as ShoppingBagIcon,
   RateReview as ReviewIcon,
   ContactMail as ContactIcon,
@@ -34,9 +34,9 @@ import {
   Close,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
-import imgLogo from "../../assets/logo.jpg"
+import imgLogo from "../../assets/logo-navbar.png"
 import { useState } from "react"
-import { authService } from "../../services/authService"
+import {authService} from "../../services/authService"
 
 
 const StyledAppBar = styled(AppBar)(() => ({
@@ -67,14 +67,14 @@ const baseMenuItems = [
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
-type NavBarProps = {
+/*type NavBarProps = {
   onCartClick?: () => void
   cartCount?: number
-}
+}*/
 
 
 
-export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
+export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -108,8 +108,7 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => setProfileMenuAnchor(event.currentTarget)
   const handleProfileMenuClose = () => setProfileMenuAnchor(null)
   const handleLogout = () => {
-    // Usar el servicio centralizado de autenticación
-    authService.logout()
+    authService.logout();
     setIsLoggedIn(false)
     handleProfileMenuClose()
     window.location.href = "/"  //manda al home cuando cierra sesión
@@ -251,13 +250,13 @@ export default function NavBar({ onCartClick, cartCount = 0 }: NavBarProps) {
 
           {/* Right: cart (optional) + profile */}
           {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-            {onCartClick && (
+            {/* {onCartClick && (
               <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
                 <Badge badgeContent={cartCount} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
-            )}
+            )} */}
             <IconButton color="inherit" onClick={handleProfileMenuOpen}>
               <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
                 <PersonIcon />

@@ -77,8 +77,8 @@ export const authService = {
     return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   },
 
-  // Función para eliminar token
-  removeToken(): void {
+  // Función para desloguearse
+  logout(): void {
     localStorage.removeItem('authToken');
     sessionStorage.removeItem('authToken');
     localStorage.removeItem('user');
@@ -97,13 +97,10 @@ export const authService = {
       return true;
     } catch {
       // Si el token no es válido, lo eliminamos
-      this.removeToken();
+      this.logout();
       return false;
     }
   },
 
-  // Función para hacer logout
-  logout(): void {
-    this.removeToken();
-  },
+  
 };

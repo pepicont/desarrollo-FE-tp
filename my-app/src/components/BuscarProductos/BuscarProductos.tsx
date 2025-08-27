@@ -22,10 +22,15 @@ const darkTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: "#1e2532",
-          border: "1px solid #374151",
-          "&:hover": {
-            borderColor: "#4b5563",
-          },
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+          borderRadius: 8,
         },
       },
     },
@@ -33,6 +38,10 @@ const darkTheme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
+            bgcolor: "background.paper",
+            borderRadius: 3,
+            fontSize: "1.125rem",
+            padding: "12px",
             "& fieldset": {
               borderColor: "#4b5563",
             },
@@ -182,6 +191,7 @@ export default function BuscarProductos() {
                   "& .MuiOutlinedInput-root": {
                     fontSize: "1.125rem",
                     padding: "12px",
+                    borderRadius: 3,
                   },
                 }}
               />

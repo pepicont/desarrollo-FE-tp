@@ -132,19 +132,19 @@ export default function MisResenasPage() {
     return "Producto desconocido"
   }
 
-  // Función para obtener imagen del producto con sistema de fallback inteligente
+  // Función para obtener imagen del producto con sistema de fallback inteligente (significa que el sistema tiene múltiples niveles de respaldo que se ejecutan en orden de prioridad, tomando decisiones automáticas según el contexto (cuando lo conectemos a la base que tiene imagenes se va a ejecutar lo primero))
   const getProductImage = (venta: Resenia['venta']) => {
-    // ✅ FUTURO: Imagen específica desde backend (cuando esté implementado)
+    //  FUTURO: Imagen específica desde backend (cuando esté implementado)
     if (venta.juego?.imagen) return venta.juego.imagen
     if (venta.servicio?.imagen) return venta.servicio.imagen
     if (venta.complemento?.imagen) return venta.complemento.imagen
 
-    // ✅ PRESENTE: Imágenes por defecto según tipo (funciona ahora)
+    //  PRESENTE: Imágenes por defecto según tipo (funciona ahora)
     if (venta.juego) return cyberpunkImg
     if (venta.servicio) return mw3Img
     if (venta.complemento) return fifaImg
     
-    // Fallback final
+    // Fallback final (es la última opción de respaldo cuando todas las demás condiciones fallan, para que no rompa la UI)
     return cyberpunkImg
   }
 
@@ -289,7 +289,7 @@ export default function MisResenasPage() {
             </Box>
           </Box>
 
-          {/* Lista de reseñas */}
+          {/* Lista de reseñas */} 
           {resenias.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="h6" sx={{ color: "text.secondary", mb: 2 }}>

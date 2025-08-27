@@ -5,7 +5,7 @@ import {
   IconButton,
   Typography,
   Box,
-  Drawer,
+  /*Drawer,*/
   Card,
   CardContent,
   CardMedia,
@@ -18,7 +18,7 @@ import {
 import CssBaseline from "@mui/material/CssBaseline"
 
 import {
-  Close as CloseIcon,
+  /*Close as CloseIcon,*/
   Star,
   ArrowBackIos,
   ArrowForwardIos,
@@ -28,6 +28,9 @@ import cyberpunkImg from "../../assets/cyberpunk.jpg"
 import fifaImg from "../../assets/fifa24.jpg"
 import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
+import juegos from "../../assets/carousel-juegos.png"
+import servicios from "../../assets/carousel-servicios.jpg"
+import complementos from "../../assets/carousel-complementos.jpg"
 
 const darkTheme = createTheme({
   palette: {
@@ -67,7 +70,7 @@ const darkTheme = createTheme({
   },
 })
 
-// Removed page-specific AppBar and search overlay; using shared NavBar instead
+
 
 const CarouselContainer = styled(Box)`
   position: relative;
@@ -117,23 +120,23 @@ const CarouselArrow = styled(IconButton)`
 const carouselItems = [
   {
     id: 1,
-    title: "Cyberpunk 2077: Phantom Liberty",
-  image: cyberpunkImg,
-    description: "La nueva expansión ya disponible",
+    title: "Juegos",
+  image: juegos,
+    description: "Los juegos del momento al alcance de tu mano",
     badge: "NUEVO",
   },
   {
     id: 2,
-    title: "FIFA 24",
-  image: fifaImg,
-    description: "La experiencia futbolística más realista",
+    title: "Complementos",
+  image: complementos,
+    description: "Complementos adicionales sobre los juegos que más te gustan",
     badge: "POPULAR",
   },
   {
     id: 3,
-    title: "Call of Duty: Modern Warfare III",
-  image: mw3Img,
-    description: "La guerra nunca cambia",
+    title: "Streaming",
+  image: servicios,
+    description: "Los mejores servicios de streaming para poder seguir viendo tus series",
     badge: "OFERTA",
   },
 ]
@@ -180,11 +183,11 @@ const featuredProducts = [
 
 
 export default function Home() {
-  const [cartOpen, setCartOpen] = React.useState(false)
+  /*const [cartOpen, setCartOpen] = React.useState(false)*/
   const [currentSlide, setCurrentSlide] = React.useState(0)
-  const [cartCount] = React.useState(3)
+  /*const [cartCount] = React.useState(3)*/
 
-  const cartItems = [
+  /*const cartItems = [
     {
       id: 1,
       title: "Cyberpunk 2077: Phantom Liberty",
@@ -207,11 +210,11 @@ export default function Home() {
       quantity: 1,
     },
   ]
-
+*/
   React.useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length)
-    }, 5000)
+    }, 7000)
     return () => clearInterval(timer)
   }, [])
 
@@ -223,15 +226,16 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length)
   }
 
-  const handleCartToggle = () => {
+  /*const handleCartToggle = () => {
     setCartOpen(!cartOpen)
-  }
+  }*/
 
   return (
     <ThemeProvider theme={darkTheme}>
   <CssBaseline />
   <Box sx={{ flexGrow: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
-  <NavBar onCartClick={handleCartToggle} cartCount={cartCount} />
+    <NavBar />
+    {/*<NavBar onCartClick={handleCartToggle} cartCount={cartCount} />
 
         <Drawer anchor="right" open={cartOpen} onClose={handleCartToggle}>
           <Box sx={{ width: 350, backgroundColor: "#1E2A3A", height: "100%" }}>
@@ -314,7 +318,7 @@ export default function Home() {
 
   <Box sx={{ pt: 12, pb: 4, px: { xs: 2, sm: 3, md: 4 }, backgroundColor: "background.paper", width: "100%" }}>
           <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "#FFFFFF" }}>
-            Novedades
+            Atravesá el Portal y disfrutá de 
           </Typography>
 
           <CarouselContainer>
@@ -349,13 +353,15 @@ export default function Home() {
                 >
                   <Box
                     sx={{
-                      background: "linear-gradient(transparent, rgba(0,0,0,0.8))",
+                      background: "linear-gradient(180deg, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.7) 100%)",
                       width: "100%",
                       p: 4,
                       color: "white",
+                      borderBottomLeftRadius: 16,
+                      borderBottomRightRadius: 16,
                     }}
                   >
-                    <Chip label={item.badge} color="primary" sx={{ mb: 2 }} />
+                    {/*<Chip label={item.badge} color="primary" sx={{ mb: 2 }} />*/}
                     <Typography variant="h3" component="h3" gutterBottom>
                       {item.title}
                     </Typography>

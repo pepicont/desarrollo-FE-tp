@@ -89,7 +89,7 @@ export default function Profile() {
         if (response.ok) {
           const profile = await response.json()
           
-          // Función para formatear fechas UTC correctamente
+          // Función para formatear fechas UTC correctamente (se ponian fechas con otro uso horario)
           const formatUTCDate = (dateString: string) => {
             const date = new Date(dateString)
             return date.toISOString().split('T')[0]
