@@ -21,6 +21,8 @@ import StepLabel from "@mui/material/StepLabel"
 import { styled } from "@mui/material/styles"
 import AppTheme from '../shared-theme/AppTheme'
 import { SitemarkIcon } from "../sign-in/components/CustomIcons"
+import { useEffect } from "react"
+import { authService } from "../../services/authService.ts"
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -75,6 +77,11 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     name: "",
     birthDate: "",
   })
+
+    //Funcion para prevenir que un usuario entre, vuelva para atrás y siga logueado
+    useEffect(() => {
+    authService.logout();
+  }, []);
   
   // Estados de validación por paso
   const [emailError, setEmailError] = React.useState(false)

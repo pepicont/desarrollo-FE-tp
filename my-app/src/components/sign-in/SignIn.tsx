@@ -19,6 +19,7 @@ import ForgotPassword from './components/ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import { SitemarkIcon } from './components/CustomIcons';
 import { authService } from '../../services/authService';
+import { useEffect } from 'react';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -86,6 +87,11 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const handleClose = () => {
     setOpen(false);
   };
+
+  //Funcion para prevenir que un usuario entre, vuelva para atrás y siga logueado
+  useEffect(() => {
+  authService.logout();
+}, []);
 
   // Función para resetear todos los estados
   const resetForm = () => {
