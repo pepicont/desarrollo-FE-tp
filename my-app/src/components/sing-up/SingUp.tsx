@@ -266,9 +266,6 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
         setRegisterSuccess(true)
         setRegisterError("")
         
-        // Guardar token en localStorage
-        localStorage.setItem('token', result.token)
-        localStorage.setItem('user', JSON.stringify(result.user))
         
         // Redirigir al login después de 2 segundos para que el usuario pueda iniciar sesión
         setTimeout(() => {
