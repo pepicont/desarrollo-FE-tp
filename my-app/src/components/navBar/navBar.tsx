@@ -23,6 +23,7 @@ import {
   Menu as MenuIcon,
   Search as SearchIcon,
   Person as PersonIcon,
+  Info as InfoIcon,
   /*ShoppingCart as ShoppingCartIcon,*/
   ShoppingBag as ShoppingBagIcon,
   RateReview as ReviewIcon,
@@ -64,6 +65,7 @@ const baseMenuItems = [
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Mis compras", icon: <ShoppingBagIcon />, href: "/mis-compras" },
   { text: "Mis reseñas", icon: <ReviewIcon />, href: "/mis-resenas" },
+  { text: "Acerca de nosotros", icon: <InfoIcon />, href: "/about-us" },
   { text: "Contáctenos", icon: <ContactIcon /> },
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
