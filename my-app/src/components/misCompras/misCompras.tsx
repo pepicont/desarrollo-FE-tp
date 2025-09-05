@@ -84,8 +84,8 @@ interface Venta {
   };
   juego?: {
     id: number;
-    titulo: string;
-    precio: number;
+    nombre: string;
+    monto: number;
   };
   servicio?: {
     id: number;
@@ -132,6 +132,7 @@ export default function MisComprasPage() {
 
         if (ventasResponse.ok) {
           const ventasData = await ventasResponse.json()
+          console.log('Ventas obtenidas:', ventasData)
           
           // Ya no necesitamos filtrar - el backend nos envía solo las del usuario
           setVentas(ventasData.data)
@@ -149,19 +150,7 @@ export default function MisComprasPage() {
     fetchUserPurchases()
   }, [])
 
-
-
-  const filteredVentas = ventas.filter((venta: Venta) => {
-    const productName = getProductName(venta)
-    const matchesSearch = searchQuery === "" || 
-      productName.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesDate = dateFilter === "" || venta.fecha.includes(dateFilter)
-
-    return matchesSearch && matchesDate
-  })
-
-  // Funciones auxiliares
+// Funciones auxiliares
   const getProductName = (venta: Venta) => {
     if (venta.juego) return venta.juego.titulo
     if (venta.servicio) return venta.servicio.nombre
@@ -188,6 +177,18 @@ export default function MisComprasPage() {
     const date = new Date(dateString)
     return date.toLocaleDateString("es-ES")
   }
+
+  const filteredVentas = ventas.filter((venta: Venta) => {
+    const productName = getProductName(venta)
+    const matchesSearch = searchQuery === "" || 
+      productName.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesDate = dateFilter === "" || venta.fecha.includes(dateFilter)
+
+    return matchesSearch && matchesDate
+  })
+
+  
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -302,7 +303,7 @@ export default function MisComprasPage() {
                       </Box>
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-                          {getProductName(venta)}
+                          {(getProductName(venta)) ?? "Producto desconocido"}
                         </Typography>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                           <CalendarIcon sx={{ fontSize: 16, color: "text.secondary" }} />
@@ -311,7 +312,7 @@ export default function MisComprasPage() {
                           </Typography>
                         </Box>
                         <Typography variant="h6" sx={{ color: "primary.main", fontWeight: "bold" }}>
-                          ${getProductPrice(venta).toFixed(2)}
+                          ${(getProductPrice(venta) ?? 0).toFixed(2)}
                         </Typography>
                       </Box>
                       <Box sx={{ textAlign: "right" }}>
