@@ -39,6 +39,7 @@ import { useState } from "react"
 import {authService} from "../../services/authService"
 
 
+
 const StyledAppBar = styled(AppBar)(() => ({
   backgroundColor: "#000000ff",
   color: "#ffffff",
@@ -89,6 +90,20 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     }
     return !!user && !!token;
   });
+  const [nombre, setNombre] = React.useState("Usuario sin nombre");
+  
+  React.useEffect(() => {
+    if (!isLoggedIn) return;  // Si no está logueado, no hacer nada
+
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (user) {
+      const parsed = JSON.parse(user);
+      const fullName = parsed.nombre || "Usuario sin nombre";
+      const firstName = fullName.split(" ")[0];
+      setNombre(firstName);
+    }
+  }, [isLoggedIn]);
+
   const [activeItem, setActiveItem] = React.useState<string>(() => {
     try {
       const path = window.location.pathname
@@ -257,6 +272,9 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                 </Badge>
               </IconButton>
             )} */}
+            <Typography variant="body1" sx={{ mr: 1 }}>
+              Bienvenido, {nombre}!
+            </Typography>
             <IconButton color="inherit" onClick={handleProfileMenuOpen}>
               <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
                 <PersonIcon />
