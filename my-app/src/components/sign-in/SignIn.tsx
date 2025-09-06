@@ -26,11 +26,19 @@ const Card = styled(MuiCard)(({ theme }) => ({
   flexDirection: 'column',
   alignSelf: 'center',
   width: '100%',
-  padding: theme.spacing(4),
+  padding: theme.spacing(2.5),
   gap: theme.spacing(2),
   margin: 'auto',
+  [theme.breakpoints.up('sm')]: {
+    maxWidth: 420,
+    padding: theme.spacing(3),
+  },
+  [theme.breakpoints.up('md')]: {
+    maxWidth: 480,
+    padding: theme.spacing(4),
+  },
   [theme.breakpoints.up('xl')]: {
-    maxWidth: '450px',
+    maxWidth: 520,
   },
   boxShadow:
     'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
@@ -41,26 +49,25 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
+  minHeight: '100dvh',
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   padding: theme.spacing(2),
-  [theme.breakpoints.up('xl')]: {
+  [theme.breakpoints.up('sm')]: {
+    padding: theme.spacing(3),
+  },
+  [theme.breakpoints.up('md')]: {
     padding: theme.spacing(4),
   },
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
+  backgroundImage:
+    'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
+  backgroundRepeat: 'no-repeat',
+  ...theme.applyStyles('dark', {
     backgroundImage:
-      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-    backgroundRepeat: 'no-repeat',
-    ...theme.applyStyles('dark', {
-      backgroundImage:
-        'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-    }),
-  },
+      'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
+  }),
 }));
 
 export default function SignIn(props: { disableCustomTheme?: boolean }) {
@@ -69,75 +76,44 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
-  
-  // Nuevos estados para la autenticación
   const [isLoading, setIsLoading] = React.useState(false);
   const [loginError, setLoginError] = React.useState('');
   const [loginSuccess, setLoginSuccess] = React.useState(false);
 
-  // Debug: Verificar estado de isLoading
+  // Debug opcional
   React.useEffect(() => {
-    console.log('isLoading estado:', isLoading);
+    // console.log('isLoading estado:', isLoading);
   }, [isLoading]);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  //Funcion para prevenir que un usuario entre, vuelva para atrás y siga logueado
+  // Forzar logout al entrar a la pantalla
   useEffect(() => {
-  authService.logout();
-}, []);
-
-  // Función para resetear todos los estados
-  const resetForm = () => {
-    setIsLoading(false);
-    setLoginError('');
-    setLoginSuccess(false);
-    setEmailError(false);
-    setEmailErrorMessage('');
-    setPasswordError(false);
-    setPasswordErrorMessage('');
-    console.log('Formulario reseteado');
-  };
+    authService.logout();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevenir reload de página
-    
-    // Validar inputs antes de enviar
-    if (!validateInputs()) {
-      return;
-    }
+    event.preventDefault();
 
-    // Limpiar errores previos
+    if (!validateInputs()) return;
+
     setLoginError('');
     setLoginSuccess(false);
     setIsLoading(true);
 
     try {
-      // Extraer datos del formulario
       const data = new FormData(event.currentTarget);
       const email = data.get('email') as string;
       const password = data.get('password') as string;
-      const remember = data.get('rememberMe') === 'remember'; // Nuevo campo "Recordarme"
+      const remember = data.get('rememberMe') === 'remember';
 
-      // Llamar al servicio de autenticación
       const response = await authService.login({
         mail: email,
         contrasenia: password,
       });
 
-      // Si llegamos aquí, el login fue exitoso
-      console.log('Login exitoso:', response);
-      
-      // Guardar token usando el servicio de autenticación
       authService.saveToken(response.token, remember);
-      
-      // Guardar usuario en localStorage o sessionStorage
       if (remember) {
         localStorage.setItem('user', JSON.stringify(response.user));
       } else {
@@ -146,21 +122,10 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       setLoginSuccess(true);
       setLoginError('');
-      
-      // Redirigir al home después de login exitoso
       window.location.href = '/';
-      
     } catch (error: unknown) {
-      console.error('Error en login completo:', error);
-      console.error('Tipo de error:', typeof error);
-      console.error('Error stringificado:', JSON.stringify(error, null, 2));
-      
-      // Manejar diferentes tipos de errores
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response?: { status: number; data?: unknown } };
-        console.error('Error de Axios - Status:', axiosError.response?.status);
-        console.error('Error de Axios - Data:', axiosError.response?.data);
-        
         if (axiosError.response?.status === 401) {
           setLoginError('Email o contraseña incorrectos');
         } else if (axiosError.response?.status === 400) {
@@ -169,10 +134,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
           setLoginError(`Error del servidor (${axiosError.response?.status}). Intenta nuevamente.`);
         }
       } else {
-        console.error('Error no es de tipo Axios:', error);
         setLoginError('Error inesperado. Intenta nuevamente.');
       }
-      
     } finally {
       setIsLoading(false);
     }
@@ -214,7 +177,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
           <Typography
             component="h1"
             variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            sx={{ width: '100%', fontSize: { xs: '1.75rem', sm: '2rem', md: '2.15rem' } }}
           >
             Iniciar Sesión
           </Typography>
@@ -222,12 +185,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             component="form"
             onSubmit={handleSubmit}
             noValidate
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 2,
-            }}
+            sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: { xs: 1.5, sm: 2 } }}
           >
             <FormControl>
               <FormLabel htmlFor="email">Correo Electrónico</FormLabel>
@@ -264,45 +222,22 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" name="rememberMe" color="primary" />}
-              label="Recordarme"
-            />
+            <FormControlLabel control={<Checkbox value="remember" name="rememberMe" color="primary" />} label="Recordarme" />
             <ForgotPassword open={open} handleClose={handleClose} />
-            
-            {/* Mostrar errores de login */}
+
             {loginError && (
               <Alert severity="error" sx={{ width: '100%' }}>
                 {loginError}
               </Alert>
             )}
-            
-            {/* Mostrar éxito de login */}
+
             {loginSuccess && (
               <Alert severity="success" sx={{ width: '100%' }}>
                 ¡Login exitoso! Bienvenido
               </Alert>
             )}
-            
-            {/* Botón de debug - temporal */}
-            {isLoading && (
-              <Button 
-                onClick={resetForm}
-                variant="outlined" 
-                color="secondary"
-                size="small"
-              >
-                🔧 Reset (Debug)
-              </Button>
-            )}
-            
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading}
-              sx={{ mt: 1 }}
-            >
+
+            <Button type="submit" fullWidth variant="contained" disabled={isLoading} sx={{ mt: 1 }}>
               {isLoading ? (
                 <>
                   <CircularProgress size={20} sx={{ mr: 1 }} />
@@ -312,44 +247,19 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 'Iniciar Sesión'
               )}
             </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
+            <Link component="button" type="button" onClick={handleClickOpen} variant="body2" sx={{ alignSelf: 'center', mt: 1 }}>
               ¿Olvidaste tu contraseña?
             </Link>
           </Box>
-          <Divider>o</Divider>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-              }}
-            >
-              <Typography
-                sx={{
-                  textAlign: 'center',
-                  width: '100%',
-                  display: { xs: 'inline', sm: 'inline' }
-                }}
-              >
-                ¿No tienes una cuenta?{' '}
-                <Link
-                  href="/register"
-                  variant="body2"
-                  sx={{
-                  alignSelf: 'center',
-                  display: { xs: 'inline', sm: 'inline' }, // Asegura que siempre se muestre
-                  }}
-                >
-                  Regístrate
-                </Link>
-              </Typography>
-            </Box>
+          <Divider sx={{ my: { xs: 1, sm: 2 } }}>o</Divider>
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Typography sx={{ textAlign: 'center', width: '100%', display: { xs: 'inline', sm: 'inline' } }}>
+              ¿No tienes una cuenta?{' '}
+              <Link href="/register" variant="body2" sx={{ alignSelf: 'center', display: { xs: 'inline', sm: 'inline' } }}>
+                Regístrate
+              </Link>
+            </Typography>
+          </Box>
         </Card>
       </SignInContainer>
     </AppTheme>

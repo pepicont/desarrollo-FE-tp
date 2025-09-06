@@ -29,11 +29,19 @@ const Card = styled(MuiCard)(({ theme }) => ({
   flexDirection: "column",
   alignSelf: "center",
   width: "100%",
-  padding: theme.spacing(4),
+  padding: theme.spacing(2.5),
   gap: theme.spacing(2),
   margin: "auto",
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: 480,
+    padding: theme.spacing(3),
+  },
+  [theme.breakpoints.up("md")]: {
+    maxWidth: 560,
+    padding: theme.spacing(4),
+  },
   [theme.breakpoints.up("xl")]: {
-    maxWidth: "500px",
+    maxWidth: 600,
   },
   boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
   ...theme.applyStyles("dark", {
@@ -42,24 +50,23 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }))
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-  height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
-  minHeight: "100%",
+  minHeight: "100dvh",
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   padding: theme.spacing(2),
-  [theme.breakpoints.up("xl")]: {
+  [theme.breakpoints.up("sm")]: {
+    padding: theme.spacing(3),
+  },
+  [theme.breakpoints.up("md")]: {
     padding: theme.spacing(4),
   },
-  "&::before": {
-    content: '""',
-    display: "block",
-    position: "absolute",
-    zIndex: -1,
-    inset: 0,
-    backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
-    backgroundRepeat: "no-repeat",
-    ...theme.applyStyles("dark", {
-      backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
-    }),
-  },
+  backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
+  backgroundRepeat: "no-repeat",
+  ...theme.applyStyles("dark", {
+    backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+  }),
 }))
 
 const steps = ['Datos de cuenta', 'Información personal']
@@ -438,12 +445,12 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <SitemarkIcon />
-          <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}>
+          <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: { xs: '1.75rem', sm: '2rem', md: '2.15rem' } }}>
             Registrarse
           </Typography>
           
           {/* Stepper para mostrar progreso */}
-          <Stepper activeStep={activeStep} sx={{ pt: 3, pb: 5 }}>
+          <Stepper activeStep={activeStep} sx={{ pt: { xs: 2, sm: 3 }, pb: { xs: 3, sm: 5 } }}>
             {steps.map((label) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
@@ -460,12 +467,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
               component="form"
               onSubmit={handleSubmit}
               noValidate
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-                gap: 2,
-              }}
+              sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: { xs: 1.5, sm: 2 } }}
             >
               {registerError && (
                 <Alert severity="error" sx={{ width: "100%" }}>
@@ -475,7 +477,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
               {renderStepContent(activeStep)}
 
-              <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', pt: { xs: 1.5, sm: 2 } }}>
                 <Button
                   color="inherit"
                   disabled={activeStep === 0 || isLoading}
@@ -520,14 +522,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 )}
               </Box>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                  mt: 2,
-                }}
-              >
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 }, mt: { xs: 1.5, sm: 2 } }}>
                 <Typography
                   component="p"
                   variant="body2"
