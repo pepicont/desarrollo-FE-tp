@@ -1,14 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { Button, TextField, Card, CardContent, CardMedia, Chip, Container, Box, Rating, InputAdornment, FormControl, InputLabel, Select, MenuItem, Typography, Drawer } from "@mui/material"
+import { useEffect, useMemo, useState } from "react"
+import { Button, TextField, Card, CardContent, CardMedia, Chip, Container, Box, InputAdornment, FormControl, InputLabel, Select, MenuItem, Typography, Drawer } from "@mui/material"
 import { Search, FilterList } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
-import cyberpunkImg from "../../assets/cyberpunk.jpg"
-import fifaImg from "../../assets/fifa24.jpg"
-import mw3Img from "../../assets/mw3.jpg"
+import { useLocation, useNavigate } from "react-router-dom"
+import { searchService, type SearchItem, type SearchParams } from "../../services/searchService"
+import { companyService, type Company } from "../../services/companyService"
 
 const darkTheme = createTheme({
   palette: {
@@ -59,102 +59,69 @@ const darkTheme = createTheme({
 })
 
 export default function BuscarProductos() {
-  const [mainSearchQuery, setMainSearchQuery] = useState("")
+  const location = useLocation()
+  const navigate = useNavigate()
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const [mainSearchQuery, setMainSearchQuery] = useState(params.get("q") ?? "")
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
-  const [priceFilter, setPriceFilter] = useState("")
-  const [companyFilter, setCompanyFilter] = useState("")
-  const [productTypeFilter, setProductTypeFilter] = useState("")
-  const [ageFilter, setAgeFilter] = useState("")
+  const [priceFilter, setPriceFilter] = useState(params.get("priceRange") ?? "")
+  const [companyFilter, setCompanyFilter] = useState(params.get("companiaId") ?? "")
+  const [productTypeFilter, setProductTypeFilter] = useState(params.get("tipo") ?? "")
+  const [ageFilter, setAgeFilter] = useState(params.get("edadMax") ?? "")
+  const [items, setItems] = useState<SearchItem[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [page, setPage] = useState<number>(Number(params.get('page')) || 1)
+  const [limit, setLimit] = useState<number>(Number(params.get('limit')) || 12)
 
-  const products = [
-    {
-      id: 1,
-      title: "EA Sports FC™ 26",
-      price: 59.99,
-      originalPrice: 69.99,
-      discount: 15,
-  image: fifaImg,
-      rating: 4.2,
-      category: "Deportes",
-      type: "Juego",
-    },
-    {
-      id: 2,
-      title: "Fortnite",
-      price: 0,
-  image: fifaImg,
-      rating: 4.5,
-      category: "Battle Royale",
-      type: "Juego",
-    },
-    {
-      id: 3,
-      title: "Pavos de Fortnite - 1000 V-Bucks",
-      price: 9.99,
-  image: fifaImg,
-      rating: 4.8,
-      category: "Moneda Virtual",
-      type: "Complemento",
-    },
-    {
-      id: 4,
-      title: "Xbox Game Pass Ultimate - 1 Mes",
-      price: 14.99,
-  image: mw3Img,
-      rating: 4.7,
-      category: "Suscripción",
-      type: "Servicio",
-    },
-    {
-      id: 5,
-      title: "Call of Duty: Modern Warfare III",
-      price: 49.99,
-      originalPrice: 69.99,
-      discount: 28,
-  image: mw3Img,
-      rating: 4.0,
-      category: "Acción",
-      type: "Juego",
-    },
-    {
-      id: 6,
-      title: "PlayStation Plus Premium - 3 Meses",
-      price: 39.99,
-  image: mw3Img,
-      rating: 4.6,
-      category: "Suscripción",
-      type: "Servicio",
-    },
-    {
-      id: 7,
-      title: "Cyberpunk 2077",
-      price: 29.99,
-      originalPrice: 59.99,
-      discount: 50,
-  image: cyberpunkImg,
-      rating: 4.3,
-      category: "RPG",
-      type: "Juego",
-    },
-    {
-      id: 8,
-      title: "FIFA 24 Ultimate Team Points - 2200",
-      price: 19.99,
-  image: fifaImg,
-      rating: 4.1,
-      category: "Moneda Virtual",
-      type: "Complemento",
-    },
-    {
-      id: 9,
-      title: "Netflix Gaming - 1 Mes",
-      price: 15.99,
-  image: cyberpunkImg,
-      rating: 4.4,
-      category: "Streaming",
-      type: "Servicio",
-    },
-  ]
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Mapear filtros de UI a params del backend
+        const params: SearchParams = {}
+        const q = (new URLSearchParams(location.search)).get('q') ?? ''
+        if (q) params.q = q
+
+        const tipo = productTypeFilter || ''
+        if (tipo === 'juego' || tipo === 'servicio' || tipo === 'complemento' || tipo === 'todos') {
+          params.tipo = tipo
+        }
+
+        const companiaId = companyFilter ? Number(companyFilter) : undefined
+        if (companiaId) params.companiaId = companiaId
+
+        // priceFilter sintético a rango
+        if (priceFilter === 'under-10') { params.priceMax = 10 }
+        else if (priceFilter === '10-50') { params.priceMin = 10; params.priceMax = 50 }
+        else if (priceFilter === '50-100') { params.priceMin = 50; params.priceMax = 100 }
+        else if (priceFilter === 'over-100') { params.priceMin = 100 }
+
+        const edad = ageFilter ? Number(ageFilter) : undefined
+        if (!Number.isNaN(edad!) && edad !== undefined) params.edadMax = edad
+
+    params.page = page
+    params.limit = limit
+
+        const res = await searchService.search(params)
+        setItems(res.data)
+      } catch (e: unknown) {
+        console.error('Error buscando productos', e)
+        setError('No se pudieron cargar los productos')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [location.search, priceFilter, companyFilter, productTypeFilter, ageFilter, page, limit])
+
+  // Cargar compañías para el Select
+  useEffect(() => {
+    companyService.getAll().then(setCompanies).catch(() => {})
+  }, [])
 
 
 
@@ -163,6 +130,9 @@ export default function BuscarProductos() {
     setCompanyFilter("")
     setProductTypeFilter("")
     setAgeFilter("")
+  const sp = new URLSearchParams(location.search)
+  ;['priceRange','companiaId','tipo','edadMax'].forEach(k => sp.delete(k))
+  navigate({ pathname: '/productos', search: sp.toString() ? `?${sp.toString()}` : '' })
   }
 
   return (
@@ -194,6 +164,14 @@ export default function BuscarProductos() {
                     borderRadius: 3,
                   },
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const sp = new URLSearchParams(location.search)
+                    if (mainSearchQuery.trim()) sp.set('q', mainSearchQuery.trim())
+                    else sp.delete('q')
+                    navigate({ pathname: '/productos', search: sp.toString() ? `?${sp.toString()}` : '' })
+                  }
+                }}
               />
             </Box>
           </Box>
@@ -203,7 +181,9 @@ export default function BuscarProductos() {
               <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 1 }}>
                 Todos los productos
               </Typography>
-              <Typography sx={{ color: "#9ca3af" }}>Mostrando {products.length} de 10000 resultados</Typography>
+              <Typography sx={{ color: "#9ca3af" }}>
+                {loading ? 'Cargando resultados...' : `Mostrando ${items.length} resultados`}
+              </Typography>
             </Box>
 
             <Button
@@ -227,21 +207,20 @@ export default function BuscarProductos() {
               gap: 3,
             }}
           >
-            {products.map((product) => (
-              <Box key={product.id}>
-                <Card sx={{ cursor: "pointer", height: "100%" }}>
+            {error && (
+              <Typography sx={{ color: '#ef4444' }}>{error}</Typography>
+            )}
+            {!loading && !error && items.length === 0 && (
+              <Typography sx={{ color: '#9ca3af' }}>Sin resultados</Typography>
+            )}
+            {!loading && !error && items.map((product) => (
+              <Box key={`${product.tipo}-${product.id}`}>
+                <Card sx={{ cursor: "pointer", height: "100%" }} onClick={() => navigate('/producto', { state: { id: product.id, tipo: product.tipo } })}>
                   <Box sx={{ position: "relative" }}>
-                    <CardMedia component="img" height="200" image={product.image} alt={product.title} />
-                    {product.discount && (
-                      <Chip
-                        label={`-${product.discount}%`}
-                        color="error"
-                        size="small"
-                        sx={{ position: "absolute", top: 8, left: 8 }}
-                      />
-                    )}
+                    {/* No hay imagen en backend aún; placeholder */}
+                    <CardMedia component="img" height="200" image={"/vite.svg"} alt={product.nombre} />
                     <Chip
-                      label={product.type}
+                      label={product.tipo}
                       color="primary"
                       size="small"
                       sx={{ position: "absolute", top: 8, right: 8 }}
@@ -249,33 +228,25 @@ export default function BuscarProductos() {
                   </Box>
                   <CardContent>
                     <Typography variant="h6" sx={{ color: "white", mb: 1, minHeight: "3rem" }}>
-                      {product.title}
+                      {product.nombre}
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <Rating value={product.rating} precision={0.1} size="small" readOnly />
-                        <Typography variant="body2" sx={{ color: "#9ca3af" }}>
-                          {product.rating}
-                        </Typography>
-                      </Box>
-                      <Chip label={product.category} size="small" sx={{ backgroundColor: "#374151", color: "#9ca3af" }} />
+                      <Chip label={product.compania?.nombre ?? 'S/D'} size="small" sx={{ backgroundColor: "#374151", color: "#9ca3af" }} />
+                      {product.categorias && product.categorias[0] && (
+                        <Chip label={product.categorias[0].nombre} size="small" sx={{ backgroundColor: "#374151", color: "#9ca3af" }} />
+                      )}
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        {product.price === 0 ? (
+                        {product.monto === 0 ? (
                           <Typography sx={{ color: "#10b981", fontWeight: "bold" }}>Gratuito</Typography>
                         ) : (
                           <>
-                            <Typography sx={{ color: "white", fontWeight: "bold" }}>US${product.price}</Typography>
-                            {product.originalPrice && (
-                              <Typography variant="body2" sx={{ color: "#6b7280", textDecoration: "line-through" }}>
-                                US${product.originalPrice}
-                              </Typography>
-                            )}
+                            <Typography sx={{ color: "white", fontWeight: "bold" }}>US${product.monto}</Typography>
                           </>
                         )}
                       </Box>
-                      <Button variant="contained" size="small">
+                      <Button variant="contained" size="small" onClick={(e) => { e.stopPropagation(); navigate('/producto', { state: { id: product.id, tipo: product.tipo } }) }}>
                         Ver detalles
                       </Button>
                     </Box>
@@ -325,14 +296,10 @@ export default function BuscarProductos() {
                   label="Compañía"
                   sx={{ color: "white" }}
                 >
-                  <MenuItem value="ea">Electronic Arts</MenuItem>
-                  <MenuItem value="epic">Epic Games</MenuItem>
-                  <MenuItem value="activision">Activision</MenuItem>
-                  <MenuItem value="cdpr">CD Projekt Red</MenuItem>
-                  <MenuItem value="mojang">Mojang Studios</MenuItem>
-                  <MenuItem value="microsoft">Microsoft</MenuItem>
-                  <MenuItem value="sony">Sony</MenuItem>
-                  <MenuItem value="netflix">Netflix</MenuItem>
+                  <MenuItem value="">Todas</MenuItem>
+                  {companies.map(c => (
+                    <MenuItem key={c.id} value={String(c.id)}>{c.nombre}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
@@ -346,9 +313,9 @@ export default function BuscarProductos() {
                   label="Tipo de producto"
                   sx={{ color: "white" }}
                 >
-                  <MenuItem value="juegos">Juegos</MenuItem>
-                  <MenuItem value="complementos">Complementos</MenuItem>
-                  <MenuItem value="servicios">Servicios</MenuItem>
+                  <MenuItem value="juego">Juegos</MenuItem>
+                  <MenuItem value="complemento">Complementos</MenuItem>
+                  <MenuItem value="servicio">Servicios</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -362,9 +329,9 @@ export default function BuscarProductos() {
                   label="Edad"
                   sx={{ color: "white" }}
                 >
-                  <MenuItem value="child">Niño</MenuItem>
-                  <MenuItem value="teen">Adolescente (+13)</MenuItem>
-                  <MenuItem value="adult">Adulto (+18)</MenuItem>
+                  <MenuItem value="8">Niño</MenuItem>
+                  <MenuItem value="13">Adolescente (+13)</MenuItem>
+                  <MenuItem value="18">Adulto (+18)</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -381,6 +348,27 @@ export default function BuscarProductos() {
               >
                 Borrar filtros
               </Button>
+          {/* Paginación básica */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
+            <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+              Anterior
+            </Button>
+            <TextField
+              size="small"
+              value={page}
+              onChange={(e) => setPage(Math.max(1, Number(e.target.value) || 1))}
+              sx={{ width: 80 }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+            />
+            <Select size="small" value={String(limit)} onChange={(e) => setLimit(Number(e.target.value))}>
+              <MenuItem value={12}>12</MenuItem>
+              <MenuItem value={24}>24</MenuItem>
+              <MenuItem value={48}>48</MenuItem>
+            </Select>
+            <Button variant="outlined" onClick={() => setPage(p => p + 1)}>
+              Siguiente
+            </Button>
+          </Box>
             </Box>
           </Box>
         </Drawer>
