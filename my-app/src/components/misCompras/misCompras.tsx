@@ -99,12 +99,15 @@ interface Venta {
   servicio?: {
     id: number;
     nombre: string;
-    precio: number;
+    detalle:string;
+    monto: number;
+    compania:number;
   };
   complemento?: {
     id: number;
     nombre: string;
-    precio: number;
+    detalle:string;
+    monto: number;
   };
 }
 
@@ -152,9 +155,16 @@ export default function MisComprasPage() {
 
   const getProductPrice = (venta: Venta) => {
     if (venta.juego) return venta.juego.monto
-    if (venta.servicio) return venta.servicio.precio
-    if (venta.complemento) return venta.complemento.precio
+    if (venta.servicio) return venta.servicio.monto
+    if (venta.complemento) return venta.complemento.monto
     return 0
+  }
+
+  const getProductCategory = (venta: Venta) => {
+    if (venta.juego) return "Juego"
+    if (venta.servicio) return "Servicio"
+    if (venta.complemento) return "Complemento"
+    return "Desconocido"
   }
 
   const getProductImage = (venta: Venta) => {
@@ -309,7 +319,7 @@ export default function MisComprasPage() {
                       </Box>
                       <Box sx={{ textAlign: "right" }}>
                         <Chip
-                          label="Completada"
+                          label={getProductCategory(venta)}
                           color="success"
                           size="small"
                           sx={{ mb: 1 }}
