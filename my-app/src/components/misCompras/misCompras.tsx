@@ -81,11 +81,19 @@ interface Venta {
     id: number;
     nombre: string;
     nombreUsuario: string;
+    contrasenia: string;
+    fechaCreacion: string;
+    fechaNacimiento: string;
+    mail:string;
   };
   juego?: {
     id: number;
     nombre: string;
+    detalle:string;
     monto: number;
+    edadPermitida: number;
+    fechalanzamiento: string;
+    compania:number;
   };
   servicio?: {
     id: number;
@@ -152,14 +160,14 @@ export default function MisComprasPage() {
 
 // Funciones auxiliares
   const getProductName = (venta: Venta) => {
-    if (venta.juego) return venta.juego.titulo
+    if (venta.juego) return venta.juego.nombre
     if (venta.servicio) return venta.servicio.nombre
     if (venta.complemento) return venta.complemento.nombre
     return "Producto desconocido"
   }
 
   const getProductPrice = (venta: Venta) => {
-    if (venta.juego) return venta.juego.precio
+    if (venta.juego) return venta.juego.monto
     if (venta.servicio) return venta.servicio.precio
     if (venta.complemento) return venta.complemento.precio
     return 0
