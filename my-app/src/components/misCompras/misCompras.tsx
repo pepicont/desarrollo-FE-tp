@@ -32,6 +32,7 @@ import fifaImg from "../../assets/fifa24.jpg"
 import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
 import { authService } from "../../services/authService"
+import { getUserPurchases } from "../../services/comprasService.ts"
 
 const darkTheme = createTheme({
   palette: {
@@ -107,6 +108,7 @@ interface Venta {
   };
 }
 
+
 export default function MisComprasPage() {
   // Estados para manejar los datos
   const [ventas, setVentas] = useState<Venta[]>([])
@@ -117,46 +119,28 @@ export default function MisComprasPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [dateFilter, setDateFilter] = useState("")
 
-  // Cargar ventas del usuario autenticado
+//Fetch al back para traerse las compras del usuario
   useEffect(() => {
-    const fetchUserPurchases = async () => {
-      try {
-        const token = authService.getToken()
-        
-        if (!token) {
-          setError('No estás autenticado')
-          setLoading(false)
-          return
+      const fetchUserPurchases = async () => {
+        try {
+          const token = authService.getToken();
+          if (!token) {
+            setError('No estás autenticado');
+            setLoading(false);
+            return;
+          }
+          const ventas = await getUserPurchases(token);
+          setVentas(ventas);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          setError('Error al cargar las compras');
+        } finally {
+          setLoading(false);
         }
+      };
+      fetchUserPurchases();
+    }, []);
 
-        // Ahora obtenemos directamente las ventas del usuario
-        const ventasResponse = await fetch('http://localhost:3000/api/venta/my-ventas', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        if (ventasResponse.ok) {
-          const ventasData = await ventasResponse.json()
-          console.log('Ventas obtenidas:', ventasData)
-          
-          // Ya no necesitamos filtrar - el backend nos envía solo las del usuario
-          setVentas(ventasData.data)
-        } else {
-          setError('Error al cargar las compras')
-        }
-      } catch (error) {
-        console.error('Error fetching purchases:', error)
-        setError('Error de conexión')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUserPurchases()
-  }, [])
 
 // Funciones auxiliares
   const getProductName = (venta: Venta) => {
