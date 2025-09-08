@@ -127,7 +127,7 @@ export default function Producto() {
               </Box>
 
               <Button fullWidth variant="contained" color="warning" sx={{ py: 1.5, fontWeight: 700 }}>
-                Agregar al carrito
+                Comprar
               </Button>
 
               <Box sx={{ mt: 3 }}>
