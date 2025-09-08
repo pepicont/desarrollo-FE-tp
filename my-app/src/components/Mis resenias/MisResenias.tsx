@@ -169,7 +169,7 @@ export default function MisResenasPage() {
           </Container>
         </Box>
       </ThemeProvider>
-    )
+      )
   }
 
   // Mostrar error y  botón "Reintentar" en caso de error de conexión
@@ -305,7 +305,7 @@ export default function MisResenasPage() {
                       <Avatar
                         src={getProductImage(resenia.venta)}
                         alt={getProductName(resenia.venta)}
-                        sx={{ width: 80, height: 80, borderRadius: 12 }}
+                        sx={{ width: 80, height: 80, borderRadius: 1 }}
                         variant="rounded"
                       />
 
