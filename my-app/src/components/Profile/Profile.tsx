@@ -34,6 +34,7 @@ import avatar1 from "../../assets/cyberpunk.jpg"
 import avatar2 from "../../assets/fifa24.jpg"
 import avatar3 from "../../assets/mw3.jpg"
 import { authService } from "../../services/authService"
+import { getUserProfile, updateUserProfile } from "../../services/profileService"
 
 const darkTheme = createTheme({
   palette: {
@@ -71,52 +72,32 @@ export default function Profile() {
     const fetchUserProfile = async () => {
       try {
         const token = authService.getToken()
-        
         if (!token) {
           setError('No estás autenticado')
           setLoading(false)
           return
         }
-
-        const response = await fetch('http://localhost:3000/api/auth/profile', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-        
-        if (response.ok) {
-          const profile = await response.json()
-          
-          // Función para formatear fechas UTC correctamente (se ponian fechas con otro uso horario)
-          const formatUTCDate = (dateString: string) => {
-            const date = new Date(dateString)
-            return date.toISOString().split('T')[0]
-          }
-          
-          // Actualizar userData con los datos reales
-          const updatedUserData = {
-            username: profile.nombreUsuario,
-            realName: profile.nombre,
-            email: profile.mail,
-            birthDate: formatUTCDate(profile.fechaNacimiento),
-            accountCreated: formatUTCDate(profile.fechaCreacion),
-          }
-          
-          setUserData(updatedUserData)
-          setEditData(updatedUserData)
-        } else {
-          setError('Error al cargar el perfil')
+        const profile = await getUserProfile(token)
+        const formatUTCDate = (dateString: string) => {
+          const date = new Date(dateString)
+          return date.toISOString().split('T')[0]
         }
+        const updatedUserData = {
+          username: profile.nombreUsuario,
+          realName: profile.nombre,
+          email: profile.mail,
+          birthDate: formatUTCDate(profile.fechaNacimiento),
+          accountCreated: formatUTCDate(profile.fechaCreacion),
+        }
+        setUserData(updatedUserData)
+        setEditData(updatedUserData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error('Error fetching profile:', error)
-        setError('Error de conexión')
+        setError('Error al cargar el perfil')
       } finally {
         setLoading(false)
       }
     }
-
     fetchUserProfile()
   }, [])
 
@@ -147,52 +128,26 @@ export default function Profile() {
       }
 
       // Primero obtenemos el ID del usuario actual
-      const profileResponse = await fetch('http://localhost:3000/api/auth/profile', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!profileResponse.ok) {
-        setError('Error al obtener perfil del usuario')
-        return
-      }
-      
-      const profileData = await profileResponse.json()
-      
-      // Preparar los datos para el backend (convertir de editData a formato del backend)
+      // Usar getUserProfile para obtener el id
+      const profile = await getUserProfile(token)
+      const userId = profile.id
       const updateData = {
         nombre: editData.realName,
         nombreUsuario: editData.username,
         mail: editData.email,
         fechaNacimiento: editData.birthDate,
       }
-
-      // Actualizar el perfil del usuario
-      const updateResponse = await fetch(`http://localhost:3000/api/usuario/${profileData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-      })
-
-      if (updateResponse.ok) {
-        // Si la actualización fue exitosa, actualizar el estado local
+      try {
+        await updateUserProfile(token, userId, updateData)
         setUserData(editData)
         setIsEditing(false)
         setSuccessMessage('Perfil actualizado correctamente')
-        
-        // Limpiar el mensaje de éxito después de 3 segundos
         setTimeout(() => {
           setSuccessMessage('')
         }, 3000)
-      } else {
-        const errorData = await updateResponse.json()
-        setError(errorData.message || 'Error al guardar los cambios')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        setError(error.message || 'Error al guardar los cambios')
       }
     } catch (error) {
       console.error('Error saving profile:', error)
