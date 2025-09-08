@@ -11,6 +11,8 @@ import mw3Img from "../../assets/mw3.jpg"
 import EditIcon from "@mui/icons-material/Edit"
 import { useNavigate } from "react-router-dom"
 import { authService } from "../../services/authService"
+import { updateResenia } from "../../services/reseniasService"
+import { getUserResenias } from "../../services/reseniasService"
 
 const darkTheme = createTheme({
   palette: {
@@ -45,7 +47,7 @@ interface Resenia {
     fecha: string;
     juego?: {
       id: number;
-      titulo: string;
+      nombre: string;
       imagen?: string; // Campo opcional para imagen del juego
     };
     servicio?: {
@@ -62,6 +64,11 @@ interface Resenia {
 }
 
 export default function MisResenasPage() {
+  const [editId, setEditId] = useState<number | null>(null)
+  const [editDetalle, setEditDetalle] = useState("")
+  const [editPuntaje, setEditPuntaje] = useState<number>(0)
+  const [editFecha, setEditFecha] = useState("")
+  const [editLoading, setEditLoading] = useState(false)
   const navigate = useNavigate()
   
   // Estados para manejar los datos
@@ -75,46 +82,33 @@ export default function MisResenasPage() {
     const fetchUserReviews = async () => {
       try {
         const token = authService.getToken()
-
-        //  Ahora obtenemos directamente las reseñas del usuario
-        const resenasResponse = await fetch('http://localhost:3000/api/resenia/my-resenias', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        if (resenasResponse.ok) {
-          const resenasData = await resenasResponse.json()
-          
-          //  Ya no necesitamos filtrar - el backend nos envía solo las del usuario
-          setResenias(resenasData.data)
-        } else {
-          // Manejo de errores más específico
-          if (resenasResponse.status === 401) {
-            setError('Sesión expirada. Por favor, inicia sesión nuevamente.')
-            setCanRetry(false) // No sirve reintentar
-          } else if (resenasResponse.status === 403) {
-            setError('No tienes permisos para acceder a esta información.')
-            setCanRetry(false) // No sirve reintentar
-          } else if (resenasResponse.status === 404) {
-            setError('Servicio no disponible. Contacta al administrador.')
-            setCanRetry(false) // No sirve reintentar
-          } else {
-            setError('Error al cargar las reseñas. Intenta nuevamente.')
-            setCanRetry(true) // Sí sirve reintentar
-          }
+        if (!token) {
+          setError('No estás autenticado')
+          setLoading(false)
+          return
         }
-      } catch (error) {
-        console.error('Error fetching reviews:', error)
-        setError('Error de conexión. Verifica tu internet e intenta nuevamente.')
-        setCanRetry(true) // Sí sirve reintentar - puede ser temporal
+        const resenasData = await getUserResenias(token)
+        setResenias(resenasData.data)
+        setCanRetry(true)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.status === 401) {
+          setError('Sesión expirada. Por favor, inicia sesión nuevamente.')
+          setCanRetry(false)
+        } else if (error.status === 403) {
+          setError('No tienes permisos para acceder a esta información.')
+          setCanRetry(false)
+        } else if (error.status === 404) {
+          setError('Servicio no disponible. Contacta al administrador.')
+          setCanRetry(false)
+        } else {
+          setError('Error al cargar las reseñas. Intenta nuevamente.')
+          setCanRetry(true)
+        }
       } finally {
         setLoading(false)
       }
     }
-
     fetchUserReviews()
   }, [])
 
@@ -126,7 +120,7 @@ export default function MisResenasPage() {
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: Resenia['venta']) => {
-    if (venta.juego) return venta.juego.titulo
+    if (venta.juego) return venta.juego.nombre
     if (venta.servicio) return venta.servicio.nombre
     if (venta.complemento) return venta.complemento.nombre
     return "Producto desconocido"
@@ -153,10 +147,14 @@ export default function MisResenasPage() {
     navigate("/producto", { state: { productId, productName } })
   }
 
-  const handleEditReview = (reviewId: number, productName: string) => {
-    // Punto de entrada para edición de reseña (pendiente de definir destino)
-    // Por ahora dejamos un placeholder
-    console.log(`Editar reseña ${reviewId} de ${productName}`)
+  const handleEditReview = (reviewId: number) => {
+    const review = resenias.find(r => r.id === reviewId)
+    if (review) {
+      setEditId(reviewId)
+      setEditDetalle(review.detalle)
+      setEditPuntaje(review.puntaje)
+      setEditFecha(review.fecha)
+    }
   }
 
   // Mostrar loading
@@ -193,41 +191,32 @@ export default function MisResenasPage() {
                     onClick={() => {
                       setError('')
                       setLoading(true)
-                      // Recargar reseñas
                       const fetchUserReviews = async () => {
                         try {
                           const token = authService.getToken()
-                          const resenasResponse = await fetch('http://localhost:3000/api/resenia/my-resenias', {
-                            method: 'GET',
-                            headers: {
-                              'Authorization': `Bearer ${token}`,
-                              'Content-Type': 'application/json',
-                            },
-                          })
-
-                          if (resenasResponse.ok) {
-                            const resenasData = await resenasResponse.json()
-                            setResenias(resenasData.data)
-                          } else {
-                            // Usar la misma lógica mejorada de errores
-                            if (resenasResponse.status === 401) {
-                              setError('Sesión expirada. Por favor, inicia sesión nuevamente.')
-                              setCanRetry(false)
-                            } else if (resenasResponse.status === 403) {
-                              setError('No tienes permisos para acceder a esta información.')
-                              setCanRetry(false)
-                            } else if (resenasResponse.status === 404) {
-                              setError('Servicio no disponible. Contacta al administrador.')
-                              setCanRetry(false)
-                            } else {
-                              setError('Error al cargar las reseñas. Intenta nuevamente.')
-                              setCanRetry(true)
-                            }
+                          if (!token) {
+                            setError('No estás autenticado')
+                            setLoading(false)
+                            return
                           }
-                        } catch (error) {
-                          console.error('Error fetching reviews:', error)
-                          setError('Error de conexión. Verifica tu internet e intenta nuevamente.')
+                          const resenasData = await getUserResenias(token)
+                          setResenias(resenasData.data)
                           setCanRetry(true)
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        } catch (error: any) {
+                          if (error.status === 401) {
+                            setError('Sesión expirada. Por favor, inicia sesión nuevamente.')
+                            setCanRetry(false)
+                          } else if (error.status === 403) {
+                            setError('No tienes permisos para acceder a esta información.')
+                            setCanRetry(false)
+                          } else if (error.status === 404) {
+                            setError('Servicio no disponible. Contacta al administrador.')
+                            setCanRetry(false)
+                          } else {
+                            setError('Error al cargar las reseñas. Intenta nuevamente.')
+                            setCanRetry(true)
+                          }
                         } finally {
                           setLoading(false)
                         }
@@ -316,7 +305,7 @@ export default function MisResenasPage() {
                       <Avatar
                         src={getProductImage(resenia.venta)}
                         alt={getProductName(resenia.venta)}
-                        sx={{ width: 80, height: 80, borderRadius: 2 }}
+                        sx={{ width: 80, height: 80, borderRadius: 12 }}
                         variant="rounded"
                       />
 
@@ -337,47 +326,117 @@ export default function MisResenasPage() {
                           {getProductName(resenia.venta)}
                         </Typography>
 
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-                          <Rating
-                            value={resenia.puntaje}
-                            readOnly
-                            size="small"
-                            sx={{
-                              "& .MuiRating-iconFilled": {
-                                color: "#ffd700",
-                              },
-                            }}
-                          />
-                          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                            {resenia.puntaje} estrellas
-                          </Typography>
-                        </Box>
-
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                            Fecha de reseña: {formatDate(resenia.fecha)}
-                          </Typography>
-                        </Box>
-
-                        <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
-                          "{resenia.detalle}"
-                        </Typography>
+                        {editId === resenia.id ? (
+                          <>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                              <Rating
+                                value={editPuntaje}
+                                onChange={(_, value) => setEditPuntaje(value || 0)}
+                                size="small"
+                                sx={{
+                                  "& .MuiRating-iconFilled": {
+                                    color: "#ffd700",
+                                  },
+                                }}
+                              />
+                              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                                {editPuntaje} estrellas
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                                Fecha de reseña: {formatDate(editFecha)}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ mb: 2 }}>
+                              <textarea
+                                value={editDetalle}
+                                onChange={e => setEditDetalle(e.target.value)}
+                                rows={3}
+                                style={{ width: "100%", borderRadius: 8, padding: 8, fontSize: "1rem" }}
+                              />
+                            </Box>
+                            <Box sx={{ display: "flex", gap: 2 }}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                disabled={editLoading}
+                                onClick={async () => {
+                                  setEditLoading(true)
+                                  try {
+                                    const token = authService.getToken()
+                                    if (!token) {
+                                      setError('No estás autenticado')
+                                      setLoading(false)
+                                      return
+                                    }
+                                    const now = new Date().toISOString()
+                                    await updateResenia(token, resenia.id, {
+                                      detalle: editDetalle,
+                                      puntaje: editPuntaje,
+                                      fecha: now,
+                                    })
+                                    // Actualizar en UI local
+                                    setResenias(prev => prev.map(r => r.id === resenia.id ? { ...r, detalle: editDetalle, puntaje: editPuntaje, fecha: now } : r))
+                                    setEditId(null)
+                                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                  } catch (err) {
+                                    setError("Error al guardar la reseña")
+                                  } finally {
+                                    setEditLoading(false)
+                                  }
+                                }}
+                              >Guardar</Button>
+                              <Button variant="outlined" size="small" onClick={() => setEditId(null)}>Cancelar</Button>
+                            </Box>
+                          </>
+                        ) : (
+                          <>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                              <Rating
+                                value={resenia.puntaje}
+                                readOnly
+                                size="small"
+                                sx={{
+                                  "& .MuiRating-iconFilled": {
+                                    color: "#ffd700",
+                                  },
+                                }}
+                              />
+                              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                                {resenia.puntaje} estrellas
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                                Fecha de reseña: {formatDate(resenia.fecha)}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+                              "{resenia.detalle}"
+                            </Typography>
+                          </>
+                        )}
                       </Box>
                       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <IconButton
-                          onClick={() => handleEditReview(resenia.id, getProductName(resenia.venta))}
-                          sx={{
-                            bgcolor: "primary.main",
-                            color: "white",
-                            "&:hover": { bgcolor: "#3a7bc8" },
-                            mb: 1,
-                          }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                          Editar
-                        </Typography>
+                        {editId === resenia.id ? null : (
+                          <>
+                            <IconButton
+                              onClick={() => handleEditReview(resenia.id)}
+                              sx={{
+                                bgcolor: "primary.main",
+                                color: "white",
+                                "&:hover": { bgcolor: "#3a7bc8" },
+                                mb: 1,
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              Editar
+                            </Typography>
+                          </>
+                        )}
                       </Box>
                     </Box>
                   </CardContent>
