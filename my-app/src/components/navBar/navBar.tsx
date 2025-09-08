@@ -140,10 +140,12 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
   }
 
   const onSubmitSearch = () => {
-
-    if (searchQuery.trim()) {
-      console.log("Buscar:", searchQuery.trim())
-    }
+    const q = searchQuery.trim()
+    if (!q) return
+    // Navegar a la página de productos con el parámetro de búsqueda
+    const url = `/productos?q=${encodeURIComponent(q)}`
+    window.location.href = url
+    closeSearch()
   }
 
   const handleMenuClick = (text: string, href?: string, isLogout?: boolean) => {
