@@ -19,6 +19,10 @@ import Stepper from "@mui/material/Stepper"
 import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
 import { styled } from "@mui/material/styles"
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
 import AppTheme from '../shared-theme/AppTheme'
 import { SitemarkIcon } from "../sign-in/components/CustomIcons"
 import { useEffect } from "react"
@@ -477,22 +481,27 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="birthDate">Fecha de Nacimiento</FormLabel>
-              <TextField
-                error={birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit)}
-                helperText={(fieldsTouched.birthDate || hasAttemptedSubmit) && birthDateError ? birthDateErrorMessage : ""}
-                id="birthDate"
-                name="birthDate"
-                type="date"
-                required
-                fullWidth
-                variant="outlined"
-                disabled={isLoading}
-                color={birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit) ? "error" : "primary"}
-                value={formData.birthDate}
-                onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                InputLabelProps={{
-                  shrink: true,
+              <DatePicker
+                value={formData.birthDate ? dayjs(formData.birthDate) : null}
+                onChange={(newValue) => {
+                  const dateString = newValue ? newValue.format('YYYY-MM-DD') : ''
+                  handleInputChange("birthDate", dateString)
                 }}
+                disabled={isLoading}
+                slotProps={{
+                  textField: {
+                    error: birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit),
+                    helperText: (fieldsTouched.birthDate || hasAttemptedSubmit) && birthDateError ? birthDateErrorMessage : "",
+                    fullWidth: true,
+                    variant: "outlined",
+                    required: true,
+                    name: "birthDate",
+                    id: "birthDate",
+                    color: birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit) ? "error" : "primary"
+                  }
+                }}
+                format="DD/MM/YYYY"
+                label=""
               />
             </FormControl>
           </>
@@ -503,14 +512,15 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   }
 
   return (
-    <AppTheme {...props}>
-      <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined">
-          <SitemarkIcon />
-          <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: { xs: '1.75rem', sm: '2rem', md: '2.15rem' } }}>
-            Registrarse
-          </Typography>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <AppTheme {...props}>
+        <CssBaseline enableColorScheme />
+        <SignInContainer direction="column" justifyContent="space-between">
+          <Card variant="outlined">
+            <SitemarkIcon />
+            <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: { xs: '1.75rem', sm: '2rem', md: '2.15rem' } }}>
+              Registrarse
+            </Typography>
           
           {/* Stepper para mostrar progreso */}
           <Stepper activeStep={activeStep} sx={{ pt: { xs: 2, sm: 3 }, pb: { xs: 3, sm: 5 } }}>
@@ -613,5 +623,6 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
         </Card>
       </SignInContainer>
     </AppTheme>
+    </LocalizationProvider>
   )
 }
