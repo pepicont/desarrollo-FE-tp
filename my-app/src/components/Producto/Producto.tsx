@@ -147,15 +147,16 @@ export default function Producto() {
                 <Box sx={{ display: 'grid', gap: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CalendarMonth fontSize="small" color="disabled" />
+                    <Typography>Lanzado el {data && 'fechaLanzamiento' in data && (data as JuegoDetail).fechaLanzamiento ? new Date((data as JuegoDetail).fechaLanzamiento).toLocaleDateString() : '(fecha)'}</Typography>
                     
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Person fontSize="small" color="disabled" />
-                    
+                    <Typography>Edad permitida: {data && 'edadPermitida' in data && typeof (data as JuegoDetail).edadPermitida === 'number' ? (data as JuegoDetail).edadPermitida + '+' : '(edad)+'}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Category fontSize="small" color="disabled" />
-                    
+                    <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : '(categorias)'}</Typography>
                   </Box>
                 </Box>
               </Box>
