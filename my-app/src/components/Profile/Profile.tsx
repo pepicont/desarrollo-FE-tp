@@ -162,6 +162,23 @@ export default function Profile() {
         setTimeout(() => {
           setSuccessMessage('')
         }, 3000)
+
+        // Actualizar la variable 'user' en localStorage o sessionStorage
+        const storage = localStorage.getItem('user') ? localStorage : sessionStorage.getItem('user') ? sessionStorage : null;
+        if (storage) {
+          try {
+            const userRaw = storage.getItem('user');
+            if (userRaw) {
+              const userObj = JSON.parse(userRaw);
+              userObj.mail = editData.email;
+              userObj.nombre = editData.realName;
+              storage.setItem('user', JSON.stringify(userObj));
+            }
+          } catch (e) {
+            // Si hay error, no romper la app
+            console.error('No se pudo actualizar la variable user en storage:', e);
+          }
+        }
       } else {
         // Traducir errores técnicos de la base de datos a mensajes user-friendly
         const errorMessage = result.message || "Error al guardar los cambios"
