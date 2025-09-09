@@ -196,7 +196,7 @@ export default function BuscarProductos() {
                 "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
-              Filtros
+              FILTROS
             </Button>
           </Box>
 
@@ -220,7 +220,7 @@ export default function BuscarProductos() {
                     {/* No hay imagen en backend aún; placeholder */}
                     <CardMedia component="img" height="200" image={"/vite.svg"} alt={product.nombre} />
                     <Chip
-                      label={product.tipo}
+                      label={product.tipo.charAt(0).toUpperCase() + product.tipo.slice(1)}
                       color="primary"
                       size="small"
                       sx={{ position: "absolute", top: 8, right: 8 }}
