@@ -56,6 +56,7 @@ export default function Profile() {
   const [successMessage, setSuccessMessage] = useState("")
   const [showEmailWarning, setShowEmailWarning] = useState(false)
   const [pendingEmailChange, setPendingEmailChange] = useState("")
+  const [emailWarningShown, setEmailWarningShown] = useState(false)
 
   const [userData, setUserData] = useState({
     username: "",
@@ -160,17 +161,19 @@ export default function Profile() {
   const handleCancel = () => {
     setEditData(userData)
     setIsEditing(false)
+    setEmailWarningShown(false) // Resetear la bandera al cancelar
   }
 
   // Función para manejar el cambio de email con advertencia
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
-    if (newEmail !== userData.email && userData.email) {
-      // Si el email es diferente al actual, mostrar advertencia
+    if (newEmail !== userData.email && userData.email && !emailWarningShown) {
+      // Si el email es diferente al actual y no se ha mostrado la advertencia, mostrarla
       setPendingEmailChange(newEmail)
       setShowEmailWarning(true)
+      setEmailWarningShown(true)
     } else {
-      // Si es el mismo email o es la primera vez, permitir el cambio directo
+      // Si es el mismo email, es la primera vez, o ya se mostró la advertencia, permitir el cambio directo
       setEditData({ ...editData, email: newEmail })
     }
   }
@@ -186,6 +189,7 @@ export default function Profile() {
   const cancelEmailChange = () => {
     setShowEmailWarning(false)
     setPendingEmailChange("")
+    setEmailWarningShown(false) // Resetear para permitir mostrar la advertencia de nuevo
   }
 
   const formatDate = (dateString: string) => {

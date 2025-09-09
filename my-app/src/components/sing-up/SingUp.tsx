@@ -110,12 +110,25 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [registerError, setRegisterError] = React.useState("")
   const [registerSuccess, setRegisterSuccess] = React.useState(false)
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false)
+  
+  // Estados para rastrear si el usuario ha interactuado con los campos
+  const [fieldsTouched, setFieldsTouched] = React.useState({
+    username: false,
+    name: false,
+    birthDate: false
+  })
 
   // Función para validar el segundo paso
   const validateSecondStep = React.useCallback(() => {
     let isValid = true
 
-    if (!formData.username || formData.username.length < 3) {
+    // Validar username solo si está vacío o si tiene contenido pero es muy corto
+    if (!formData.username) {
+      setUsernameError(true)
+      setUsernameErrorMessage("El nombre de usuario es requerido.")
+      isValid = false
+    } else if (formData.username.length < 3) {
       setUsernameError(true)
       setUsernameErrorMessage("El nombre de usuario debe tener al menos 3 caracteres.")
       isValid = false
@@ -124,7 +137,12 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       setUsernameErrorMessage("")
     }
 
-    if (!formData.name || formData.name.length < 2) {
+    // Validar nombre solo si está vacío o si tiene contenido pero es muy corto
+    if (!formData.name) {
+      setNameError(true)
+      setNameErrorMessage("El nombre es requerido.")
+      isValid = false
+    } else if (formData.name.length < 2) {
       setNameError(true)
       setNameErrorMessage("El nombre debe tener al menos 2 caracteres.")
       isValid = false
@@ -133,6 +151,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       setNameErrorMessage("")
     }
 
+    // Validar fecha de nacimiento solo si está vacía
     if (!formData.birthDate) {
       setBirthDateError(true)
       setBirthDateErrorMessage("La fecha de nacimiento es requerida.")
@@ -145,17 +164,19 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     return isValid
   }, [formData.username, formData.name, formData.birthDate])
 
-  // Validar automáticamente el segundo paso cuando esté en esa página
-  React.useEffect(() => {
-    if (activeStep === 1) {
-      validateSecondStep()
-    }
-  }, [activeStep, validateSecondStep])
+  // Nota: Se removió la validación automática para evitar errores prematuros
+  // La validación solo se ejecutará cuando el usuario intente registrarse
 
   // Función para manejar cambios en inputs
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Limpiar error cuando el usuario empiece a escribir
+    
+    // Marcar el campo como tocado cuando el usuario interactúa
+    if (field === 'username' || field === 'name' || field === 'birthDate') {
+      setFieldsTouched(prev => ({ ...prev, [field]: true }))
+    }
+    
+    // Limpiar errores cuando el usuario empiece a escribir (solo para los campos del primer paso)
     if (field === 'email' && emailError) {
       setEmailError(false)
       setEmailErrorMessage("")
@@ -168,17 +189,53 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       setConfirmPasswordError(false)
       setConfirmPasswordErrorMessage("")
     }
-    if (field === 'username' && usernameError) {
-      setUsernameError(false)
-      setUsernameErrorMessage("")
-    }
-    if (field === 'name' && nameError) {
-      setNameError(false)
-      setNameErrorMessage("")
-    }
-    if (field === 'birthDate' && birthDateError) {
-      setBirthDateError(false)
-      setBirthDateErrorMessage("")
+    
+    // Para los campos del segundo paso, solo validar si ya se intentó enviar O si el campo tenía un error previo
+    const hadError = (field === 'username' && usernameError) || 
+                    (field === 'name' && nameError) || 
+                    (field === 'birthDate' && birthDateError)
+    
+    const shouldValidate = hasAttemptedSubmit || hadError
+    
+    if (shouldValidate) {
+      if (field === 'username') {
+        const newValue = value as string
+        if (!newValue) {
+          setUsernameError(true)
+          setUsernameErrorMessage("El nombre de usuario es requerido.")
+        } else if (newValue.length < 3) {
+          setUsernameError(true)
+          setUsernameErrorMessage("El nombre de usuario debe tener al menos 3 caracteres.")
+        } else {
+          setUsernameError(false)
+          setUsernameErrorMessage("")
+        }
+      }
+      
+      if (field === 'name') {
+        const newValue = value as string
+        if (!newValue) {
+          setNameError(true)
+          setNameErrorMessage("El nombre es requerido.")
+        } else if (newValue.length < 2) {
+          setNameError(true)
+          setNameErrorMessage("El nombre debe tener al menos 2 caracteres.")
+        } else {
+          setNameError(false)
+          setNameErrorMessage("")
+        }
+      }
+      
+      if (field === 'birthDate') {
+        const newValue = value as string
+        if (!newValue) {
+          setBirthDateError(true)
+          setBirthDateErrorMessage("La fecha de nacimiento es requerida.")
+        } else {
+          setBirthDateError(false)
+          setBirthDateErrorMessage("")
+        }
+      }
     }
   }
 
@@ -222,7 +279,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     return isValid
   }
 
-  const handleNext = () => {
+  const handleNext = (e?: React.MouseEvent<HTMLButtonElement>) => {
+    e?.preventDefault() // Prevenir el submit del formulario
     const isValid = validateFirstStep()
     if (isValid) {
       setActiveStep(1)
@@ -231,6 +289,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
   const handleBack = () => {
     setActiveStep(0)
+    setHasAttemptedSubmit(false) // Resetear cuando vuelve atrás
+    setFieldsTouched({ username: false, name: false, birthDate: false }) // Resetear campos tocados
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -238,8 +298,11 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
     // Solo procesar el submit si estamos en el último paso
     if (activeStep !== steps.length - 1) {
-      return
+      return // No hacer nada si no estamos en el último paso
     }
+
+    // Marcar que se ha intentado enviar el formulario
+    setHasAttemptedSubmit(true)
 
     if (!validateSecondStep()) {
       return
@@ -379,8 +442,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             <FormControl>
               <FormLabel htmlFor="username">Nombre de Usuario</FormLabel>
               <TextField
-                error={usernameError}
-                helperText={usernameErrorMessage}
+                error={usernameError && (fieldsTouched.username || hasAttemptedSubmit)}
+                helperText={(fieldsTouched.username || hasAttemptedSubmit) && usernameError ? usernameErrorMessage : ""}
                 id="username"
                 name="username"
                 placeholder="mi_usuario"
@@ -389,7 +452,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 fullWidth
                 variant="outlined"
                 disabled={isLoading}
-                color={usernameError ? "error" : "primary"}
+                color={usernameError && (fieldsTouched.username || hasAttemptedSubmit) ? "error" : "primary"}
                 value={formData.username}
                 onChange={(e) => handleInputChange("username", e.target.value)}
               />
@@ -397,8 +460,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             <FormControl>
               <FormLabel htmlFor="name">Nombre Completo</FormLabel>
               <TextField
-                error={nameError}
-                helperText={nameErrorMessage}
+                error={nameError && (fieldsTouched.name || hasAttemptedSubmit)}
+                helperText={(fieldsTouched.name || hasAttemptedSubmit) && nameError ? nameErrorMessage : ""}
                 id="name"
                 name="name"
                 placeholder="Tu nombre completo"
@@ -407,7 +470,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 fullWidth
                 variant="outlined"
                 disabled={isLoading}
-                color={nameError ? "error" : "primary"}
+                color={nameError && (fieldsTouched.name || hasAttemptedSubmit) ? "error" : "primary"}
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
               />
@@ -415,8 +478,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             <FormControl>
               <FormLabel htmlFor="birthDate">Fecha de Nacimiento</FormLabel>
               <TextField
-                error={birthDateError}
-                helperText={birthDateErrorMessage}
+                error={birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit)}
+                helperText={(fieldsTouched.birthDate || hasAttemptedSubmit) && birthDateError ? birthDateErrorMessage : ""}
                 id="birthDate"
                 name="birthDate"
                 type="date"
@@ -424,7 +487,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 fullWidth
                 variant="outlined"
                 disabled={isLoading}
-                color={birthDateError ? "error" : "primary"}
+                color={birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit) ? "error" : "primary"}
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange("birthDate", e.target.value)}
                 InputLabelProps={{
@@ -513,7 +576,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 ) : (
                   <Button
                     type="button"
-                    onClick={handleNext}
+                    onClick={(e) => handleNext(e)}
                     variant="contained"
                     disabled={isLoading}
                   >
