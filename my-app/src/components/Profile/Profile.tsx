@@ -34,7 +34,7 @@ import avatar1 from "../../assets/cyberpunk.jpg"
 import avatar2 from "../../assets/fifa24.jpg"
 import avatar3 from "../../assets/mw3.jpg"
 import { authService } from "../../services/authService"
-import { getUserProfile, updateUserProfile } from "../../services/profileService"
+import { getUserProfile } from "../../services/profileService"
 
 const darkTheme = createTheme({
   palette: {
@@ -53,6 +53,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [usernameError, setUsernameError] = useState("")
+  const [emailError, setEmailError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
   const [showEmailWarning, setShowEmailWarning] = useState(false)
   const [pendingEmailChange, setPendingEmailChange] = useState("")
@@ -106,6 +108,8 @@ export default function Profile() {
     try {
       setSaving(true)
       setError('')
+      setUsernameError('')
+      setEmailError('')
       setSuccessMessage('')
       
       // Validar campos obligatorios
@@ -117,7 +121,7 @@ export default function Profile() {
       // Validar formato de email básico
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(editData.email)) {
-        setError('Por favor ingresa un email válido')
+        setEmailError('Por favor ingresa un email válido')
         return
       }
       
@@ -138,19 +142,39 @@ export default function Profile() {
         mail: editData.email,
         fechaNacimiento: editData.birthDate,
       }
-      try {
-        await updateUserProfile(token, userId, updateData)
+
+      // Hacer la llamada directamente igual que en signup
+      const response = await fetch(`http://localhost:3000/api/usuario/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
         setUserData(editData)
         setIsEditing(false)
         setSuccessMessage('Perfil actualizado correctamente')
         setTimeout(() => {
           setSuccessMessage('')
         }, 3000)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        setError(error.message || 'Error al guardar los cambios')
+      } else {
+        // Traducir errores técnicos de la base de datos a mensajes user-friendly
+        const errorMessage = result.message || "Error al guardar los cambios"
+        
+        if (errorMessage.includes('Duplicate entry') && errorMessage.includes('usuario_nombre_usuario_unique')) {
+          setUsernameError("El nombre de usuario ya está en uso")
+        } else if (errorMessage.includes('Duplicate entry') && errorMessage.includes('usuario_mail_unique')) {
+          setEmailError("El email ya está registrado")
+        } else {
+          setError(errorMessage)
+        }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error saving profile:', error)
       setError('Error de conexión al guardar los cambios')
     } finally {
@@ -167,6 +191,12 @@ export default function Profile() {
   // Función para manejar el cambio de email con advertencia
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
+    
+    // Limpiar error de email cuando el usuario empiece a escribir
+    if (emailError) {
+      setEmailError('')
+    }
+    
     if (newEmail !== userData.email && userData.email && !emailWarningShown) {
       // Si el email es diferente al actual y no se ha mostrado la advertencia, mostrarla
       setPendingEmailChange(newEmail)
@@ -213,8 +243,8 @@ export default function Profile() {
     )
   }
 
-  // Mostrar error si ocurrió algún problema
-  if (error) {
+  // Mostrar error si ocurrió algún problema crítico (no errores de validación)
+  if (error && (error.includes('autenticado') || error.includes('conexión') || error.includes('cargar'))) {
     return (
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
@@ -320,7 +350,12 @@ export default function Profile() {
                             size="small"
                             fullWidth
                             value={editData.username}
-                            onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                            onChange={(e) => {
+                              setEditData({ ...editData, username: e.target.value })
+                              if (usernameError) setUsernameError('')
+                            }}
+                            error={!!usernameError}
+                            helperText={usernameError}
                           />
                         ) : (
                           <Typography sx={{ color: "white", fontWeight: 500 }}>{userData.username}</Typography>
@@ -362,6 +397,8 @@ export default function Profile() {
                             type="email"
                             value={editData.email}
                             onChange={handleEmailChange}
+                            error={!!emailError}
+                            helperText={emailError}
                           />
                         ) : (
                           <Typography sx={{ color: "white" }}>{userData.email}</Typography>
