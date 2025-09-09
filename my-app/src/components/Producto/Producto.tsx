@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Chip, Avatar, Rating } from '@mui/material'
-import { ArrowBack, CloudDownload, Person } from '@mui/icons-material'
+import { ArrowBack, Person, CalendarMonth, Category } from '@mui/icons-material'
 import NavBar from '../navBar/navBar'
 import { Link, useLocation } from 'react-router-dom'
 import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail } from '../../services/productService'
@@ -111,8 +111,8 @@ export default function Producto() {
                   Volver
                 </Button>
                 <Box component="img" src={'/vite.svg'} alt="Producto" sx={{ width: '100%', height: 400, objectFit: 'contain', borderRadius: 2, p: 6, bgcolor: '#0f1625' }} />
-                {tipo && <Chip label={tipo} color="primary" sx={{ position: 'absolute', right: 16, top: 56 }} />}
-              </Box>
+                {tipo && <Chip label={tipo.charAt(0).toUpperCase() + tipo.slice(1)} color="primary" sx={{ position: 'absolute', right: 16, top: 56 }} />}
+              </Box> 
             </Box>
 
             {/* Right - details */}
@@ -146,16 +146,16 @@ export default function Producto() {
 
                 <Box sx={{ display: 'grid', gap: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Person fontSize="small" color="disabled" />
-                    <Typography>Juego offline activado</Typography>
+                    <CalendarMonth fontSize="small" color="disabled" />
+                    
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Person fontSize="small" color="disabled" />
-                    <Typography>1 jugador</Typography>
+                    
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CloudDownload fontSize="small" color="disabled" />
-                    <Typography>(plataforma)</Typography>
+                    <Category fontSize="small" color="disabled" />
+                    
                   </Box>
                 </Box>
               </Box>
