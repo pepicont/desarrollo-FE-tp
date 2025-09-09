@@ -4,6 +4,7 @@ import { ArrowBack, CloudDownload, Person } from '@mui/icons-material'
 import NavBar from '../navBar/navBar'
 import { Link, useLocation } from 'react-router-dom'
 import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail } from '../../services/productService'
+import { getReviewsByProduct, type ProductReview } from '../../services/reseniasService'
 
 const darkTheme = createTheme({
   palette: {
@@ -34,6 +35,7 @@ export default function Producto() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ProductoData | null>(null)
+  const [reviews, setReviews] = useState<ProductReview[]>([])
 
   useEffect(() => {
     const search = new URLSearchParams(location.search)
@@ -60,6 +62,9 @@ export default function Producto() {
         else if (tipo === 'servicio') res = await productService.getServicio(id)
         else res = await productService.getComplemento(id)
         setData(res)
+        // cargar reseñas reales
+        const revs = await getReviewsByProduct(tipo, id)
+        setReviews(revs)
       } catch (e) {
         console.error(e)
         setError('No se pudo cargar el producto')
@@ -70,11 +75,17 @@ export default function Producto() {
     load()
   }, [tipo, id])
 
-  const reviews: Review[] = [
-    { id: 1, user: 'GamerPro2024', rating: 5, date: '21 oct 2024', comment: 'Excelente juego.' },
-    { id: 2, user: 'JuanCarlos88', rating: 4, date: '15 may 2024', comment: 'Muy bueno, lo recomiendo.' },
-    { id: 3, user: 'TechGamer', rating: 5, date: '02 ago 2024', comment: 'Rinde bárbaro en mi PC.' },
-  ]
+  const reviewsUi: Review[] = reviews.map(r => ({
+    id: r.id,
+    user: r.usuario?.nombreUsuario ?? 'Usuario',
+    rating: r.puntaje,
+    date: new Date(r.fecha).toLocaleDateString(),
+    comment: r.detalle,
+  }))
+
+  const avgRating = reviews.length
+    ? Number((reviews.reduce((acc, r) => acc + (r.puntaje || 0), 0) / reviews.length).toFixed(1))
+    : 0
 
   const goReviews = () => reviewsRef.current?.scrollIntoView({ behavior: 'smooth' })
 
@@ -116,10 +127,10 @@ export default function Producto() {
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Button onClick={goReviews} variant="text" color="inherit" sx={{ p: 0, minWidth: 0 }}>
-                  <Rating name="read-only" value={5} readOnly />
+                  <Rating name="read-only" value={avgRating} precision={0.5} readOnly />
                 </Button>
-                <Typography>4.6</Typography>
-                <Typography color="text.secondary">847K ratings</Typography>
+                <Typography>{avgRating ? avgRating.toFixed(1) : '-'}</Typography>
+                <Typography color="text.secondary">{reviews.length} opiniones</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 2 }}>
@@ -131,10 +142,7 @@ export default function Producto() {
               </Button>
 
               <Box sx={{ mt: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <Typography color="text.secondary">Disponible</Typography>
-                  <Typography>06/11/2022</Typography>
-                </Box>
+
 
                 <Box sx={{ display: 'grid', gap: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -220,11 +228,14 @@ export default function Producto() {
               Opiniones del producto
             </Typography>
             <Box sx={{ display: 'grid', gap: 2 }}>
-              {reviews.map((r) => (
+              {reviewsUi.length === 0 && (
+                <Typography color="text.secondary">Aún no hay opiniones para este producto.</Typography>
+              )}
+              {reviewsUi.map((r) => (
                 <Card key={r.id}>
                   <CardContent>
                     <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Avatar>{r.user[0]}</Avatar>
+                      <Avatar>{r.user?.[0] ?? '?'}</Avatar>
                       <Box sx={{ flex: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                           <Rating size="small" value={r.rating} readOnly />
