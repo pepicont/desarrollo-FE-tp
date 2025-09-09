@@ -177,13 +177,12 @@ export default function Producto() {
           {/* Características */}
           <Box sx={{ mt: 6 }}>
             <Typography variant="h5" fontWeight={700} gutterBottom>
-              Características
+              Información sobre el producto
             </Typography>
-            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
+            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: '1fr', maxWidth: 600, minWidth: 0, width: '100%', mx: 'auto', textAlign: 'center' }}>
               {tipo === 'juego' && data && 'fechaLanzamiento' in data && (
                 <Card>
                   <CardContent>
-                    <Typography fontWeight={600} gutterBottom>Información</Typography>
                     {'fechaLanzamiento' in data && (data as JuegoDetail).fechaLanzamiento && (
                       <Typography color="text.secondary">Lanzamiento: {new Date((data as JuegoDetail).fechaLanzamiento).toLocaleDateString()}</Typography>
                     )}
@@ -199,7 +198,6 @@ export default function Producto() {
               {tipo === 'servicio' && data && (
                 <Card>
                   <CardContent>
-                    <Typography fontWeight={600} gutterBottom>Información</Typography>
                     {Array.isArray((data as ServicioDetail).categorias) && (data as ServicioDetail).categorias.length > 0 && (
                       <Typography color="text.secondary">Categorías: {(data as ServicioDetail).categorias.map((c) => c.nombre).join(', ')}</Typography>
                     )}
@@ -209,7 +207,6 @@ export default function Producto() {
               {tipo === 'complemento' && data && (
                 <Card>
                   <CardContent>
-                    <Typography fontWeight={600} gutterBottom>Información</Typography>
                     {'juego' in data && (data as ComplementoDetail).juego && (
                       <Typography color="text.secondary">Juego: {(data as ComplementoDetail).juego.nombre}</Typography>
                     )}
@@ -241,7 +238,9 @@ export default function Producto() {
                           <Rating size="small" value={r.rating} readOnly />
                           <Typography color="text.secondary" variant="caption">{r.date}</Typography>
                         </Box>
-                        <Typography fontWeight={600}>{r.user}</Typography>
+                        <Box sx={{ mb: 0.5, textAlign: 'left' }}>
+                          <Typography fontWeight={600}>@{r.user} dijo:</Typography>
+                        </Box>
                         <Typography color="text.secondary">{r.comment}</Typography>
                       </Box>
                     </Box>
