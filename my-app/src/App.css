@@ -1,3 +1,12 @@
+/* Oculta el saludo en mobile */
+.hide-on-mobile {
+  display: inline;
+}
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
 #root {
   max-width: 1280px;
   margin: 0 auto;

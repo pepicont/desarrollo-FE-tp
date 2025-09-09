@@ -276,8 +276,8 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                 </Badge>
               </IconButton>
             )} */}
-            <Typography variant="body1" sx={{ mr: 1 }}>
-              Bienvenido, {nombre}!
+            <Typography variant="body1" className="hide-on-mobile" sx={{ mr: 1 }}>
+              Hola, {nombre}!
             </Typography>
             <IconButton color="inherit" onClick={handleProfileMenuOpen}>
               <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
