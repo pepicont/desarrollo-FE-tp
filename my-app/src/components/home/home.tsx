@@ -31,6 +31,7 @@ import NavBar from "../navBar/navBar"
 import juegos from "../../assets/carousel-juegos.png"
 import servicios from "../../assets/carousel-servicios.jpg"
 import complementos from "../../assets/carousel-complementos.jpg"
+import { useNavigate } from "react-router-dom"
 
 const darkTheme = createTheme({
   palette: {
@@ -185,6 +186,7 @@ const featuredProducts = [
 export default function Home() {
   /*const [cartOpen, setCartOpen] = React.useState(false)*/
   const [currentSlide, setCurrentSlide] = React.useState(0)
+  const navigate = useNavigate()
   /*const [cartCount] = React.useState(3)*/
 
   /*const cartItems = [
@@ -330,46 +332,57 @@ export default function Home() {
               <ArrowForwardIos />
             </CarouselArrow>
 
-            {carouselItems.map((item, index) => (
-              <CarouselSlide
-                key={item.id}
-                sx={{
-                  transform: `translateX(${(index - currentSlide) * 100}%)`,
-                }}
-              >
-                <Box
+            {carouselItems.map((item, index) => {
+              // Determinar el tipo para el filtro
+              let tipoFiltro = ""
+              if (item.title === "Juegos") tipoFiltro = "juego"
+              if (item.title === "Complementos") tipoFiltro = "complemento"
+              if (item.title === "Streaming" || item.title === "Servicios") tipoFiltro = "servicio"
+              return (
+                <CarouselSlide
+                  key={item.id}
                   sx={{
-                    width: "100%",
-                    height: "100%",
-                    backgroundImage: `url(${item.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    borderRadius: 2,
-                    display: "flex",
-                    alignItems: "flex-end",
-                    position: "relative",
+                    transform: `translateX(${(index - currentSlide) * 100}%)`,
+                    cursor: tipoFiltro ? "pointer" : "default",
+                  }}
+                  onClick={() => {
+                    if (tipoFiltro) navigate(`/productos?tipo=${tipoFiltro}`)
                   }}
                 >
                   <Box
                     sx={{
-                      background: "linear-gradient(180deg, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.7) 100%)",
                       width: "100%",
-                      p: 4,
-                      color: "white",
-                      borderBottomLeftRadius: 16,
-                      borderBottomRightRadius: 16,
+                      height: "100%",
+                      backgroundImage: `url(${item.image})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "flex-end",
+                      position: "relative",
                     }}
                   >
-                    {/*<Chip label={item.badge} color="primary" sx={{ mb: 2 }} />*/}
-                    <Typography variant="h3" component="h3" gutterBottom>
-                      {item.title}
-                    </Typography>
-                    <Typography variant="h6">{item.description}</Typography>
+                    <Box
+                      sx={{
+                        background: "linear-gradient(180deg, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.7) 100%)",
+                        width: "100%",
+                        p: 4,
+                        color: "white",
+                        borderBottomLeftRadius: 16,
+                        borderBottomRightRadius: 16,
+                      }}
+                    >
+                      {/*<Chip label={item.badge} color="primary" sx={{ mb: 2 }} />*/}
+                      <Typography variant="h3" component="h3" gutterBottom>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="h6">{item.description}</Typography>
+                    </Box>
                   </Box>
-                </Box>
-              </CarouselSlide>
-            ))}
+                </CarouselSlide>
+              )
+            })}
           </CarouselContainer>
 
           <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "#FFFFFF" }}>
