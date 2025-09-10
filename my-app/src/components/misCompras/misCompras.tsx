@@ -1,4 +1,3 @@
-"use client"
 import { useState, useEffect } from "react"
 import {
   Typography,
@@ -33,6 +32,7 @@ import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
 import { authService } from "../../services/authService"
 import { getUserPurchases } from "../../services/comprasService.ts"
+import { useNavigate } from "react-router-dom"
 
 const darkTheme = createTheme({
   palette: {
@@ -117,6 +117,13 @@ export default function MisComprasPage() {
   const [ventas, setVentas] = useState<Venta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
+  // Navegación a la página de producto
+  const handleProductClick = (productId: number | null, productName: string) => {
+    if (productId !== null) {
+      navigate("/producto", { state: { productId, productName } })
+    }
+  }
   
   const [filterDialogOpen, setFilterDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -190,7 +197,14 @@ export default function MisComprasPage() {
     return matchesSearch && matchesDate
   })
 
-  
+    // Auxiliar para obtener el id del producto
+  const getProductId = (venta: Venta): number | null => {
+    if (venta.juego?.id) return venta.juego.id
+    if (venta.servicio?.id) return venta.servicio.id
+    if (venta.complemento?.id) return venta.complemento.id
+    return null
+  }
+
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -304,7 +318,21 @@ export default function MisComprasPage() {
                         />
                       </Box>
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: "primary.main",
+                            fontWeight: "bold",
+                            mb: 1,
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                            "&:hover": { color: "#6ba3f0" },
+                          }}
+                          onClick={() => handleProductClick(
+                            getProductId(venta),
+                            getProductName(venta)
+                          )}
+                        >
                           {(getProductName(venta)) ?? "Producto desconocido"}
                         </Typography>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
