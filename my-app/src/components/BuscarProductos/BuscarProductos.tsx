@@ -179,7 +179,10 @@ export default function BuscarProductos() {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
             <Box>
               <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 1 }}>
-                Todos los productos
+                {productTypeFilter === 'servicio' && 'Todos los servicios'}
+                {productTypeFilter === 'juego' && 'Todos los juegos'}
+                {productTypeFilter === 'complemento' && 'Todos los complementos'}
+                {(productTypeFilter !== 'servicio' && productTypeFilter !== 'juego' && productTypeFilter !== 'complemento') && 'Todos los productos'}
               </Typography>
               <Typography sx={{ color: "#9ca3af" }}>
                 {loading ? 'Cargando resultados...' : `Mostrando ${items.length} resultados`}
