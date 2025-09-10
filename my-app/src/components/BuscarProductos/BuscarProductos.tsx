@@ -242,7 +242,7 @@ export default function BuscarProductos() {
                           <Typography sx={{ color: "#10b981", fontWeight: "bold" }}>Gratuito</Typography>
                         ) : (
                           <>
-                            <Typography sx={{ color: "white", fontWeight: "bold" }}>US${product.monto}</Typography>
+                            <Typography sx={{ color: "white", fontWeight: "bold" }}>US$ {product.monto}</Typography>
                           </>
                         )}
                       </Box>

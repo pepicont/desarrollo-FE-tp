@@ -109,6 +109,9 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
   const [activeItem, setActiveItem] = React.useState<string>(() => {
     try {
       const path = window.location.pathname
+      if (path.startsWith("/productos") || path.startsWith("/producto")) {
+        return "Productos"
+      }
       const items = baseMenuItems.filter((i) => i.href && !i.isLogout)
       const match = items
         .slice()
