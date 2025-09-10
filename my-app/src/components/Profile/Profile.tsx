@@ -34,7 +34,7 @@ import avatar1 from "../../assets/cyberpunk.jpg"
 import avatar2 from "../../assets/fifa24.jpg"
 import avatar3 from "../../assets/mw3.jpg"
 import { authService } from "../../services/authService"
-import { getUserProfile } from "../../services/profileService"
+import { getUserProfile, updateUserProfile } from "../../services/profileService"
 
 const darkTheme = createTheme({
   palette: {
@@ -143,52 +143,50 @@ export default function Profile() {
         fechaNacimiento: editData.birthDate,
       }
 
-      // Hacer la llamada directamente igual que en signup
-      const response = await fetch(`http://localhost:3000/api/usuario/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-      })
+      // Usar el servicio updateUserProfile
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let error: any = null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let result: any = null;
+      try {
+        result = await updateUserProfile(token, userId, updateData);
+      } catch (err) {
+        error = err;
+      }
 
-      const result = await response.json()
-
-      if (response.ok) {
-        setUserData(editData)
-        setIsEditing(false)
-        setSuccessMessage('Perfil actualizado correctamente')
-        setTimeout(() => {
-          setSuccessMessage('')
-        }, 3000)
-
-        // Actualizar la variable 'user' en localStorage o sessionStorage
-        const storage = localStorage.getItem('user') ? localStorage : sessionStorage.getItem('user') ? sessionStorage : null;
-        if (storage) {
-          try {
-            const userRaw = storage.getItem('user');
-            if (userRaw) {
-              const userObj = JSON.parse(userRaw);
-              userObj.mail = editData.email;
-              userObj.nombre = editData.realName;
-              storage.setItem('user', JSON.stringify(userObj));
-            }
-          } catch (e) {
-            // Si hay error, no romper la app
-            console.error('No se pudo actualizar la variable user en storage:', e);
-          }
-        }
-      } else {
-        // Traducir errores técnicos de la base de datos a mensajes user-friendly
-        const errorMessage = result.message || "Error al guardar los cambios"
-        
+      const errorMessage = error?.message || error?.error || result?.message || result?.error || "Error al guardar los cambios";
+      if (error || result?.error) {
         if (errorMessage.includes('Duplicate entry') && errorMessage.includes('usuario_nombre_usuario_unique')) {
-          setUsernameError("El nombre de usuario ya está en uso")
+          setUsernameError("El nombre de usuario ya está en uso");
         } else if (errorMessage.includes('Duplicate entry') && errorMessage.includes('usuario_mail_unique')) {
-          setEmailError("El email ya está registrado")
+          setEmailError("El email ya está registrado");
         } else {
-          setError(errorMessage)
+          setError(errorMessage);
+        }
+        return;
+      }
+      // Si todo ok
+      setUserData(editData);
+      setIsEditing(false);
+      setSuccessMessage('Perfil actualizado correctamente');
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+
+      // Actualizar la variable 'user' en localStorage o sessionStorage
+      const storage = localStorage.getItem('user') ? localStorage : sessionStorage.getItem('user') ? sessionStorage : null;
+      if (storage) {
+        try {
+          const userRaw = storage.getItem('user');
+          if (userRaw) {
+            const userObj = JSON.parse(userRaw);
+            userObj.mail = editData.email;
+            userObj.nombre = editData.realName;
+            storage.setItem('user', JSON.stringify(userObj));
+          }
+        } catch (e) {
+          // Si hay error, no romper la app
+          console.error('No se pudo actualizar la variable user en storage:', e);
         }
       }
     } catch (error: unknown) {
