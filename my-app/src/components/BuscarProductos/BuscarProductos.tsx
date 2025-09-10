@@ -176,7 +176,14 @@ export default function BuscarProductos() {
             </Box>
           </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Box sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
+          }}>
             <Box>
               <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 1 }}>
                 {productTypeFilter === 'servicio' && 'Todos los servicios'}
@@ -196,6 +203,7 @@ export default function BuscarProductos() {
               sx={{
                 borderColor: "#4b5563",
                 color: "white",
+                mt: { xs: 2, sm: 0 },
                 "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
