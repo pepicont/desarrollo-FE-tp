@@ -398,28 +398,6 @@ export default function Profile() {
                       </Box>
                     </Box>
 
-                    {/* Email */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <MailIcon sx={{ color: "error.main" }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                          Correo electrónico
-                        </Typography>
-                        {isEditing ? (
-                          <TextField
-                            size="small"
-                            fullWidth
-                            type="email"
-                            value={editData.email}
-                            onChange={handleEmailChange}
-                            error={!!emailError}
-                            helperText={emailError}
-                          />
-                        ) : (
-                          <Typography sx={{ color: "white" }}>{userData.email}</Typography>
-                        )}
-                      </Box>
-                    </Box>
 
                     {/* Fecha de nacimiento */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -439,6 +417,29 @@ export default function Profile() {
                           />
                         ) : (
                           <Typography sx={{ color: "white" }}>{formatDate(userData.birthDate)}</Typography>
+                        )}
+                      </Box>
+                    </Box>
+
+                    {/* Email */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <MailIcon sx={{ color: "error.main" }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                          Correo electrónico
+                        </Typography>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            fullWidth
+                            type="email"
+                            value={editData.email}
+                            onChange={handleEmailChange}
+                            error={!!emailError}
+                            helperText={emailError}
+                          />
+                        ) : (
+                          <Typography sx={{ color: "white" }}>{userData.email}</Typography>
                         )}
                       </Box>
                     </Box>
