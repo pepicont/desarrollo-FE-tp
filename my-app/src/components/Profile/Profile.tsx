@@ -30,6 +30,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import MailIcon from "@mui/icons-material/Mail"
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
 import EditIcon from "@mui/icons-material/Edit"
+import KeyIcon from '@mui/icons-material/Key';
 import avatar1 from "../../assets/cyberpunk.jpg"
 import avatar2 from "../../assets/fifa24.jpg"
 import avatar3 from "../../assets/mw3.jpg"
@@ -48,6 +49,25 @@ const darkTheme = createTheme({
 const preloadedAvatars = [avatar1, avatar2, avatar3]
 
 export default function Profile() {
+  // Estado para mostrar los campos de contraseña
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  // Estados para el cambio de contraseña
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmNewPasswordError, setConfirmNewPasswordError] = useState("");
+
+  // Handlers para los campos de contraseña
+  const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewPassword(e.target.value);
+    setNewPasswordError("");
+  };
+  const handleConfirmNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmNewPassword(e.target.value);
+    setConfirmNewPasswordError("");
+  };
+
   const [isEditing, setIsEditing] = useState(false)
   const [selectedAvatar, setSelectedAvatar] = useState<string>(preloadedAvatars[0])
   const [loading, setLoading] = useState(true)
@@ -128,6 +148,19 @@ export default function Profile() {
       const token = authService.getToken()
       
       if (!token) {
+
+        // Validar contraseña solo si el campo está visible y tiene contenido
+        if (showPasswordFields && (newPassword || confirmNewPassword)) {
+          if (newPassword.length < 6) {
+            setNewPasswordError('La contraseña debe tener al menos 6 caracteres.')
+            return
+          }
+          if (confirmNewPassword !== newPassword) {
+            setConfirmNewPasswordError('Las contraseñas no coinciden.')
+            return
+          }
+        }
+
         setError('No estás autenticado')
         return
       }
@@ -144,6 +177,10 @@ export default function Profile() {
       }
 
       // Usar el servicio updateUserProfile
+        if (showPasswordFields && newPassword) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (updateData as any).contrasenia = newPassword
+        }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let error: any = null;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -153,7 +190,8 @@ export default function Profile() {
       } catch (err) {
         error = err;
       }
-
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      {showPasswordFields ? "Ocultar campos" : "Cambiar contraseña"}
       const errorMessage = error?.message || error?.error || result?.message || result?.error || "Error al guardar los cambios";
       if (error || result?.error) {
         if (errorMessage.includes('Duplicate entry') && errorMessage.includes('usuario_nombre_usuario_unique')) {
@@ -198,9 +236,10 @@ export default function Profile() {
   }
 
   const handleCancel = () => {
-    setEditData(userData)
-    setIsEditing(false)
-    setEmailWarningShown(false) // Resetear la bandera al cancelar
+  setEditData(userData)
+  setIsEditing(false)
+  setEmailWarningShown(false) // Resetear la bandera al cancelar
+  setShowPasswordFields(false) // Oculta los campos de contraseña y vuelve a mostrar el botón
   }
 
   // Función para manejar el cambio de email con advertencia
@@ -421,6 +460,7 @@ export default function Profile() {
                       </Box>
                     </Box>
 
+
                     {/* Email */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <MailIcon sx={{ color: "error.main" }} />
@@ -443,6 +483,56 @@ export default function Profile() {
                         )}
                       </Box>
                     </Box>
+
+
+                    {/* Contraseña */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
+                      <KeyIcon sx={{ color: "#FFA726" }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                          Contraseña
+                        </Typography>
+                        {!isEditing && (
+                          <Typography sx={{ color: "white", fontWeight: 500 }}>••••••••••</Typography>
+                        )}
+                      </Box>
+                    </Box>
+                    {isEditing && !showPasswordFields && (
+                      <Button 
+                        variant="contained" 
+                        sx={{ mt: 1, width: '100%', bgcolor: '#455A64', color: '#fff', '&:hover': { bgcolor: '#607D8B' } }}
+                        onClick={() => setShowPasswordFields(true)}
+                      >
+                        Cambiar contraseña
+                      </Button>
+                    )}
+                    {isEditing && showPasswordFields && (
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+                        <TextField
+                          label="Nueva contraseña"
+                          type="password"
+                          size="small"
+                          value={newPassword}
+                          onChange={handleNewPasswordChange}
+                          error={!!newPasswordError}
+                          helperText={newPasswordError}
+                          placeholder="••••••••"
+                          fullWidth
+                        />
+                        <TextField
+                          label="Confirmar contraseña"
+                          type="password"
+                          size="small"
+                          value={confirmNewPassword}
+                          onChange={handleConfirmNewPasswordChange}
+                          error={!!confirmNewPasswordError}
+                          helperText={confirmNewPasswordError}
+                          placeholder="••••••••"
+                          fullWidth
+                        />
+                      </Box>
+                    )}
+
 
                     {/* Fecha de creación de cuenta (no editable) */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
