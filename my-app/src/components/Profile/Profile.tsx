@@ -486,8 +486,8 @@ export default function Profile() {
 
 
                     {/* Contraseña */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
-                      <KeyIcon sx={{ color: "#FFA726" }} />
+                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mt: 2 }}>
+                      <KeyIcon sx={{ color: "#FFA726", mt: 0.5 }} />
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="caption" sx={{ color: "text.secondary" }}>
                           Contraseña
@@ -495,43 +495,45 @@ export default function Profile() {
                         {!isEditing && (
                           <Typography sx={{ color: "white", fontWeight: 500 }}>••••••••••</Typography>
                         )}
+                        {isEditing && !showPasswordFields && (
+                          <Box sx={{ mt: 1 }}>
+                            <Button 
+                              variant="contained" 
+                              sx={{ width: '100%', bgcolor: '#455A64', color: '#fff', '&:hover': { bgcolor: '#607D8B' } }}
+                              onClick={() => setShowPasswordFields(true)}
+                            >
+                              Cambiar contraseña
+                            </Button>
+                          </Box>
+                        )}
+                        {isEditing && showPasswordFields && (
+                          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+                            <TextField
+                              label="Nueva contraseña"
+                              type="password"
+                              size="small"
+                              value={newPassword}
+                              onChange={handleNewPasswordChange}
+                              error={!!newPasswordError}
+                              helperText={newPasswordError}
+                              placeholder="••••••••"
+                              fullWidth
+                            />
+                            <TextField
+                              label="Confirmar contraseña"
+                              type="password"
+                              size="small"
+                              value={confirmNewPassword}
+                              onChange={handleConfirmNewPasswordChange}
+                              error={!!confirmNewPasswordError}
+                              helperText={confirmNewPasswordError}
+                              placeholder="••••••••"
+                              fullWidth
+                            />
+                          </Box>
+                        )}
                       </Box>
                     </Box>
-                    {isEditing && !showPasswordFields && (
-                      <Button 
-                        variant="contained" 
-                        sx={{ mt: 1, width: '100%', bgcolor: '#455A64', color: '#fff', '&:hover': { bgcolor: '#607D8B' } }}
-                        onClick={() => setShowPasswordFields(true)}
-                      >
-                        Cambiar contraseña
-                      </Button>
-                    )}
-                    {isEditing && showPasswordFields && (
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-                        <TextField
-                          label="Nueva contraseña"
-                          type="password"
-                          size="small"
-                          value={newPassword}
-                          onChange={handleNewPasswordChange}
-                          error={!!newPasswordError}
-                          helperText={newPasswordError}
-                          placeholder="••••••••"
-                          fullWidth
-                        />
-                        <TextField
-                          label="Confirmar contraseña"
-                          type="password"
-                          size="small"
-                          value={confirmNewPassword}
-                          onChange={handleConfirmNewPasswordChange}
-                          error={!!confirmNewPasswordError}
-                          helperText={confirmNewPasswordError}
-                          placeholder="••••••••"
-                          fullWidth
-                        />
-                      </Box>
-                    )}
 
 
                     {/* Fecha de creación de cuenta (no editable) */}
