@@ -500,7 +500,13 @@ export default function Profile() {
                             <Button 
                               variant="contained" 
                               sx={{ width: '100%', bgcolor: '#455A64', color: '#fff', '&:hover': { bgcolor: '#607D8B' } }}
-                              onClick={() => setShowPasswordFields(true)}
+                              onClick={() => {
+                                setNewPassword("");
+                                setConfirmNewPassword("");
+                                setNewPasswordError("");
+                                setConfirmNewPasswordError("");
+                                setShowPasswordFields(true);
+                              }}
                             >
                               Cambiar contraseña
                             </Button>
