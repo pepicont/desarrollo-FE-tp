@@ -13,6 +13,10 @@ import {
   CircularProgress,
   Alert,
   Button,
+  FormControl,
+  Select,
+  MenuItem,
+  Chip,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -97,6 +101,9 @@ export default function MisResenasPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [canRetry, setCanRetry] = useState(true)
+  
+  // Estado para el filtro de fecha
+  const [dateFilter, setDateFilter] = useState<string>("todas")
 
   // Cargar reseñas del usuario autenticado
   useEffect(() => {
@@ -162,6 +169,47 @@ export default function MisResenasPage() {
     const date = new Date(dateString)
     return date.toLocaleDateString("es-ES")
   }
+
+  // Función para filtrar reseñas por fecha
+  const filterReseniasByDate = (resenias: Resenia[]) => {
+    if (dateFilter === "todas") return resenias;
+
+    const now = new Date();
+    
+    return resenias.filter((resenia) => {
+      const reseniaDate = new Date(resenia.fecha);
+      
+      switch (dateFilter) {
+        case "este-mes":
+          return reseniaDate.getMonth() === now.getMonth() && 
+                 reseniaDate.getFullYear() === now.getFullYear();
+        
+        case "mes-pasado": {
+          const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
+          return reseniaDate.getMonth() === lastMonth.getMonth() && 
+                 reseniaDate.getFullYear() === lastMonth.getFullYear();
+        }
+        
+        case "2024":
+          return reseniaDate.getFullYear() === 2024;
+        
+        case "2023":
+          return reseniaDate.getFullYear() === 2023;
+        
+        case "2022":
+          return reseniaDate.getFullYear() === 2022;
+        
+        case "2021":
+          return reseniaDate.getFullYear() === 2021;
+        
+        default:
+          return true;
+      }
+    });
+  };
+
+  // Obtener reseñas filtradas
+  const filteredResenias = filterReseniasByDate(resenias);
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: Resenia["venta"]) => {
@@ -382,16 +430,80 @@ export default function MisResenasPage() {
             </Typography>
           </Box>
 
-          {/* Título y contador */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-            <Box>
-              <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 1 }}>
-                Mis reseñas
-              </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Mostrando {resenias.length} de {resenias.length} reseñas
-              </Typography>
+          {/* Título con filtro centrado y botón Nueva reseña */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", flexGrow: 1 }}>
+              Mis reseñas
+            </Typography>
+            
+            {/* Filtro centrado */}
+            <Box sx={{ mx: 4 }}>
+              <FormControl size="small">
+                <Select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  displayEmpty
+                  variant="outlined"
+                  sx={{
+                    minWidth: 120,
+                    height: 32,
+                    backgroundColor: '#2a3441',
+                    borderRadius: 3,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '& .MuiSelect-select': {
+                      color: '#9ca3af',
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                      padding: '6px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#6b7280',
+                      fontSize: '1.2rem',
+                    },
+                    '&:hover': {
+                      backgroundColor: '#374151',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#1e2532',
+                        border: '1px solid #374151',
+                        borderRadius: 2,
+                        mt: 0.5,
+                        '& .MuiMenuItem-root': {
+                          color: 'white',
+                          fontSize: '0.875rem',
+                          '&:hover': {
+                            backgroundColor: '#374151',
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: '#3a7bd5',
+                            '&:hover': {
+                              backgroundColor: '#2c5aa0',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="todas">📅 Todas</MenuItem>
+                  <MenuItem value="este-mes">📅 Este mes</MenuItem>
+                  <MenuItem value="mes-pasado">📅 Mes pasado</MenuItem>
+                  <MenuItem value="2024">📅 2024</MenuItem>
+                  <MenuItem value="2023">📅 2023</MenuItem>
+                  <MenuItem value="2022">📅 2022</MenuItem>
+                  <MenuItem value="2021">📅 2021</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
+            
             <Button
               variant="contained"
               onClick={() => navigate("/mis-compras")}
@@ -416,19 +528,26 @@ export default function MisResenasPage() {
             </Button>
           </Box>
 
+          {/* Contador */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Mostrando {filteredResenias.length} de {resenias.length} reseñas
+            </Typography>
+          </Box>
+
           {/* Lista de reseñas */}
-          {resenias.length === 0 ? (
+          {filteredResenias.length === 0 ? (
             <Box sx={{ textAlign: "center", py: 4 }}>
               <Typography variant="h6" sx={{ color: "text.secondary", mb: 2 }}>
-                No tienes reseñas aún
+                {resenias.length === 0 ? "No tienes reseñas aún" : "No hay reseñas para el filtro seleccionado"}
               </Typography>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                ¡Compra algunos productos y deja tus primeras reseñas!
+                {resenias.length === 0 ? "¡Compra algunos productos y deja tus primeras reseñas!" : "Prueba con otro filtro de fecha"}
               </Typography>
             </Box>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {resenias.map((resenia) => (
+              {filteredResenias.map((resenia) => (
                 <Card
                   key={resenia.id}
                   sx={{
