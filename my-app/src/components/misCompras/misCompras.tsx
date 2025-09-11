@@ -140,9 +140,7 @@ export default function MisComprasPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [productTypeFilter, setProductTypeFilter] = useState("")
   const [companyFilter, setCompanyFilter] = useState("")
-  const [gameFilter, setGameFilter] = useState("") // Filtro por juegos específicos
   const [companies, setCompanies] = useState<Company[]>([])
-  const [availableGames, setAvailableGames] = useState<{id: number, nombre: string}[]>([])
 
 //Fetch al back para traerse las compras del usuario
   useEffect(() => {
@@ -195,22 +193,6 @@ export default function MisComprasPage() {
     };
     loadCompanies();
   }, []);
-
-  // Extraer juegos únicos de las compras del usuario
-  useEffect(() => {
-    const games = ventas
-      .filter(venta => venta.juego) // Solo ventas que tienen juego
-      .map(venta => ({
-        id: venta.juego!.id,
-        nombre: venta.juego!.nombre
-      }))
-      .filter((game, index, self) => 
-        index === self.findIndex(g => g.id === game.id) // Eliminar duplicados
-      )
-      .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
-    
-    setAvailableGames(games);
-  }, [ventas]);
 
 
 // Funciones auxiliares
@@ -396,15 +378,7 @@ export default function MisComprasPage() {
         // Los complementos no tienen compañía directa en el modelo actual
       }
 
-      // Filtro por juego específico
-      let matchesGame = true;
-      if (gameFilter !== "") {
-        const gameId = parseInt(gameFilter);
-        matchesGame = venta.juego?.id === gameId;
-        // Solo aplica a juegos, no a servicios ni complementos
-      }
-
-      return matchesSearch && matchesDate && matchesProductType && matchesCompany && matchesGame;
+      return matchesSearch && matchesDate && matchesProductType && matchesCompany;
     });
   };
 
@@ -416,7 +390,6 @@ export default function MisComprasPage() {
     setDateFilter("");
     setProductTypeFilter("");
     setCompanyFilter("");
-    setGameFilter("");
   };
 
     // Auxiliar para obtener el id del producto
@@ -698,26 +671,6 @@ export default function MisComprasPage() {
                   {companies.map(company => (
                     <MenuItem key={company.id} value={String(company.id)}>
                       {company.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Filtro por juego específico */}
-            <Box sx={{ mb: 3 }}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ color: "white" }}>Juego</InputLabel>
-                <Select
-                  value={gameFilter}
-                  onChange={(e) => setGameFilter(e.target.value)}
-                  label="Juego"
-                  sx={{ color: "white" }}
-                >
-                  <MenuItem value="">Todos los juegos</MenuItem>
-                  {availableGames.map(game => (
-                    <MenuItem key={game.id} value={String(game.id)}>
-                      {game.nombre}
                     </MenuItem>
                   ))}
                 </Select>
