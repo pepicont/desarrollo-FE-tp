@@ -333,8 +333,8 @@ export default function MisComprasPage() {
                          ventaDate.getFullYear() === lastMonth.getFullYear();
             break;
           }
-          case "2025":
-            matchesDate = ventaDate.getFullYear() === 2025;
+          case String(new Date().getFullYear()):
+            matchesDate = ventaDate.getFullYear() === new Date().getFullYear();
             break;
           case "2024":
             matchesDate = ventaDate.getFullYear() === 2024;
@@ -347,6 +347,9 @@ export default function MisComprasPage() {
             break;
           case "2021":
             matchesDate = ventaDate.getFullYear() === 2021;
+            break;
+          case "anteriores":
+            matchesDate = ventaDate.getFullYear() <= 2020;
             break;
           default:
             matchesDate = venta.fecha.includes(dateFilter);
@@ -630,11 +633,12 @@ export default function MisComprasPage() {
                   <MenuItem value="">Todas las fechas</MenuItem>
                   <MenuItem value="este-mes">Este mes</MenuItem>
                   <MenuItem value="mes-pasado">Mes pasado</MenuItem>
-                  <MenuItem value="2025">2025</MenuItem>
+                  <MenuItem value={String(new Date().getFullYear())}>Año actual</MenuItem>
                   <MenuItem value="2024">2024</MenuItem>
                   <MenuItem value="2023">2023</MenuItem>
                   <MenuItem value="2022">2022</MenuItem>
                   <MenuItem value="2021">2021</MenuItem>
+                  <MenuItem value="anteriores">Anteriores</MenuItem>
                 </Select>
               </FormControl>
             </Box>
