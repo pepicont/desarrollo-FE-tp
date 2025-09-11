@@ -222,13 +222,14 @@ export default function ReviewModal({
               sx={{
                 px: 2,
                 py: 1,
-                bgcolor: "#3a7bd5", // Color más suave
+                bgcolor: "#1e2532", // Fondo igual al modal
                 borderRadius: 1,
                 minWidth: "100px",
                 textAlign: "center",
+                border: "1px solid #f59e0b", // Borde dorado igual a las estrellas
               }}
             >
-              <Typography variant="body1" sx={{ color: "white", fontWeight: "bold" }}>
+              <Typography variant="body1" sx={{ color: "#f59e0b", fontWeight: "bold" }}>
                 {puntaje} estrella{puntaje !== 1 ? "s" : ""}
               </Typography>
             </Box>

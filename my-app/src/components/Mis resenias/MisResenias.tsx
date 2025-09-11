@@ -177,33 +177,27 @@ export default function MisResenasPage() {
     
     return resenias.filter((resenia) => {
       const reseniaDate = new Date(resenia.fecha);
-      
       switch (dateFilter) {
         case "este-mes":
           return reseniaDate.getMonth() === now.getMonth() && 
                  reseniaDate.getFullYear() === now.getFullYear();
-        
         case "mes-pasado": {
           const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
           return reseniaDate.getMonth() === lastMonth.getMonth() && 
                  reseniaDate.getFullYear() === lastMonth.getFullYear();
         }
-        
-        case "2025":
-          return reseniaDate.getFullYear() === 2025;
-        
+        case String(new Date().getFullYear()):
+          return reseniaDate.getFullYear() === new Date().getFullYear();
         case "2024":
           return reseniaDate.getFullYear() === 2024;
-        
         case "2023":
           return reseniaDate.getFullYear() === 2023;
-        
         case "2022":
           return reseniaDate.getFullYear() === 2022;
-        
         case "2021":
           return reseniaDate.getFullYear() === 2021;
-        
+        case "anteriores":
+          return reseniaDate.getFullYear() <= 2020;
         default:
           return true;
       }
@@ -498,11 +492,12 @@ export default function MisResenasPage() {
                   <MenuItem value="todas">📅 Todas</MenuItem>
                   <MenuItem value="este-mes">📅 Este mes</MenuItem>
                   <MenuItem value="mes-pasado">📅 Mes pasado</MenuItem>
-                  <MenuItem value="2025">📅 2025</MenuItem>
+                  <MenuItem value={String(new Date().getFullYear())}>📅 Año actual</MenuItem>
                   <MenuItem value="2024">📅 2024</MenuItem>
                   <MenuItem value="2023">📅 2023</MenuItem>
                   <MenuItem value="2022">📅 2022</MenuItem>
                   <MenuItem value="2021">📅 2021</MenuItem>
+                  <MenuItem value="anteriores">📅 Anteriores</MenuItem>
                 </Select>
               </FormControl>
             </Box>
