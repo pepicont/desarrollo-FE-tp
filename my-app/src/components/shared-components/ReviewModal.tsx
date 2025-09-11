@@ -128,6 +128,8 @@ export default function ReviewModal({
           borderRadius: 3,
           boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
           overflow: "hidden",
+          width: { xs: '95vw', sm: '90vw', md: '600px' },
+          maxWidth: { xs: '95vw', sm: '90vw', md: '600px' },
         },
       }}
       BackdropProps={{
@@ -307,104 +309,77 @@ export default function ReviewModal({
         </Box>
       </DialogContent>
 
-      <DialogActions
-        sx={{
-          p: 4,
-          bgcolor: "#1e2532",
-          borderTop: "2px solid #2a3441",
-          gap: 2,
-          justifyContent: "space-between", // Cambiar para distribuir los botones
-        }}
-      >
-        <Box sx={{ display: "flex", gap: 2 }}>
-          {/* Botón de eliminar - solo en modo edición */}
-          {mode === 'edit' && onDelete && (
-            <Button
-              onClick={handleDeleteClick}
-              variant="outlined"
-              size="large"
-              disabled={loading || deleteLoading}
-              sx={{
-                color: "#ef4444",
-                borderColor: "#ef4444",
-                borderWidth: "2px",
-                px: 4,
-                py: 1.5,
-                fontWeight: "bold",
-                textTransform: "none",
-                fontSize: "1rem",
-                "&:hover": {
-                  borderColor: "#dc2626",
-                  color: "#dc2626",
-                  bgcolor: "rgba(239, 68, 68, 0.05)",
-                },
-              }}
-            >
-              {deleteLoading ? "Eliminando..." : "Eliminar"}
-            </Button>
-          )}
-        </Box>
-        
-        <Box sx={{ display: "flex", gap: 2 }}>
+      <DialogActions sx={{
+        p: { xs: 2, sm: 3 },
+        gap: { xs: 1, sm: 2 },
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: 'center',
+        width: '100%',
+        justifyContent: { xs: 'center', sm: 'flex-end' },
+        bgcolor: 'transparent',
+      }}>
+        {mode === 'edit' && onDelete && (
           <Button
-            onClick={handleClose}
-            variant="outlined"
-            size="large"
-            disabled={loading || deleteLoading}
-            sx={{
-              color: "#b0b0b0",
-              borderColor: "#2a3441",
-              borderWidth: "2px",
-              px: 4,
-              py: 1.5,
-              fontWeight: "bold",
-              textTransform: "none",
-              fontSize: "1rem",
-              "&:hover": {
-                borderColor: "#4a90e2",
-                color: "#4a90e2",
-                bgcolor: "rgba(74, 144, 226, 0.05)",
-              },
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
+            onClick={handleDeleteClick}
             variant="contained"
-            size="large"
-            disabled={loading || deleteLoading || !detalle.trim() || puntaje === 0}
+            color="error"
             sx={{
-              background: "linear-gradient(135deg, #3a7bd5 0%, #2c5aa0 100%)", // Más suave
-              px: 4,
-              py: 1.5,
+              width: { xs: '100%', sm: 'auto' },
               fontWeight: "bold",
-              textTransform: "none",
-              fontSize: "1rem",
-              minWidth: 120,
               boxShadow: "none",
-              "&:hover": {
-                background: "linear-gradient(135deg, #2c5aa0 0%, #1e4080 100%)",
-                boxShadow: "none",
-                transform: "none",
-              },
-              "&:disabled": {
-                background: "#2a3441",
-                color: "#666",
-              },
-              transition: "all 0.3s ease",
+              textTransform: "none",
+              m: 0,
             }}
           >
-            {loading ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <CircularProgress size={20} color="inherit" />
-                <span>{mode === 'create' ? 'Creando...' : 'Guardando...'}</span>
-              </Box>
-            ) : (
-              mode === 'create' ? 'Crear Reseña' : 'Guardar'
-            )}
+            Eliminar
           </Button>
-        </Box>
+        )}
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            fontWeight: "bold",
+            boxShadow: "none",
+            textTransform: "none",
+            color: "#b0b0b0",
+            borderColor: "#2a3441",
+            m: 0,
+            "&:hover": {
+              borderColor: "#4a90e2",
+              color: "#4a90e2",
+            },
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          disabled={loading || !puntaje || !detalle.trim()}
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            fontWeight: "bold",
+            boxShadow: "none",
+            textTransform: "none",
+            background: "linear-gradient(135deg, #3a7bd5, #2c5aa0)",
+            color: "white",
+            m: 0,
+            "&:hover": {
+              background: "linear-gradient(135deg, #2c5aa0, #1e3d6f)",
+            },
+          }}
+        >
+          {loading ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CircularProgress size={20} color="inherit" />
+              <span>{mode === 'create' ? 'Creando...' : 'Guardando...'}</span>
+            </Box>
+          ) : (
+            mode === 'create' ? 'Crear Reseña' : 'Guardar'
+          )}
+        </Button>
       </DialogActions>
 
       {/* Modal de confirmación para eliminar */}
@@ -429,13 +404,22 @@ export default function ReviewModal({
             Esta acción no se puede deshacer.
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ p: 3, gap: 2 }}>
+        <DialogActions sx={{
+          p: 3,
+          gap: 2,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          width: '100%',
+        }}>
           <Button 
             onClick={handleDeleteCancel} 
             variant="outlined"
             sx={{
               color: "#b0b0b0",
               borderColor: "#2a3441",
+              width: { xs: '100%', sm: 'auto' },
+              mb: { xs: 1, sm: 0 },
               "&:hover": {
                 borderColor: "#4a90e2",
                 color: "#4a90e2",
@@ -450,6 +434,8 @@ export default function ReviewModal({
             disabled={deleteLoading}
             sx={{
               backgroundColor: "#ef4444",
+              width: { xs: '100%', sm: 'auto' },
+              mb: { xs: 1, sm: 0 },
               "&:hover": {
                 backgroundColor: "#dc2626",
               },

@@ -418,7 +418,7 @@ export default function MisResenasPage() {
         <NavBar />
 
         {/* Contenido principal */}
-        <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+        <Container maxWidth="md" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
           {/* Mensaje de agradecimiento */}
           <Box sx={{ mb: 4, textAlign: "center" }}>
             <Typography variant="h5" sx={{ color: "primary.main", fontWeight: "bold" }}>
@@ -552,10 +552,12 @@ export default function MisResenasPage() {
                     bgcolor: "#1e2532",
                     borderRadius: 2,
                     border: "1px solid #2a3441",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+                  <CardContent sx={{ p: 3, width: "100%", boxSizing: "border-box" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2, md: 3 }, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
                       {/* Imagen del producto */}
                       <Avatar
                         src={getProductImage(resenia.venta)}
