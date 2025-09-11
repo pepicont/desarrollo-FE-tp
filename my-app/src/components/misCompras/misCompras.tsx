@@ -557,9 +557,12 @@ export default function MisComprasPage() {
                       <Box sx={{ textAlign: "right" }}>
                         <Chip
                           label={getProductCategory(venta)}
-                          color="success"
                           size="small"
-                          sx={{ mb: 1 }}
+                          sx={{ backgroundColor: "#e08a08ff",
+                                color: "#fff",
+                                fontWeight: "bold",
+                                mb: 1,
+                              }}
                         />
                         {venta.codActivacion && (
                           <Typography variant="caption" sx={{ display: "block", color: "text.secondary", mb: 1 }}>
