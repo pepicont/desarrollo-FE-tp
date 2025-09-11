@@ -291,11 +291,24 @@ export default function MisComprasPage() {
         fecha: reviewData.fecha,
       });
 
-      // Actualizar el estado local
-      setReviewsStatus(prev => ({
-        ...prev,
-        [currentVentaForReview.id]: { hasReview: true }
-      }));
+      // Recargar compras y estado de reseñas desde el backend
+      const ventasActualizadas = await getUserPurchases(token);
+      setVentas(ventasActualizadas);
+
+      const reviewsStatusMap: {[key: number]: { hasReview: boolean; reseniaId?: number } } = {};
+      for (const venta of ventasActualizadas) {
+        try {
+          const reviewCheck = await checkUserReviewForPurchase(token, venta.id);
+          reviewsStatusMap[venta.id] = {
+            hasReview: reviewCheck.hasReview || false,
+            reseniaId: reviewCheck.reseniaId || undefined
+          };
+        } catch (error) {
+          console.error(`Error al verificar reseña para venta ${venta.id}:`, error);
+          reviewsStatusMap[venta.id] = { hasReview: false };
+        }
+      }
+      setReviewsStatus(reviewsStatusMap);
 
       setIsCreateReviewModalOpen(false);
       setCurrentVentaForReview(null);
