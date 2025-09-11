@@ -724,7 +724,7 @@ export default function MisComprasPage() {
                   },
                 }}
               >
-                Aplicar filtros
+                Cerrar filtros
               </Button>
               <Button
                 variant="outlined"
