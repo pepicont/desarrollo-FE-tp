@@ -9,15 +9,13 @@ import {
   Card,
   CardContent,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   CircularProgress,
   Alert,
+  Drawer,
 } from "@mui/material"
 import {
   Search as SearchIcon,
@@ -33,6 +31,7 @@ import NavBar from "../navBar/navBar"
 import { authService } from "../../services/authService"
 import { getUserPurchases } from "../../services/comprasService.ts"
 import { checkUserReviewForPurchase, createResenia } from "../../services/reseniasService.ts"
+import { companyService, type Company } from "../../services/companyService"
 import { useNavigate } from "react-router-dom"
 import ReviewModal from "../shared-components/ReviewModal"
 
@@ -134,9 +133,16 @@ export default function MisComprasPage() {
     }
   }
   
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [dateFilter, setDateFilter] = useState("")
+  
+  // Estados para filtros avanzados
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [productTypeFilter, setProductTypeFilter] = useState("")
+  const [companyFilter, setCompanyFilter] = useState("")
+  const [gameFilter, setGameFilter] = useState("") // Filtro por juegos específicos
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [availableGames, setAvailableGames] = useState<{id: number, nombre: string}[]>([])
 
 //Fetch al back para traerse las compras del usuario
   useEffect(() => {
@@ -176,6 +182,35 @@ export default function MisComprasPage() {
       };
       fetchUserPurchases();
     }, []);
+
+  // Cargar compañías para el filtro
+  useEffect(() => {
+    const loadCompanies = async () => {
+      try {
+        const companiesData = await companyService.getAll();
+        setCompanies(companiesData);
+      } catch (error) {
+        console.error('Error al cargar compañías:', error);
+      }
+    };
+    loadCompanies();
+  }, []);
+
+  // Extraer juegos únicos de las compras del usuario
+  useEffect(() => {
+    const games = ventas
+      .filter(venta => venta.juego) // Solo ventas que tienen juego
+      .map(venta => ({
+        id: venta.juego!.id,
+        nombre: venta.juego!.nombre
+      }))
+      .filter((game, index, self) => 
+        index === self.findIndex(g => g.id === game.id) // Eliminar duplicados
+      )
+      .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
+    
+    setAvailableGames(games);
+  }, [ventas]);
 
 
 // Funciones auxiliares
@@ -277,15 +312,99 @@ export default function MisComprasPage() {
     setCurrentVentaForReview(null);
   };
 
-  const filteredVentas = ventas.filter((venta: Venta) => {
-    const productName = getProductName(venta)
-    const matchesSearch = searchQuery === "" || 
-      productName.toLowerCase().includes(searchQuery.toLowerCase())
+  // Función de filtrado avanzado
+  const getFilteredVentas = () => {
+    return ventas.filter((venta: Venta) => {
+      const productName = getProductName(venta);
+      
+      // Filtro por búsqueda de texto
+      const matchesSearch = searchQuery === "" || 
+        productName.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesDate = dateFilter === "" || venta.fecha.includes(dateFilter)
+      // Filtro por fecha (reutilizando el de reseñas)
+      let matchesDate = true;
+      if (dateFilter !== "") {
+        const ventaDate = new Date(venta.fecha);
+        const now = new Date();
+        
+        switch (dateFilter) {
+          case "este-mes":
+            matchesDate = ventaDate.getMonth() === now.getMonth() && 
+                         ventaDate.getFullYear() === now.getFullYear();
+            break;
+          case "mes-pasado": {
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
+            matchesDate = ventaDate.getMonth() === lastMonth.getMonth() && 
+                         ventaDate.getFullYear() === lastMonth.getFullYear();
+            break;
+          }
+          case "2025":
+            matchesDate = ventaDate.getFullYear() === 2025;
+            break;
+          case "2024":
+            matchesDate = ventaDate.getFullYear() === 2024;
+            break;
+          case "2023":
+            matchesDate = ventaDate.getFullYear() === 2023;
+            break;
+          case "2022":
+            matchesDate = ventaDate.getFullYear() === 2022;
+            break;
+          case "2021":
+            matchesDate = ventaDate.getFullYear() === 2021;
+            break;
+          default:
+            matchesDate = venta.fecha.includes(dateFilter);
+        }
+      }
 
-    return matchesSearch && matchesDate
-  })
+      // Filtro por tipo de producto
+      let matchesProductType = true;
+      if (productTypeFilter !== "") {
+        switch (productTypeFilter) {
+          case "juego":
+            matchesProductType = !!venta.juego;
+            break;
+          case "servicio":
+            matchesProductType = !!venta.servicio;
+            break;
+          case "complemento":
+            matchesProductType = !!venta.complemento;
+            break;
+        }
+      }
+
+      // Filtro por compañía
+      let matchesCompany = true;
+      if (companyFilter !== "") {
+        const companyId = parseInt(companyFilter);
+        matchesCompany = venta.juego?.compania === companyId || 
+                        venta.servicio?.compania === companyId;
+        // Los complementos no tienen compañía directa en el modelo actual
+      }
+
+      // Filtro por juego específico
+      let matchesGame = true;
+      if (gameFilter !== "") {
+        const gameId = parseInt(gameFilter);
+        matchesGame = venta.juego?.id === gameId;
+        // Solo aplica a juegos, no a servicios ni complementos
+      }
+
+      return matchesSearch && matchesDate && matchesProductType && matchesCompany && matchesGame;
+    });
+  };
+
+  const filteredVentas = getFilteredVentas();
+
+  // Función para limpiar todos los filtros
+  const clearFilters = () => {
+    setSearchQuery("");
+    setDateFilter("");
+    setProductTypeFilter("");
+    setCompanyFilter("");
+    setGameFilter("");
+  };
 
     // Auxiliar para obtener el id del producto
   const getProductId = (venta: Venta): number | null => {
@@ -354,7 +473,7 @@ export default function MisComprasPage() {
             <Button
               variant="outlined"
               startIcon={<FilterListIcon />}
-              onClick={() => setFilterDialogOpen(true)}
+              onClick={() => setIsFiltersOpen(true)}
               sx={{
                 borderColor: "#4b5563",
                 color: "white",
@@ -495,34 +614,130 @@ export default function MisComprasPage() {
           />
         )}
 
-        {/* Dialog de filtros */}
-        <Dialog
-          open={filterDialogOpen}
-          onClose={() => setFilterDialogOpen(false)}
+        {/* Drawer de filtros avanzados */}
+        <Drawer
+          anchor="right"
+          open={isFiltersOpen}
+          onClose={() => setIsFiltersOpen(false)}
           PaperProps={{
-            sx: { bgcolor: "background.paper", minWidth: 400 },
+            sx: { backgroundColor: "#1a1f2e", color: "white", width: 350 },
           }}
         >
-          <DialogTitle>Filtrar compras</DialogTitle>
-          <DialogContent>
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel>Filtrar por fecha</InputLabel>
-              <Select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} label="Filtrar por fecha">
-                <MenuItem value="">Todas las fechas</MenuItem>
-                <MenuItem value="2024-01">Enero 2024</MenuItem>
-                <MenuItem value="2023-12">Diciembre 2023</MenuItem>
-                <MenuItem value="2023-11">Noviembre 2023</MenuItem>
-              </Select>
-            </FormControl>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 3, color: "white" }}>
+              Filtros avanzados
+            </Typography>
 
-            <Box sx={{ mt: 3, display: "flex", gap: 2, justifyContent: "flex-end" }}>
-              <Button onClick={() => setFilterDialogOpen(false)}>Cancelar</Button>
-              <Button variant="contained" onClick={() => setFilterDialogOpen(false)}>
+            {/* Filtro por rango de fecha */}
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: "white" }}>Fecha</InputLabel>
+                <Select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  label="Fecha"
+                  sx={{ color: "white" }}
+                >
+                  <MenuItem value="">Todas las fechas</MenuItem>
+                  <MenuItem value="este-mes">Este mes</MenuItem>
+                  <MenuItem value="mes-pasado">Mes pasado</MenuItem>
+                  <MenuItem value="2025">2025</MenuItem>
+                  <MenuItem value="2024">2024</MenuItem>
+                  <MenuItem value="2023">2023</MenuItem>
+                  <MenuItem value="2022">2022</MenuItem>
+                  <MenuItem value="2021">2021</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Filtro por tipo de producto */}
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: "white" }}>Tipo de producto</InputLabel>
+                <Select
+                  value={productTypeFilter}
+                  onChange={(e) => setProductTypeFilter(e.target.value)}
+                  label="Tipo de producto"
+                  sx={{ color: "white" }}
+                >
+                  <MenuItem value="">Todos los tipos</MenuItem>
+                  <MenuItem value="juego">Juegos</MenuItem>
+                  <MenuItem value="servicio">Servicios</MenuItem>
+                  <MenuItem value="complemento">Complementos</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Filtro por compañía */}
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: "white" }}>Compañía</InputLabel>
+                <Select
+                  value={companyFilter}
+                  onChange={(e) => setCompanyFilter(e.target.value)}
+                  label="Compañía"
+                  sx={{ color: "white" }}
+                >
+                  <MenuItem value="">Todas las compañías</MenuItem>
+                  {companies.map(company => (
+                    <MenuItem key={company.id} value={String(company.id)}>
+                      {company.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Filtro por juego específico */}
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: "white" }}>Juego</InputLabel>
+                <Select
+                  value={gameFilter}
+                  onChange={(e) => setGameFilter(e.target.value)}
+                  label="Juego"
+                  sx={{ color: "white" }}
+                >
+                  <MenuItem value="">Todos los juegos</MenuItem>
+                  {availableGames.map(game => (
+                    <MenuItem key={game.id} value={String(game.id)}>
+                      {game.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Botones de acción */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                onClick={() => setIsFiltersOpen(false)}
+                sx={{
+                  background: "linear-gradient(135deg, #3a7bd5, #2c5aa0)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #2c5aa0, #1e3d6f)",
+                  },
+                }}
+              >
                 Aplicar filtros
               </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={clearFilters}
+                sx={{ 
+                  borderColor: "#4b5563", 
+                  color: "white",
+                  "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+                }}
+              >
+                Limpiar filtros
+              </Button>
             </Box>
-          </DialogContent>
-        </Dialog>
+          </Box>
+        </Drawer>
       </Box>
     </ThemeProvider>
   )

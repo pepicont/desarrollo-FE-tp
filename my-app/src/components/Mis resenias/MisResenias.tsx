@@ -16,7 +16,6 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Chip,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -189,6 +188,9 @@ export default function MisResenasPage() {
           return reseniaDate.getMonth() === lastMonth.getMonth() && 
                  reseniaDate.getFullYear() === lastMonth.getFullYear();
         }
+        
+        case "2025":
+          return reseniaDate.getFullYear() === 2025;
         
         case "2024":
           return reseniaDate.getFullYear() === 2024;
@@ -496,6 +498,7 @@ export default function MisResenasPage() {
                   <MenuItem value="todas">📅 Todas</MenuItem>
                   <MenuItem value="este-mes">📅 Este mes</MenuItem>
                   <MenuItem value="mes-pasado">📅 Mes pasado</MenuItem>
+                  <MenuItem value="2025">📅 2025</MenuItem>
                   <MenuItem value="2024">📅 2024</MenuItem>
                   <MenuItem value="2023">📅 2023</MenuItem>
                   <MenuItem value="2022">📅 2022</MenuItem>
