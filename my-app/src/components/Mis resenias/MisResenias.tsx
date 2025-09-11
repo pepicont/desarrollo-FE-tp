@@ -13,11 +13,6 @@ import {
   CircularProgress,
   Alert,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -26,10 +21,11 @@ import cyberpunkImg from "../../assets/cyberpunk.jpg"
 import fifaImg from "../../assets/fifa24.jpg"
 import mw3Img from "../../assets/mw3.jpg"
 import EditIcon from "@mui/icons-material/Edit"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
-import { updateResenia } from "../../services/reseniasService"
+import { updateResenia, deleteResenia } from "../../services/reseniasService"
 import { getUserResenias } from "../../services/reseniasService"
+import ReviewModal from "../shared-components/ReviewModal"
 
 const darkTheme = createTheme({
   palette: {
@@ -81,13 +77,20 @@ interface Resenia {
 }
 
 export default function MisResenasPage() {
-  const [editId, setEditId] = useState<number | null>(null)
-  const [editDetalle, setEditDetalle] = useState("")
-  const [editPuntaje, setEditPuntaje] = useState<number>(0)
-  const [editFecha, setEditFecha] = useState("")
-  const [editLoading, setEditLoading] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  
+  // Estados para el modal reutilizable
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [reviewModalMode, setReviewModalMode] = useState<'create' | 'edit'>('edit')
+  const [currentProductData, setCurrentProductData] = useState<{
+    name: string;
+    image: string;
+    ventaId?: number;
+    reseniaId?: number;
+  } | null>(null)
+  
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Estados para manejar los datos
   const [resenias, setResenias] = useState<Resenia[]>([])
@@ -130,6 +133,30 @@ export default function MisResenasPage() {
     fetchUserReviews()
   }, [])
 
+  // Verificar si viene información desde misCompras para editar una reseña
+  useEffect(() => {
+    if (location.state && resenias.length > 0) { // Asegurar que las reseñas estén cargadas
+      const { editMode, productName, reseniaId } = location.state;
+      
+      if (editMode && reseniaId) {
+        // Buscar la reseña específica
+        const resenia = resenias.find(r => r.id === reseniaId);
+        if (resenia) {
+          setCurrentProductData({
+            name: productName,
+            image: getProductImage(resenia.venta),
+            reseniaId: reseniaId
+          });
+          setReviewModalMode('edit');
+          setIsReviewModalOpen(true);
+        }
+      }
+      
+      // Limpiar el estado de navegación para evitar que se abra nuevamente
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, resenias, navigate, location.pathname]); // Depende de resenias para ejecutarse cuando estén cargadas
+
   // Función para formatear fechas, convierte una fecha en formato string a formato español legible
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -165,51 +192,83 @@ export default function MisResenasPage() {
     navigate("/producto", { state: { productId, productName } })
   }
 
-  const handleEditReview = (reviewId: number) => {
-    const review = resenias.find((r) => r.id === reviewId)
-    if (review) {
-      setEditId(reviewId)
-      setEditDetalle(review.detalle)
-      setEditPuntaje(review.puntaje)
-      setEditFecha(review.fecha)
-      setIsEditModalOpen(true)
+  // Funciones para el modal reutilizable
+  const handleEditClick = (reseniaId: number) => {
+    const resenia = resenias.find((r) => r.id === reseniaId)
+    if (resenia) {
+      const productName = resenia.venta.juego?.nombre || 
+                         resenia.venta.servicio?.nombre || 
+                         resenia.venta.complemento?.nombre || 
+                         "Producto desconocido"
+      
+      const productImage = resenia.venta.juego?.imagen || 
+                          resenia.venta.servicio?.imagen || 
+                          resenia.venta.complemento?.imagen || 
+                          cyberpunkImg // imagen por defecto
+      
+      setCurrentProductData({
+        name: productName,
+        image: productImage,
+        reseniaId: reseniaId
+      })
+      setReviewModalMode('edit')
+      setIsReviewModalOpen(true)
     }
   }
 
-  const handleCloseModal = () => {
-    setIsEditModalOpen(false)
-    setEditId(null)
-    setEditDetalle("")
-    setEditPuntaje(0)
-    setEditFecha("")
+  const handleReviewModalClose = () => {
+    setIsReviewModalOpen(false)
+    setCurrentProductData(null)
   }
 
-  const handleSaveReview = async () => {
-    if (!editId) return
+  const handleReviewModalSave = async (reviewData: { detalle: string; puntaje: number; fecha: string }) => {
+    if (!currentProductData?.reseniaId) return
 
-    setEditLoading(true)
     try {
       const token = authService.getToken()
       if (!token) {
         setError("No estás autenticado")
         return
       }
-      const now = new Date().toISOString()
-      await updateResenia(token, editId, {
-        detalle: editDetalle,
-        puntaje: editPuntaje,
-        fecha: now,
-      })
+
+      await updateResenia(token, currentProductData.reseniaId, reviewData)
+      
       // Actualizar en UI local
       setResenias((prev) =>
-        prev.map((r) => (r.id === editId ? { ...r, detalle: editDetalle, puntaje: editPuntaje, fecha: now } : r)),
+        prev.map((r) => 
+          r.id === currentProductData.reseniaId 
+            ? { ...r, detalle: reviewData.detalle, puntaje: reviewData.puntaje, fecha: reviewData.fecha } 
+            : r
+        )
       )
-      handleCloseModal()
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+      
+      handleReviewModalClose()
+    } catch (error) {
+      console.error('Error al guardar la reseña:', error)
       setError("Error al guardar la reseña")
+    }
+  }
+
+  const handleDeleteReview = async (reseniaId: number) => {
+    setDeleteLoading(true)
+    try {
+      const token = authService.getToken()
+      if (!token) {
+        setError("No estás autenticado")
+        return
+      }
+
+      await deleteResenia(token, reseniaId)
+      
+      // Remover de UI local
+      setResenias((prev) => prev.filter((r) => r.id !== reseniaId))
+      
+      handleReviewModalClose()
+    } catch (error) {
+      console.error('Error al eliminar la reseña:', error)
+      setError("Error al eliminar la reseña")
     } finally {
-      setEditLoading(false)
+      setDeleteLoading(false)
     }
   }
 
@@ -333,6 +392,28 @@ export default function MisResenasPage() {
                 Mostrando {resenias.length} de {resenias.length} reseñas
               </Typography>
             </Box>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/mis-compras")}
+              sx={{
+                background: "linear-gradient(135deg, #3a7bd5, #2c5aa0)",
+                color: "white",
+                fontWeight: "bold",
+                px: 3,
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: "none",
+                boxShadow: "0 4px 12px rgba(58, 123, 213, 0.3)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #2c5aa0, #1e3d6f)",
+                  boxShadow: "0 6px 16px rgba(58, 123, 213, 0.4)",
+                  transform: "translateY(-1px)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              Nueva reseña
+            </Button>
           </Box>
 
           {/* Lista de reseñas */}
@@ -410,7 +491,7 @@ export default function MisResenasPage() {
                       </Box>
                       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                         <IconButton
-                          onClick={() => handleEditReview(resenia.id)}
+                          onClick={() => handleEditClick(resenia.id)}
                           sx={{
                             bgcolor: "primary.main",
                             color: "white",
@@ -433,272 +514,31 @@ export default function MisResenasPage() {
         </Container>
       </Box>
 
-      {/* Modal de edición de reseña */}
-      <Dialog
-        open={isEditModalOpen}
-        onClose={handleCloseModal}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: "#141926",
-            border: "2px solid #4a90e2",
-            borderRadius: 3,
-            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
-            overflow: "hidden",
-          },
-        }}
-        BackdropProps={{
-          sx: {
-            bgcolor: "rgba(0, 0, 0, 0.8)",
-            backdropFilter: "blur(8px)",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            background: "linear-gradient(135deg, #4a90e2 0%, #357abd 100%)",
-            color: "white",
-            p: 3,
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: "1px",
-              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-            },
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-            {editId &&
-              (() => {
-                const resenia = resenias.find((r) => r.id === editId)
-                return resenia ? (
-                  <>
-                    <Box sx={{ position: "relative" }}>
-                      <Avatar
-                        src={getProductImage(resenia.venta)}
-                        alt="Producto"
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: 2,
-                          border: "3px solid rgba(255,255,255,0.2)",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                        }}
-                        variant="rounded"
-                      />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
-                        Editar Reseña
-                      </Typography>
-                      <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
-                        {getProductName(resenia.venta)}
-                      </Typography>
-                    </Box>
-                  </>
-                ) : null
-              })()}
-          </Box>
-        </DialogTitle>
-
-        <DialogContent sx={{ p: 4, bgcolor: "#141926" }}>
-          {/* Rating Section */}
-          <Box
-            sx={{
-              mt: 3,
-              mb: 4,
-              p: 3,
-              bgcolor: "#1e2532",
-              borderRadius: 2,
-              border: "1px solid #2a3441",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                borderColor: "#4a90e2",
-                boxShadow: "0 4px 12px rgba(74, 144, 226, 0.1)",
-              },
-            }}
-          >
-            <Typography variant="h6" sx={{ color: "white", mb: 2, fontWeight: "bold" }}>
-              Calificación
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <Rating
-                value={editPuntaje}
-                onChange={(_, value) => setEditPuntaje(value || 0)}
-                size="large"
-                sx={{
-                  "& .MuiRating-iconFilled": {
-                    color: "#ffd700",
-                    filter: "drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3))",
-                  },
-                  "& .MuiRating-iconEmpty": {
-                    color: "#2a3441",
-                  },
-                  "& .MuiRating-iconHover": {
-                    color: "#ffed4e",
-                  },
-                }}
-              />
-              <Box
-                sx={{
-                  px: 2,
-                  py: 1,
-                  bgcolor: "#4a90e2",
-                  borderRadius: 1,
-                  minWidth: "100px",
-                  textAlign: "center",
-                }}
-              >
-                <Typography variant="body1" sx={{ color: "white", fontWeight: "bold" }}>
-                  {editPuntaje} estrella{editPuntaje !== 1 ? "s" : ""}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* Date Section */}
-          <Box
-            sx={{
-              mb: 4,
-              p: 3,
-              bgcolor: "#1e2532",
-              borderRadius: 2,
-              border: "1px solid #2a3441",
-            }}
-          >
-            <Typography variant="h6" sx={{ color: "white", mb: 1, fontWeight: "bold" }}>
-              Fecha de reseña
-            </Typography>
-            <Typography variant="body1" sx={{ color: "#b0b0b0" }}>
-              {formatDate(editFecha)}
-            </Typography>
-          </Box>
-
-          {/* Comment Section */}
-          <Box
-            sx={{
-              p: 3,
-              bgcolor: "#1e2532",
-              borderRadius: 2,
-              border: "1px solid #2a3441",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                borderColor: "#4a90e2",
-                boxShadow: "0 4px 12px rgba(74, 144, 226, 0.1)",
-              },
-            }}
-          >
-            <Typography variant="h6" sx={{ color: "white", mb: 2, fontWeight: "bold" }}>
-              Tu opinión
-            </Typography>
-            <TextField
-              value={editDetalle}
-              onChange={(e) => setEditDetalle(e.target.value)}
-              multiline
-              rows={5}
-              fullWidth
-              variant="outlined"
-              placeholder="Comparte tu experiencia con este producto..."
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "white",
-                  bgcolor: "#141926",
-                  fontSize: "1rem",
-                  "& fieldset": {
-                    borderColor: "#2a3441",
-                    borderWidth: "2px",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#4a90e2",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#4a90e2",
-                    boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
-                  },
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "#666",
-                  opacity: 1,
-                },
-              }}
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            p: 4,
-            bgcolor: "#1e2532",
-            borderTop: "2px solid #2a3441",
-            gap: 2,
-            justifyContent: "flex-end",
-          }}
-        >
-          <Button
-            onClick={handleCloseModal}
-            variant="outlined"
-            size="large"
-            disabled={editLoading}
-            sx={{
-              color: "#b0b0b0",
-              borderColor: "#2a3441",
-              borderWidth: "2px",
-              px: 4,
-              py: 1.5,
-              fontWeight: "bold",
-              textTransform: "none",
-              fontSize: "1rem",
-              "&:hover": {
-                borderColor: "#4a90e2",
-                color: "#4a90e2",
-                bgcolor: "rgba(74, 144, 226, 0.05)",
-              },
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSaveReview}
-            variant="contained"
-            size="large"
-            disabled={editLoading}
-            sx={{
-              background: "linear-gradient(135deg, #4a90e2 0%, #357abd 100%)",
-              px: 4,
-              py: 1.5,
-              fontWeight: "bold",
-              textTransform: "none",
-              fontSize: "1rem",
-              minWidth: 120,
-              boxShadow: "0 4px 12px rgba(74, 144, 226, 0.3)",
-              "&:hover": {
-                background: "linear-gradient(135deg, #357abd 0%, #2968a3 100%)",
-                boxShadow: "0 6px 16px rgba(74, 144, 226, 0.4)",
-                transform: "translateY(-1px)",
-              },
-              "&:disabled": {
-                background: "#2a3441",
-                color: "#666",
-              },
-              transition: "all 0.3s ease",
-            }}
-          >
-            {editLoading ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <CircularProgress size={20} color="inherit" />
-                <span>Guardando...</span>
-              </Box>
-            ) : (
-              "Guardar"
-            )}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Modal Reutilizable */}
+      {currentProductData && (
+        <ReviewModal
+          open={isReviewModalOpen}
+          onClose={handleReviewModalClose}
+          onSave={handleReviewModalSave}
+          onDelete={reviewModalMode === 'edit' && currentProductData?.reseniaId ? 
+            () => handleDeleteReview(currentProductData.reseniaId!) : undefined}
+          mode={reviewModalMode}
+          productName={currentProductData.name}
+          productImage={currentProductData.image}
+          loading={false}
+          deleteLoading={deleteLoading}
+          initialData={
+            reviewModalMode === 'edit' && currentProductData.reseniaId ? (() => {
+              const resenia = resenias.find(r => r.id === currentProductData.reseniaId);
+              return resenia ? {
+                detalle: resenia.detalle,
+                puntaje: resenia.puntaje,
+                fecha: resenia.fecha,
+              } : undefined;
+            })() : undefined
+          }
+        />
+      )}
     </ThemeProvider>
   )
 }

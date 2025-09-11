@@ -32,7 +32,9 @@ import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
 import { authService } from "../../services/authService"
 import { getUserPurchases } from "../../services/comprasService.ts"
+import { checkUserReviewForPurchase, createResenia } from "../../services/reseniasService.ts"
 import { useNavigate } from "react-router-dom"
+import ReviewModal from "../shared-components/ReviewModal"
 
 const darkTheme = createTheme({
   palette: {
@@ -117,6 +119,13 @@ export default function MisComprasPage() {
   const [ventas, setVentas] = useState<Venta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [reviewsStatus, setReviewsStatus] = useState<{[key: number]: { hasReview: boolean; reseniaId?: number } }>({})
+  
+  // Estados para el modal de crear reseña
+  const [isCreateReviewModalOpen, setIsCreateReviewModalOpen] = useState(false)
+  const [currentVentaForReview, setCurrentVentaForReview] = useState<Venta | null>(null)
+  const [createReviewLoading, setCreateReviewLoading] = useState(false)
+  
   const navigate = useNavigate()
   // Navegación a la página de producto
   const handleProductClick = (productId: number | null, productName: string) => {
@@ -141,6 +150,23 @@ export default function MisComprasPage() {
           }
           const ventas = await getUserPurchases(token);
           setVentas(ventas);
+
+          // Verificar el estado de las reseñas para cada compra
+          const reviewsStatusMap: {[key: number]: { hasReview: boolean; reseniaId?: number } } = {};
+          for (const venta of ventas) {
+            try {
+              const reviewCheck = await checkUserReviewForPurchase(token, venta.id);
+              reviewsStatusMap[venta.id] = {
+                hasReview: reviewCheck.hasReview || false,
+                reseniaId: reviewCheck.reseniaId || undefined
+              };
+            } catch (error) {
+              console.error(`Error al verificar reseña para venta ${venta.id}:`, error);
+              reviewsStatusMap[venta.id] = { hasReview: false };
+            }
+          }
+          setReviewsStatus(reviewsStatusMap);
+
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           setError('Error al cargar las compras');
@@ -186,6 +212,70 @@ export default function MisComprasPage() {
     const date = new Date(dateString)
     return date.toLocaleDateString("es-ES")
   }
+
+  // Manejar la navegación para agregar/editar reseña
+  const handleReviewAction = (venta: Venta) => {
+    const reviewInfo = reviewsStatus[venta.id];
+    
+    if (reviewInfo?.hasReview && reviewInfo.reseniaId) {
+      // Editar reseña existente - navegar a mis-reseñas
+      navigate('/mis-resenas', { 
+        state: { 
+          editMode: true, 
+          reseniaId: reviewInfo.reseniaId,
+          productName: getProductName(venta)
+        } 
+      });
+    } else {
+      // Agregar nueva reseña - abrir modal en esta página
+      setCurrentVentaForReview(venta);
+      setIsCreateReviewModalOpen(true);
+    }
+  }
+
+  // Funciones para el modal de crear reseña
+  const handleCreateReviewSave = async (reviewData: {
+    detalle: string;
+    puntaje: number;
+    fecha: string;
+  }) => {
+    if (!currentVentaForReview) return;
+
+    setCreateReviewLoading(true);
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        setError("No estás autenticado");
+        return;
+      }
+
+      await createResenia(token, {
+        venta: currentVentaForReview.id,
+        detalle: reviewData.detalle,
+        puntaje: reviewData.puntaje,
+        fecha: reviewData.fecha,
+      });
+
+      // Actualizar el estado local
+      setReviewsStatus(prev => ({
+        ...prev,
+        [currentVentaForReview.id]: { hasReview: true }
+      }));
+
+      setIsCreateReviewModalOpen(false);
+      setCurrentVentaForReview(null);
+    } catch (error) {
+      console.error('Error al crear reseña:', error);
+      setError("Error al crear la reseña");
+    } finally {
+      setCreateReviewLoading(false);
+    }
+  };
+
+  const handleCreateReviewClose = () => {
+    setIsCreateReviewModalOpen(false);
+    setCurrentVentaForReview(null);
+  };
 
   const filteredVentas = ventas.filter((venta: Venta) => {
     const productName = getProductName(venta)
@@ -353,9 +443,33 @@ export default function MisComprasPage() {
                           sx={{ mb: 1 }}
                         />
                         {venta.codActivacion && (
-                          <Typography variant="caption" sx={{ display: "block", color: "text.secondary" }}>
+                          <Typography variant="caption" sx={{ display: "block", color: "text.secondary", mb: 1 }}>
                             Código: {venta.codActivacion}
                           </Typography>
+                        )}
+                        {/* Botón de reseña */}
+                        {reviewsStatus[venta.id] ? (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            sx={{
+                              background: 'linear-gradient(45deg, #3a7bd5, #3a82f6)',
+                              '&:hover': {
+                                background: 'linear-gradient(45deg, #2563eb, #1d4ed8)',
+                              },
+                              color: 'white',
+                              fontSize: '0.75rem',
+                              textTransform: 'none',
+                              mt: 1,
+                            }}
+                            onClick={() => handleReviewAction(venta)}
+                          >
+                            {reviewsStatus[venta.id].hasReview ? 'Editar reseña' : 'Agregar reseña'}
+                          </Button>
+                        ) : (
+                          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                            <CircularProgress size={16} sx={{ color: '#3a7bd5' }} />
+                          </Box>
                         )}
                       </Box>
                     </Box>
@@ -367,6 +481,19 @@ export default function MisComprasPage() {
             </>
           )}
         </Container>
+
+        {/* Modal para crear reseña */}
+        {currentVentaForReview && (
+          <ReviewModal
+            open={isCreateReviewModalOpen}
+            onClose={handleCreateReviewClose}
+            onSave={handleCreateReviewSave}
+            mode="create"
+            productName={getProductName(currentVentaForReview)}
+            productImage={getProductImage(currentVentaForReview)}
+            loading={createReviewLoading}
+          />
+        )}
 
         {/* Dialog de filtros */}
         <Dialog
