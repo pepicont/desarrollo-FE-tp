@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Alert, CircularProgress } from '@mui/material'
+import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Alert, CircularProgress, Radio, Divider, List, ListItemButton, ListItemAvatar, Avatar, ListItemText } from '@mui/material'
 import NavBar from '../navBar/navBar'
+import mpLogo from '../../assets/mercadopago.png'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { startCheckout, simulateSuccess, type TipoProducto } from '../../services/checkoutService'
 
@@ -12,13 +13,13 @@ const darkTheme = createTheme({
 export default function Checkout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { tipo, id, nombre, precio } = (location.state || {}) as { tipo: TipoProducto; id: number; nombre?: string; precio?: number }
+  const { tipo, id, nombre, precio, imageUrl } = (location.state || {}) as { tipo: TipoProducto; id: number; nombre?: string; precio?: number; imageUrl?: string }
 
   const [sessionId, setSessionId] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [status, setStatus] = useState<'pending' | 'paid' | 'cancelled'>('pending')
-  const [ventaId, setVentaId] = useState<number | undefined>(undefined)
+  // estado interno para simular sesión
+  const [method, setMethod] = useState<'mp' | 'stripe'>('mp')
 
   useEffect(() => {
     if (!tipo || !id) {
@@ -46,10 +47,20 @@ export default function Checkout() {
     try {
       setLoading(true)
       setError(null)
-      // NOTA: Pago simulado. Reemplazamos luego por redirección a Mercado Pago
-      const r = await simulateSuccess(sessionId)
-      setStatus(r.status)
-      setVentaId(r.venta.id)
+      // NOTA: Pago simulado. Reemplazaremos luego por redirección a Mercado Pago
+  const r = await simulateSuccess(sessionId)
+      navigate('/checkout/success', {
+        state: {
+          ventaId: r.venta.id,
+          codActivacion: r.venta.codActivacion,
+          tipo,
+          id,
+          nombre,
+          precio,
+          imageUrl: imageUrl || '/vite.svg',
+          metodoPago: method,
+        }
+      })
     } catch (e: unknown) {
       const err = e as Error
       setError(err?.message || 'No se pudo confirmar el pago')
@@ -57,15 +68,12 @@ export default function Checkout() {
       setLoading(false)
     }
   }
-
-  const goMisCompras = () => navigate('/mis-compras')
-
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
         <NavBar />
-        <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
+  <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
           <Typography variant="h4" fontWeight={700} gutterBottom>Checkout</Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -73,35 +81,60 @@ export default function Checkout() {
           <Card sx={{ mb: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Resumen</Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography>{nombre || `${tipo} #${id}`}</Typography>
-                <Typography fontWeight={700}>{typeof precio === 'number' ? `US$${precio}` : '-'}</Typography>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Box component="img" src={imageUrl || '/vite.svg'} alt={nombre || 'Producto'} sx={{ width: 96, height: 96, objectFit: 'contain', borderRadius: 2, bgcolor: '#0f1625', p: 1 }} />
+                <Box sx={{ flex: 1, minWidth: 200 }}>
+                  <Typography fontWeight={600}>{nombre || `${tipo} #${id}`}</Typography>
+                  <Typography color="text.secondary">Tipo: {tipo}</Typography>
+                </Box>
+                <Box>
+                  <Typography color="text.secondary">Total</Typography>
+                  <Typography fontWeight={800} variant="h6">{typeof precio === 'number' ? `US$${precio}` : '-'}</Typography>
+                </Box>
               </Box>
             </CardContent>
           </Card>
 
-          {status === 'pending' && (
-            <>
-              <Typography color="text.secondary" sx={{ mb: 2 }}>
-                Esta es una simulación de pago. Proximamente se redireccionará a la pasarela (Mercado Pago).
+          {/* Método de pago */}
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Método de pago</Typography>
+              <List sx={{ py: 0 }}>
+                <ListItemButton
+                  selected={method === 'mp'}
+                  onClick={() => setMethod('mp')}
+                  sx={{ borderRadius: 1, '&.Mui-selected': { bgcolor: 'rgba(74,144,226,0.08)' } }}
+                >
+                  <ListItemAvatar>
+                    <Avatar variant="rounded" sx={{ bgcolor: 'transparent' }}>
+                      <Box component="img" src={mpLogo} alt="Mercado Pago" sx={{ height: 22, width: 'auto' }} />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary="Mercado Pago" secondary="Tarjeta, débito, efectivo (simulado por ahora)" />
+                  <Radio edge="end" checked={method === 'mp'} value="mp" />
+                </ListItemButton>
+                <Divider component="li" sx={{ my: 0.5, opacity: 0.15 }} />
+                <ListItemButton disabled sx={{ borderRadius: 1, opacity: 0.6 }}>
+                  <ListItemAvatar>
+                    <Avatar variant="rounded">O</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary="Otro" secondary="Próximamente" />
+                  <Radio edge="end" disabled value="stripe" />
+                </ListItemButton>
+              </List>
+              <Typography color="text.secondary" sx={{ mt: 2 }}>
+                Nota: flujo de pago simulado. Luego redirigiremos a la pasarela elegida y confirmaremos por webhook.
               </Typography>
-              <Button variant="contained" fullWidth disabled={!sessionId || loading} onClick={handleSimulatePay}>
-                {loading ? <CircularProgress size={20} /> : 'Simular pago y confirmar compra'}
-              </Button>
-            </>
-          )}
+            </CardContent>
+          </Card>
 
-          {status === 'paid' && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              ¡Pago confirmado! Tu compra fue registrada. Verifica "Mis compras" para ver tu código de activación.
-              {ventaId ? ` (Venta #${ventaId})` : ''}
-            </Alert>
-          )}
-
-          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+          {/* Acciones */}
+          <Box sx={{ display: 'flex', gap: 2 }}>
             <Button variant="outlined" onClick={() => navigate(-1)}>Volver</Button>
-            <Button variant="contained" onClick={goMisCompras}>Ir a Mis compras</Button>
-          </Box>
+            <Button variant="contained" disabled={!sessionId || loading} onClick={handleSimulatePay}>
+              {loading ? <CircularProgress size={20} /> : 'Pagar'}
+            </Button>
+          </Box>          
         </Container>
       </Box>
     </ThemeProvider>

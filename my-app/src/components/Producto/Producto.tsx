@@ -156,7 +156,8 @@ export default function Producto() {
                   sx={{ py: 1.5, fontWeight: 700 }}
                   onClick={() => {
                     if (!tipo || !id) return
-                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto } })
+                    // TODO: reemplazar '/vite.svg' por imagen real del producto cuando esté disponible
+                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: '/vite.svg' } })
                   }}
                 >
                   Comprar

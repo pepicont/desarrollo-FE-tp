@@ -7,6 +7,7 @@ import MisCompras from './components/misCompras/misCompras.tsx'
 import Compra from './components/Compra/Compra.tsx'
 import Producto from './components/Producto/Producto.tsx'
 import Checkout from './components/Compra/Checkout.tsx'
+import CheckoutSuccess from './components/Compra/CheckoutSuccess.tsx'
 import MisResenias from './components/Mis resenias/MisResenias.tsx'
 import Profile from './components/Profile/Profile.tsx'
 import BuscarProductos from './components/BuscarProductos/BuscarProductos.tsx'
@@ -30,6 +31,11 @@ function App() {
         <Route path="/checkout" element={
           <ProtectedRoute>
             <Checkout />
+          </ProtectedRoute>
+        } />
+        <Route path="/checkout/success" element={
+          <ProtectedRoute>
+            <CheckoutSuccess />
           </ProtectedRoute>
         } />
         <Route path="/producto" element={<Producto />} />
