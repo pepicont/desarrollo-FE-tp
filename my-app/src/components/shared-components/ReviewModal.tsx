@@ -381,11 +381,11 @@ export default function ReviewModal({
               textTransform: "none",
               fontSize: "1rem",
               minWidth: 120,
-              boxShadow: "0 2px 8px rgba(74, 144, 226, 0.2)", // Sombra más sutil
+              boxShadow: "none",
               "&:hover": {
                 background: "linear-gradient(135deg, #2c5aa0 0%, #1e4080 100%)",
-                boxShadow: "0 4px 12px rgba(74, 144, 226, 0.25)", // Sombra hover más sutil
-                transform: "translateY(-1px)",
+                boxShadow: "none",
+                transform: "none",
               },
               "&:disabled": {
                 background: "#2a3441",

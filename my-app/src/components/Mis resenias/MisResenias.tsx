@@ -511,18 +511,18 @@ export default function MisResenasPage() {
               variant="contained"
               onClick={() => navigate("/mis-compras")}
               sx={{
-                background: "linear-gradient(135deg, #3a7bd5, #2c5aa0)",
+                background: "#3a7bd5",
                 color: "white",
                 fontWeight: "bold",
                 px: 3,
                 py: 1.5,
                 borderRadius: 2,
                 textTransform: "none",
-                boxShadow: "0 4px 12px rgba(58, 123, 213, 0.3)",
+                boxShadow: "none",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #2c5aa0, #1e3d6f)",
-                  boxShadow: "0 6px 16px rgba(58, 123, 213, 0.4)",
-                  transform: "translateY(-1px)",
+                  background: "#2c5aa0",
+                  boxShadow: "none",
+                  transform: "none",
                 },
                 transition: "all 0.3s ease",
               }}
