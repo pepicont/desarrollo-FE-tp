@@ -57,7 +57,7 @@ export default function Profile() {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmNewPasswordError, setConfirmNewPasswordError] = useState("");
-
+  
   // Handlers para los campos de contraseña
   const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewPassword(e.target.value);
@@ -146,21 +146,27 @@ export default function Profile() {
       }
       
       const token = authService.getToken()
-      
-      if (!token) {
 
-        // Validar contraseña solo si el campo está visible y tiene contenido
-        if (showPasswordFields && (newPassword || confirmNewPassword)) {
-          if (newPassword.length < 6) {
-            setNewPasswordError('La contraseña debe tener al menos 6 caracteres.')
-            return
-          }
-          if (confirmNewPassword !== newPassword) {
-            setConfirmNewPasswordError('Las contraseñas no coinciden.')
-            return
-          }
+      // Validar contraseña solo si el campo está visible y tiene contenido
+      if (showPasswordFields && (newPassword || confirmNewPassword)) {
+        
+        let valid = true;
+        if (newPassword.length < 6) {
+          setNewPasswordError('La contraseña debe tener al menos 6 caracteres.')
+          valid = false;
+        } else {
+          setNewPasswordError("");
         }
+        if (confirmNewPassword !== newPassword) {
+          setConfirmNewPasswordError('Las contraseñas no coinciden.')
+          valid = false;
+        } else {
+          setConfirmNewPasswordError("");
+        }
+        if (!valid) return;
+      } 
 
+      if (!token) {
         setError('No estás autenticado')
         return
       }
@@ -207,6 +213,11 @@ export default function Profile() {
       setUserData(editData);
       setIsEditing(false);
       setSuccessMessage('Perfil actualizado correctamente');
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setNewPasswordError("");
+      setConfirmNewPasswordError("");
+      setShowPasswordFields(false);
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
@@ -240,6 +251,10 @@ export default function Profile() {
   setIsEditing(false)
   setEmailWarningShown(false) // Resetear la bandera al cancelar
   setShowPasswordFields(false) // Oculta los campos de contraseña y vuelve a mostrar el botón
+  setNewPassword("");
+  setConfirmNewPassword("");
+  setNewPasswordError("");
+  setConfirmNewPasswordError("");
   }
 
   // Función para manejar el cambio de email con advertencia
