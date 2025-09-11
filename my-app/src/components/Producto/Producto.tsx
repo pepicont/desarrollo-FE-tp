@@ -149,7 +149,16 @@ export default function Producto() {
                   <Typography variant="h4" fontWeight={800}>{data?.monto === 0 ? 'Gratuito' : `US$${data?.monto ?? ''}`}</Typography>
                 </Box>
 
-                <Button fullWidth variant="contained" color="warning" sx={{ py: 1.5, fontWeight: 700 }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="warning"
+                  sx={{ py: 1.5, fontWeight: 700 }}
+                  onClick={() => {
+                    if (!tipo || !id) return
+                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto } })
+                  }}
+                >
                   Comprar
                 </Button>
 
