@@ -104,6 +104,10 @@ export default function MisResenasPage() {
   // Estado para el filtro de fecha
   const [dateFilter, setDateFilter] = useState<string>("todas")
 
+  // Estados para alertas de éxito y eliminación
+  const [successAlert, setSuccessAlert] = useState(false);
+  const [deleteAlert, setDeleteAlert] = useState(false);
+
   // Cargar reseñas del usuario autenticado
   useEffect(() => {
     const fetchUserReviews = async () => {
@@ -162,6 +166,16 @@ export default function MisResenasPage() {
       navigate(location.pathname, { replace: true });
     }
   }, [location.state, resenias, navigate, location.pathname]); // Depende de resenias para ejecutarse cuando estén cargadas
+
+  // Mostrar alerta si viene de misCompras
+  useEffect(() => {
+    if (location.state && location.state.created) {
+      setSuccessAlert(true);
+      setTimeout(() => setSuccessAlert(false), 4000);
+      // Limpiar el estado para evitar mostrar la alerta en recarga
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   // Función para formatear fechas, convierte una fecha en formato string a formato español legible
   const formatDate = (dateString: string) => {
@@ -266,53 +280,48 @@ export default function MisResenasPage() {
   }
 
   const handleReviewModalSave = async (reviewData: { detalle: string; puntaje: number; fecha: string }) => {
-    if (!currentProductData?.reseniaId) return
-
+    if (!currentProductData?.reseniaId) return;
     try {
-      const token = authService.getToken()
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-
-      await updateResenia(token, currentProductData.reseniaId, reviewData)
-      
-      // Actualizar en UI local
+      await updateResenia(token, currentProductData.reseniaId, reviewData);
       setResenias((prev) =>
-        prev.map((r) => 
-          r.id === currentProductData.reseniaId 
-            ? { ...r, detalle: reviewData.detalle, puntaje: reviewData.puntaje, fecha: reviewData.fecha } 
+        prev.map((r) =>
+          r.id === currentProductData.reseniaId
+            ? { ...r, detalle: reviewData.detalle, puntaje: reviewData.puntaje, fecha: reviewData.fecha }
             : r
         )
-      )
-      
-      handleReviewModalClose()
+      );
+      setSuccessAlert(true);
+      setTimeout(() => setSuccessAlert(false), 4000);
+      handleReviewModalClose();
     } catch (error) {
-      console.error('Error al guardar la reseña:', error)
-      setError("Error al guardar la reseña")
+      console.error('Error al guardar la reseña:', error);
+      setError("Error al guardar la reseña");
     }
   }
 
   const handleDeleteReview = async (reseniaId: number) => {
-    setDeleteLoading(true)
+    setDeleteLoading(true);
     try {
-      const token = authService.getToken()
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-
-      await deleteResenia(token, reseniaId)
-      
-      // Remover de UI local
-      setResenias((prev) => prev.filter((r) => r.id !== reseniaId))
-      
-      handleReviewModalClose()
+      await deleteResenia(token, reseniaId);
+      setResenias((prev) => prev.filter((r) => r.id !== reseniaId));
+      setDeleteAlert(true);
+      setTimeout(() => setDeleteAlert(false), 4000);
+      handleReviewModalClose();
     } catch (error) {
-      console.error('Error al eliminar la reseña:', error)
-      setError("Error al eliminar la reseña")
+      console.error('Error al eliminar la reseña:', error);
+      setError("Error al eliminar la reseña");
     } finally {
-      setDeleteLoading(false)
+      setDeleteLoading(false);
     }
   }
 
@@ -416,9 +425,15 @@ export default function MisResenasPage() {
       <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
         {/* NavBar compartida */}
         <NavBar />
-
         {/* Contenido principal */}
         <Container maxWidth="md" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
+          {/* Alertas de éxito y eliminación */}
+          {successAlert && (
+            <Alert severity="success" sx={{ mb: 2, fontWeight: 'bold' }}>Reseña modificada con éxito</Alert>
+          )}
+          {deleteAlert && (
+            <Alert severity="error" sx={{ mb: 2, fontWeight: 'bold' }}>Se eliminó la reseña</Alert>
+          )}
           {/* Mensaje de agradecimiento */}
           <Box sx={{ mb: 4, textAlign: "center" }}>
             <Typography variant="h5" sx={{ color: "primary.main", fontWeight: "bold" }}>
