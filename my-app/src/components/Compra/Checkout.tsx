@@ -3,7 +3,8 @@ import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Ca
 import NavBar from '../navBar/navBar'
 import mpLogo from '../../assets/mercadopago.png'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { startCheckout, simulateSuccess, type TipoProducto } from '../../services/checkoutService'
+import { startCheckout, simulateSuccess, type TipoProducto, mpStartPreference } from '../../services/checkoutService'
+import axios from 'axios'
 
 const darkTheme = createTheme({
   palette: { mode: 'dark', background: { default: '#141926', paper: '#1e2532' }, primary: { main: '#4a90e2' } },
@@ -47,7 +48,7 @@ export default function Checkout() {
     try {
       setLoading(true)
       setError(null)
-      // NOTA: Pago simulado. Reemplazaremos luego por redirección a Mercado Pago
+      
   const r = await simulateSuccess(sessionId)
       navigate('/checkout/success', {
         state: {
@@ -62,11 +63,47 @@ export default function Checkout() {
         }
       })
     } catch (e: unknown) {
-      const err = e as Error
-      setError(err?.message || 'No se pudo confirmar el pago')
+      const isAx = axios.isAxiosError(e)
+      const msg = isAx ? (e.response?.data?.message || e.message) : (e as Error)?.message
+      const cause = isAx ? e.response?.data?.cause : undefined
+      setError(cause ? `${msg} — ${JSON.stringify(cause)}` : (msg || 'No se pudo confirmar el pago'))
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePay = async () => {
+    if (method === 'mp') {
+      try {
+        setLoading(true)
+        setError(null)
+        if (!tipo || !id) throw new Error('Checkout inválido')
+        if (typeof precio === 'number' && precio <= 0) {
+          
+          await handleSimulatePay()
+          return
+        }
+        
+        try {
+          sessionStorage.setItem('lastCheckout', JSON.stringify({ tipo, id, nombre, precio, imageUrl, metodoPago: 'mp' as const }))
+        } catch {
+          // 
+        }
+        const pref = await mpStartPreference(tipo, id)
+        // Redirigir a Mercado Pago
+        window.location.href = pref.init_point
+      } catch (e: unknown) {
+        const isAx = axios.isAxiosError(e)
+        const msg = isAx ? (e.response?.data?.message || e.message) : (e as Error)?.message
+        const cause = isAx ? e.response?.data?.cause : undefined
+        setError(cause ? `${msg} — ${JSON.stringify(cause)}` : (msg || 'No se pudo iniciar el pago'))
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+    // 
+    await handleSimulatePay()
   }
   return (
     <ThemeProvider theme={darkTheme}>
@@ -110,7 +147,7 @@ export default function Checkout() {
                       <Box component="img" src={mpLogo} alt="Mercado Pago" sx={{ height: 22, width: 'auto' }} />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary="Mercado Pago" secondary="Tarjeta, débito, efectivo (simulado por ahora)" />
+                  <ListItemText primary="Mercado Pago" secondary="Tarjeta, débito, efectivo" />
                   <Radio edge="end" checked={method === 'mp'} value="mp" />
                 </ListItemButton>
                 <Divider component="li" sx={{ my: 0.5, opacity: 0.15 }} />
@@ -123,7 +160,7 @@ export default function Checkout() {
                 </ListItemButton>
               </List>
               <Typography color="text.secondary" sx={{ mt: 2 }}>
-                Nota: flujo de pago simulado. Luego redirigiremos a la pasarela elegida y confirmaremos por webhook.
+                Serás redirigido a Mercado Pago para completar tu compra.
               </Typography>
             </CardContent>
           </Card>
@@ -131,7 +168,7 @@ export default function Checkout() {
           {/* Acciones */}
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button variant="outlined" onClick={() => navigate(-1)}>Volver</Button>
-            <Button variant="contained" disabled={!sessionId || loading} onClick={handleSimulatePay}>
+            <Button variant="contained" disabled={loading} onClick={handlePay}>
               {loading ? <CircularProgress size={20} /> : 'Pagar'}
             </Button>
           </Box>          
