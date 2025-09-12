@@ -104,6 +104,10 @@ export default function MisResenasPage() {
   // Estado para el filtro de fecha
   const [dateFilter, setDateFilter] = useState<string>("todas")
 
+  // Estados para alertas de éxito y eliminación
+  const [successAlert, setSuccessAlert] = useState(false);
+  const [deleteAlert, setDeleteAlert] = useState(false);
+
   // Cargar reseñas del usuario autenticado
   useEffect(() => {
     const fetchUserReviews = async () => {
@@ -163,6 +167,16 @@ export default function MisResenasPage() {
     }
   }, [location.state, resenias, navigate, location.pathname]); // Depende de resenias para ejecutarse cuando estén cargadas
 
+  // Mostrar alerta si viene de misCompras
+  useEffect(() => {
+    if (location.state && location.state.created) {
+      setSuccessAlert(true);
+      setTimeout(() => setSuccessAlert(false), 4000);
+      // Limpiar el estado para evitar mostrar la alerta en recarga
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
   // Función para formatear fechas, convierte una fecha en formato string a formato español legible
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -177,33 +191,27 @@ export default function MisResenasPage() {
     
     return resenias.filter((resenia) => {
       const reseniaDate = new Date(resenia.fecha);
-      
       switch (dateFilter) {
         case "este-mes":
           return reseniaDate.getMonth() === now.getMonth() && 
                  reseniaDate.getFullYear() === now.getFullYear();
-        
         case "mes-pasado": {
           const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
           return reseniaDate.getMonth() === lastMonth.getMonth() && 
                  reseniaDate.getFullYear() === lastMonth.getFullYear();
         }
-        
-        case "2025":
-          return reseniaDate.getFullYear() === 2025;
-        
+        case String(new Date().getFullYear()):
+          return reseniaDate.getFullYear() === new Date().getFullYear();
         case "2024":
           return reseniaDate.getFullYear() === 2024;
-        
         case "2023":
           return reseniaDate.getFullYear() === 2023;
-        
         case "2022":
           return reseniaDate.getFullYear() === 2022;
-        
         case "2021":
           return reseniaDate.getFullYear() === 2021;
-        
+        case "anteriores":
+          return reseniaDate.getFullYear() <= 2020;
         default:
           return true;
       }
@@ -272,53 +280,48 @@ export default function MisResenasPage() {
   }
 
   const handleReviewModalSave = async (reviewData: { detalle: string; puntaje: number; fecha: string }) => {
-    if (!currentProductData?.reseniaId) return
-
+    if (!currentProductData?.reseniaId) return;
     try {
-      const token = authService.getToken()
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-
-      await updateResenia(token, currentProductData.reseniaId, reviewData)
-      
-      // Actualizar en UI local
+      await updateResenia(token, currentProductData.reseniaId, reviewData);
       setResenias((prev) =>
-        prev.map((r) => 
-          r.id === currentProductData.reseniaId 
-            ? { ...r, detalle: reviewData.detalle, puntaje: reviewData.puntaje, fecha: reviewData.fecha } 
+        prev.map((r) =>
+          r.id === currentProductData.reseniaId
+            ? { ...r, detalle: reviewData.detalle, puntaje: reviewData.puntaje, fecha: reviewData.fecha }
             : r
         )
-      )
-      
-      handleReviewModalClose()
+      );
+      setSuccessAlert(true);
+      setTimeout(() => setSuccessAlert(false), 4000);
+      handleReviewModalClose();
     } catch (error) {
-      console.error('Error al guardar la reseña:', error)
-      setError("Error al guardar la reseña")
+      console.error('Error al guardar la reseña:', error);
+      setError("Error al guardar la reseña");
     }
   }
 
   const handleDeleteReview = async (reseniaId: number) => {
-    setDeleteLoading(true)
+    setDeleteLoading(true);
     try {
-      const token = authService.getToken()
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-
-      await deleteResenia(token, reseniaId)
-      
-      // Remover de UI local
-      setResenias((prev) => prev.filter((r) => r.id !== reseniaId))
-      
-      handleReviewModalClose()
+      await deleteResenia(token, reseniaId);
+      setResenias((prev) => prev.filter((r) => r.id !== reseniaId));
+      setDeleteAlert(true);
+      setTimeout(() => setDeleteAlert(false), 4000);
+      handleReviewModalClose();
     } catch (error) {
-      console.error('Error al eliminar la reseña:', error)
-      setError("Error al eliminar la reseña")
+      console.error('Error al eliminar la reseña:', error);
+      setError("Error al eliminar la reseña");
     } finally {
-      setDeleteLoading(false)
+      setDeleteLoading(false);
     }
   }
 
@@ -422,9 +425,15 @@ export default function MisResenasPage() {
       <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
         {/* NavBar compartida */}
         <NavBar />
-
         {/* Contenido principal */}
-        <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+        <Container maxWidth="md" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
+          {/* Alertas de éxito y eliminación */}
+          {successAlert && (
+            <Alert severity="success" sx={{ mb: 2, fontWeight: 'bold' }}>Reseña modificada con éxito</Alert>
+          )}
+          {deleteAlert && (
+            <Alert severity="error" sx={{ mb: 2, fontWeight: 'bold' }}>Se eliminó la reseña</Alert>
+          )}
           {/* Mensaje de agradecimiento */}
           <Box sx={{ mb: 4, textAlign: "center" }}>
             <Typography variant="h5" sx={{ color: "primary.main", fontWeight: "bold" }}>
@@ -498,11 +507,12 @@ export default function MisResenasPage() {
                   <MenuItem value="todas">📅 Todas</MenuItem>
                   <MenuItem value="este-mes">📅 Este mes</MenuItem>
                   <MenuItem value="mes-pasado">📅 Mes pasado</MenuItem>
-                  <MenuItem value="2025">📅 2025</MenuItem>
+                  <MenuItem value={String(new Date().getFullYear())}>📅 Año actual</MenuItem>
                   <MenuItem value="2024">📅 2024</MenuItem>
                   <MenuItem value="2023">📅 2023</MenuItem>
                   <MenuItem value="2022">📅 2022</MenuItem>
                   <MenuItem value="2021">📅 2021</MenuItem>
+                  <MenuItem value="anteriores">📅 Anteriores</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -511,18 +521,18 @@ export default function MisResenasPage() {
               variant="contained"
               onClick={() => navigate("/mis-compras")}
               sx={{
-                background: "linear-gradient(135deg, #3a7bd5, #2c5aa0)",
+                background: "#3a7bd5",
                 color: "white",
                 fontWeight: "bold",
                 px: 3,
                 py: 1.5,
                 borderRadius: 2,
                 textTransform: "none",
-                boxShadow: "0 4px 12px rgba(58, 123, 213, 0.3)",
+                boxShadow: "none",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #2c5aa0, #1e3d6f)",
-                  boxShadow: "0 6px 16px rgba(58, 123, 213, 0.4)",
-                  transform: "translateY(-1px)",
+                  background: "#2c5aa0",
+                  boxShadow: "none",
+                  transform: "none",
                 },
                 transition: "all 0.3s ease",
               }}
@@ -557,10 +567,12 @@ export default function MisResenasPage() {
                     bgcolor: "#1e2532",
                     borderRadius: 2,
                     border: "1px solid #2a3441",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+                  <CardContent sx={{ p: 3, width: "100%", boxSizing: "border-box" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2, md: 3 }, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
                       {/* Imagen del producto */}
                       <Avatar
                         src={getProductImage(resenia.venta)}

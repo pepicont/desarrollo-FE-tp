@@ -349,7 +349,7 @@ export default function BuscarProductos() {
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Button variant="contained" fullWidth onClick={() => setIsFiltersOpen(false)}>
-                Mostrar resultados
+                Cerrar filtros
               </Button>
               <Button
                 variant="outlined"

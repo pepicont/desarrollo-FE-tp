@@ -140,9 +140,7 @@ export default function MisComprasPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [productTypeFilter, setProductTypeFilter] = useState("")
   const [companyFilter, setCompanyFilter] = useState("")
-  const [gameFilter, setGameFilter] = useState("") // Filtro por juegos específicos
   const [companies, setCompanies] = useState<Company[]>([])
-  const [availableGames, setAvailableGames] = useState<{id: number, nombre: string}[]>([])
 
 //Fetch al back para traerse las compras del usuario
   useEffect(() => {
@@ -195,22 +193,6 @@ export default function MisComprasPage() {
     };
     loadCompanies();
   }, []);
-
-  // Extraer juegos únicos de las compras del usuario
-  useEffect(() => {
-    const games = ventas
-      .filter(venta => venta.juego) // Solo ventas que tienen juego
-      .map(venta => ({
-        id: venta.juego!.id,
-        nombre: venta.juego!.nombre
-      }))
-      .filter((game, index, self) => 
-        index === self.findIndex(g => g.id === game.id) // Eliminar duplicados
-      )
-      .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
-    
-    setAvailableGames(games);
-  }, [ventas]);
 
 
 // Funciones auxiliares
@@ -291,14 +273,9 @@ export default function MisComprasPage() {
         fecha: reviewData.fecha,
       });
 
-      // Actualizar el estado local
-      setReviewsStatus(prev => ({
-        ...prev,
-        [currentVentaForReview.id]: { hasReview: true }
-      }));
-
-      setIsCreateReviewModalOpen(false);
-      setCurrentVentaForReview(null);
+      // Redirigir a mis reseñas con alerta de éxito
+      navigate('/mis-resenas', { state: { created: true } });
+      return;
     } catch (error) {
       console.error('Error al crear reseña:', error);
       setError("Error al crear la reseña");
@@ -338,8 +315,8 @@ export default function MisComprasPage() {
                          ventaDate.getFullYear() === lastMonth.getFullYear();
             break;
           }
-          case "2025":
-            matchesDate = ventaDate.getFullYear() === 2025;
+          case String(new Date().getFullYear()):
+            matchesDate = ventaDate.getFullYear() === new Date().getFullYear();
             break;
           case "2024":
             matchesDate = ventaDate.getFullYear() === 2024;
@@ -352,6 +329,9 @@ export default function MisComprasPage() {
             break;
           case "2021":
             matchesDate = ventaDate.getFullYear() === 2021;
+            break;
+          case "anteriores":
+            matchesDate = ventaDate.getFullYear() <= 2020;
             break;
           default:
             matchesDate = venta.fecha.includes(dateFilter);
@@ -383,15 +363,7 @@ export default function MisComprasPage() {
         // Los complementos no tienen compañía directa en el modelo actual
       }
 
-      // Filtro por juego específico
-      let matchesGame = true;
-      if (gameFilter !== "") {
-        const gameId = parseInt(gameFilter);
-        matchesGame = venta.juego?.id === gameId;
-        // Solo aplica a juegos, no a servicios ni complementos
-      }
-
-      return matchesSearch && matchesDate && matchesProductType && matchesCompany && matchesGame;
+      return matchesSearch && matchesDate && matchesProductType && matchesCompany;
     });
   };
 
@@ -403,7 +375,6 @@ export default function MisComprasPage() {
     setDateFilter("");
     setProductTypeFilter("");
     setCompanyFilter("");
-    setGameFilter("");
   };
 
     // Auxiliar para obtener el id del producto
@@ -557,9 +528,12 @@ export default function MisComprasPage() {
                       <Box sx={{ textAlign: "right" }}>
                         <Chip
                           label={getProductCategory(venta)}
-                          color="success"
                           size="small"
-                          sx={{ mb: 1 }}
+                          sx={{ backgroundColor: "#e08a08ff",
+                                color: "#fff",
+                                fontWeight: "bold",
+                                mb: 1,
+                              }}
                         />
                         {venta.codActivacion && (
                           <Typography variant="caption" sx={{ display: "block", color: "text.secondary", mb: 1 }}>
@@ -641,11 +615,12 @@ export default function MisComprasPage() {
                   <MenuItem value="">Todas las fechas</MenuItem>
                   <MenuItem value="este-mes">Este mes</MenuItem>
                   <MenuItem value="mes-pasado">Mes pasado</MenuItem>
-                  <MenuItem value="2025">2025</MenuItem>
+                  <MenuItem value={String(new Date().getFullYear())}>Año actual</MenuItem>
                   <MenuItem value="2024">2024</MenuItem>
                   <MenuItem value="2023">2023</MenuItem>
                   <MenuItem value="2022">2022</MenuItem>
                   <MenuItem value="2021">2021</MenuItem>
+                  <MenuItem value="anteriores">Anteriores</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -688,26 +663,6 @@ export default function MisComprasPage() {
               </FormControl>
             </Box>
 
-            {/* Filtro por juego específico */}
-            <Box sx={{ mb: 3 }}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ color: "white" }}>Juego</InputLabel>
-                <Select
-                  value={gameFilter}
-                  onChange={(e) => setGameFilter(e.target.value)}
-                  label="Juego"
-                  sx={{ color: "white" }}
-                >
-                  <MenuItem value="">Todos los juegos</MenuItem>
-                  {availableGames.map(game => (
-                    <MenuItem key={game.id} value={String(game.id)}>
-                      {game.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
             {/* Botones de acción */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}>
               <Button 
@@ -721,7 +676,7 @@ export default function MisComprasPage() {
                   },
                 }}
               >
-                Aplicar filtros
+                Cerrar filtros
               </Button>
               <Button
                 variant="outlined"
