@@ -5,6 +5,12 @@ const API_BASE_URL = 'http://localhost:3000/api'
 export type CompaniaRef = { id: number; nombre: string }
 export type CategoriaRef = { id: number; nombre: string }
 
+export type Foto = {
+  id: number
+  url: string
+  esPrincipal: boolean
+}
+
 export type JuegoDetail = {
   id: number
   nombre: string
@@ -14,6 +20,7 @@ export type JuegoDetail = {
   categorias: CategoriaRef[]
   fechaLanzamiento: string
   edadPermitida: number
+  fotos?: Foto[]
 }
 
 export type ServicioDetail = {
@@ -23,6 +30,7 @@ export type ServicioDetail = {
   monto: number
   compania: CompaniaRef
   categorias: CategoriaRef[]
+  fotos?: Foto[]
 }
 
 export type ComplementoDetail = {
@@ -33,6 +41,7 @@ export type ComplementoDetail = {
   compania: CompaniaRef
   categorias: CategoriaRef[]
   juego: { id: number; nombre: string }
+  fotos?: Foto[]
 }
 
 type ApiResponse<T> = { message: string; data: T }

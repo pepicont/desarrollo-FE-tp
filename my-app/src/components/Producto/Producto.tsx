@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Ca
 import { ArrowBack, Person, CalendarMonth, Category } from '@mui/icons-material'
 import NavBar from '../navBar/navBar'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail } from '../../services/productService'
+import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail, type Foto } from '../../services/productService'
 import { getReviewsByProduct, type ProductReview } from '../../services/reseniasService'
 
 const darkTheme = createTheme({
@@ -37,6 +37,7 @@ export default function Producto() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ProductoData | null>(null)
   const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [heroImage, setHeroImage] = useState<string | null>(null)
 
   useEffect(() => {
     const search = new URLSearchParams(location.search)
@@ -63,6 +64,18 @@ export default function Producto() {
         else if (tipo === 'servicio') res = await productService.getServicio(id)
         else res = await productService.getComplemento(id)
         setData(res)
+        // Elegir imagen principal del producto si existe
+        const fotos: Foto[] | undefined =
+          (tipo === 'juego' && (res as JuegoDetail).fotos) ||
+          (tipo === 'servicio' && (res as ServicioDetail).fotos) ||
+          (tipo === 'complemento' && (res as ComplementoDetail).fotos) ||
+          undefined
+        if (Array.isArray(fotos) && fotos.length > 0) {
+          const principal = fotos.find(f => f.esPrincipal)
+          setHeroImage((principal ?? fotos[0]).url)
+        } else {
+          setHeroImage(null)
+        }
         // cargar reseñas reales
         const revs = await getReviewsByProduct(tipo, id)
         setReviews(revs)
@@ -122,7 +135,13 @@ export default function Producto() {
                   >
                     Volver
                   </Button>
-                  <Box component="img" src={'/vite.svg'} alt="Producto" sx={{ width: '100%', height: 400, objectFit: 'contain', borderRadius: 2, p: 6, bgcolor: '#0f1625' }} />
+                  <Box
+                    component="img"
+                    src={heroImage ?? '/vite.svg'}
+                    alt={data?.nombre ?? 'Producto'}
+                    sx={{ width: '100%', height: 400, objectFit: 'contain', borderRadius: 2, p: 6, bgcolor: '#0f1625' }}
+                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
+                  />
                   {tipo && <Chip label={tipo.charAt(0).toUpperCase() + tipo.slice(1)} color="primary" sx={{ position: 'absolute', right: 16, top: 56 }} />}
                 </Box> 
               </Box>
@@ -156,8 +175,7 @@ export default function Producto() {
                   sx={{ py: 1.5, fontWeight: 700 }}
                   onClick={() => {
                     if (!tipo || !id) return
-                    // TODO: reemplazar '/vite.svg' por imagen real del producto cuando esté disponible
-                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: '/vite.svg' } })
+                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: heroImage ?? '/vite.svg' } })
                   }}
                 >
                   Comprar
