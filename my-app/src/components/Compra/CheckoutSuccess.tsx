@@ -74,7 +74,7 @@ export default function CheckoutSuccess() {
     }
     run()
     // 
-  }, [])
+  }, [location.search])
 
   // Cargar detalles de producto desde sessionStorage si no vinieron por state
   const persisted = useMemo(() => {
@@ -114,7 +114,7 @@ export default function CheckoutSuccess() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                <Box component="img" src={state.imageUrl || persisted?.imageUrl || '/vite.svg'} alt={state.nombre || persisted?.nombre || 'Producto'} sx={{ width: 96, height: 96, objectFit: 'contain', borderRadius: 2, bgcolor: '#0f1625', p: 1 }} />
+                <Box component="img" src={state.imageUrl || persisted?.imageUrl || '/vite.svg'} alt={state.nombre || persisted?.nombre || 'Producto'} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }} sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625' }} />
                 <Box sx={{ flex: 1 }}>
                   <Typography fontWeight={700}>{state?.nombre || persisted?.nombre || `${(state?.tipo ?? persisted?.tipo) || '—'} #${(state?.id ?? persisted?.id) ?? '—'}`}</Typography>
                     <Typography color="text.secondary">{state?.tipo ?? persisted?.tipo ?? '—'}</Typography>

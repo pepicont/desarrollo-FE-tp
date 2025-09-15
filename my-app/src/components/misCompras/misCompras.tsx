@@ -24,9 +24,6 @@ import {
 } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
-import cyberpunkImg from "../../assets/cyberpunk.jpg"
-import fifaImg from "../../assets/fifa24.jpg"
-import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
 import { authService } from "../../services/authService"
 import { getUserPurchases } from "../../services/comprasService.ts"
@@ -96,6 +93,7 @@ interface Venta {
     edadPermitida: number;
     fechalanzamiento: string;
     compania:number;
+    fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
   };
   servicio?: {
     id: number;
@@ -103,12 +101,14 @@ interface Venta {
     detalle:string;
     monto: number;
     compania:number;
+    fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
   };
   complemento?: {
     id: number;
     nombre: string;
     detalle:string;
     monto: number;
+    fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
   };
 }
 
@@ -218,11 +218,14 @@ export default function MisComprasPage() {
   }
 
   const getProductImage = (venta: Venta) => {
-    // Por ahora usamos imágenes por defecto, más adelante se puede mejorar
-    if (venta.juego) return cyberpunkImg
-    if (venta.servicio) return mw3Img
-    if (venta.complemento) return fifaImg
-    return cyberpunkImg
+    // Usa foto principal o primera disponible por tipo; fallback a /vite.svg
+    const pick = (fotos?: Array<{ url: string; esPrincipal?: boolean }>) =>
+      fotos?.find(f => f.esPrincipal)?.url || fotos?.[0]?.url
+
+    if (venta.juego) return pick(venta.juego.fotos) || '/vite.svg'
+    if (venta.servicio) return pick(venta.servicio.fotos) || '/vite.svg'
+    if (venta.complemento) return pick(venta.complemento.fotos) || '/vite.svg'
+    return '/vite.svg'
   }
 
   const formatDate = (dateString: string) => {
@@ -480,8 +483,8 @@ export default function MisComprasPage() {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Box
                         sx={{
-                          width: 80,
-                          height: 80,
+                          width: 96,
+                          height: 96,
                           borderRadius: 2,
                           overflow: "hidden",
                           flexShrink: 0,
@@ -495,6 +498,7 @@ export default function MisComprasPage() {
                             height: "100%",
                             objectFit: "cover",
                           }}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }}
                         />
                       </Box>
                       <Box sx={{ flexGrow: 1 }}>

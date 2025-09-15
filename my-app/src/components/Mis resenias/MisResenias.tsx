@@ -20,9 +20,6 @@ import {
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
-import cyberpunkImg from "../../assets/cyberpunk.jpg"
-import fifaImg from "../../assets/fifa24.jpg"
-import mw3Img from "../../assets/mw3.jpg"
 import EditIcon from "@mui/icons-material/Edit"
 import { useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
@@ -64,17 +61,20 @@ interface Resenia {
     juego?: {
       id: number
       nombre: string
-      imagen?: string // Campo opcional para imagen del juego
+      imagen?: string // legacy opcional
+      fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
     }
     servicio?: {
       id: number
       nombre: string
-      imagen?: string // Campo opcional para imagen del servicio
+      imagen?: string // legacy opcional
+      fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
     }
     complemento?: {
       id: number
       nombre: string
-      imagen?: string // Campo opcional para imagen del complemento
+      imagen?: string // legacy opcional
+      fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
     }
   }
 }
@@ -231,18 +231,12 @@ export default function MisResenasPage() {
 
   // Función para obtener imagen del producto con sistema de fallback inteligente (significa que el sistema tiene múltiples niveles de respaldo que se ejecutan en orden de prioridad, tomando decisiones automáticas según el contexto (cuando lo conectemos a la base que tiene imagenes se va a ejecutar lo primero))
   const getProductImage = (venta: Resenia["venta"]) => {
-    //  FUTURO: Imagen específica desde backend (cuando esté implementado)
-    if (venta.juego?.imagen) return venta.juego.imagen
-    if (venta.servicio?.imagen) return venta.servicio.imagen
-    if (venta.complemento?.imagen) return venta.complemento.imagen
-
-    //  PRESENTE: Imágenes por defecto según tipo (funciona ahora)
-    if (venta.juego) return cyberpunkImg
-    if (venta.servicio) return mw3Img
-    if (venta.complemento) return fifaImg
-
-    // Fallback final (es la última opción de respaldo cuando todas las demás condiciones fallan, para que no rompa la UI)
-    return cyberpunkImg
+    const pick = (fotos?: Array<{ url: string; esPrincipal?: boolean }>) =>
+      fotos?.find(f => f.esPrincipal)?.url || fotos?.[0]?.url
+    if (venta.juego) return venta.juego.imagen || pick(venta.juego.fotos) || '/vite.svg'
+    if (venta.servicio) return venta.servicio.imagen || pick(venta.servicio.fotos) || '/vite.svg'
+    if (venta.complemento) return venta.complemento.imagen || pick(venta.complemento.fotos) || '/vite.svg'
+    return '/vite.svg'
   }
 
   const handleProductClick = (productId: number, productName: string) => {
@@ -259,10 +253,7 @@ export default function MisResenasPage() {
                          resenia.venta.complemento?.nombre || 
                          "Producto desconocido"
       
-      const productImage = resenia.venta.juego?.imagen || 
-                          resenia.venta.servicio?.imagen || 
-                          resenia.venta.complemento?.imagen || 
-                          cyberpunkImg // imagen por defecto
+  const productImage = getProductImage(resenia.venta)
       
       setCurrentProductData({
         name: productName,
@@ -577,8 +568,9 @@ export default function MisResenasPage() {
                       <Avatar
                         src={getProductImage(resenia.venta)}
                         alt={getProductName(resenia.venta)}
-                        sx={{ width: 80, height: 80, borderRadius: 1 }}
+                        sx={{ width: 96, height: 96, borderRadius: 1, bgcolor: '#0f1625' }}
                         variant="rounded"
+                        imgProps={{ onError: (e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' } }}
                       />
 
                       {/* Información de la reseña */}
