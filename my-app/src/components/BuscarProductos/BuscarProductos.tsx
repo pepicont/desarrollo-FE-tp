@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Button, TextField, Card, CardContent, CardMedia, Chip, Container, Box, InputAdornment, FormControl, InputLabel, Select, MenuItem, Typography, Drawer } from "@mui/material"
+import { Button, TextField, Card, CardContent, Chip, Container, Box, InputAdornment, FormControl, InputLabel, Select, MenuItem, Typography, Drawer } from "@mui/material"
 import { Search, FilterList } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -228,8 +228,13 @@ export default function BuscarProductos() {
               <Box key={`${product.tipo}-${product.id}`}>
                 <Card sx={{ cursor: "pointer", height: "100%" }} onClick={() => navigate('/producto', { state: { id: product.id, tipo: product.tipo } })}>
                   <Box sx={{ position: "relative" }}>
-                    {/* No hay imagen en backend aún; placeholder */}
-                    <CardMedia component="img" height="200" image={"/vite.svg"} alt={product.nombre} />
+                    <Box
+                      component="img"
+                      src={product.imageUrl || '/vite.svg'}
+                      alt={product.nombre}
+                      onError={(e: React.SyntheticEvent<HTMLImageElement>) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }}
+                      sx={{ width: '100%', height: 200, objectFit: 'cover', display: 'block', borderTopLeftRadius: 12, borderTopRightRadius: 12, backgroundColor: '#0f1625' }}
+                    />
                     <Chip
                       label={product.tipo.charAt(0).toUpperCase() + product.tipo.slice(1)}
                       color="primary"

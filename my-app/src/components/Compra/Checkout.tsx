@@ -119,7 +119,13 @@ export default function Checkout() {
             <CardContent>
               <Typography variant="h6" gutterBottom>Resumen</Typography>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Box component="img" src={imageUrl || '/vite.svg'} alt={nombre || 'Producto'} sx={{ width: 96, height: 96, objectFit: 'contain', borderRadius: 2, bgcolor: '#0f1625', p: 1 }} />
+                <Box
+                  component="img"
+                  src={imageUrl || '/vite.svg'}
+                  alt={nombre || 'Producto'}
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }}
+                  sx={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625', display: 'block' }}
+                />
                 <Box sx={{ flex: 1, minWidth: 200 }}>
                   <Typography fontWeight={600}>{nombre || `${tipo} #${id}`}</Typography>
                   <Typography color="text.secondary">Tipo: {tipo}</Typography>

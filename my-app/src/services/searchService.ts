@@ -24,6 +24,7 @@ export type SearchItem = {
 	monto: number;
 	compania: { id: number; nombre: string } | null;
 	categorias?: { id: number; nombre: string }[];
+	imageUrl?: string | null;
 	fechaLanzamiento?: string;
 	edadPermitida?: number;
 	juegoRelacionado?: { id: number; nombre: string } | null;
