@@ -28,30 +28,74 @@ type ProductoData = JuegoDetail | ServicioDetail | ComplementoDetail
 export default function Producto() {
   const reviewsRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
-  const navState = location.state as { id?: number; tipo?: ProductoTipo } | null
   const navigate = useNavigate()
 
   const [tipo, setTipo] = useState<ProductoTipo | null>(null)
   const [id, setId] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<ProductoData | null>(null)
-  const [reviews, setReviews] = useState<ProductReview[]>([])
-  const [heroImage, setHeroImage] = useState<string | null>(null)
-
+  
   useEffect(() => {
     const search = new URLSearchParams(location.search)
     const qTipo = search.get('tipo') as ProductoTipo | null
     const qId = search.get('id') ? Number(search.get('id')) : null
-    const stTipo = navState?.tipo ?? qTipo
-    const stId = typeof navState?.id === 'number' ? navState!.id : qId
+    const stTipo = (location.state as { id?: number; tipo?: ProductoTipo } | null)?.tipo ?? qTipo
+    const stId = typeof (location.state as { id?: number; tipo?: ProductoTipo } | null)?.id === 'number'
+      ? (location.state as { id?: number; tipo?: ProductoTipo })!.id
+      : qId
     if (!stTipo || !stId) {
       setError('Producto no especificado')
       return
     }
     setTipo(stTipo)
     setId(stId)
-  }, [location, navState])
+  }, [location])
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<ProductoData | null>(null)
+  const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [heroImage, setHeroImage] = useState<string | null>(null)
+  const [displayImage, setDisplayImage] = useState<string>('/vite.svg')
+  const imageTimeoutRef = useRef<number | null>(null)
+  
+  const fotos: Foto[] = (
+    (tipo === 'juego' && data && 'fotos' in (data as JuegoDetail) ? (data as JuegoDetail).fotos : undefined) ||
+    (tipo === 'servicio' && data && 'fotos' in (data as ServicioDetail) ? (data as ServicioDetail).fotos : undefined) ||
+    (tipo === 'complemento' && data && 'fotos' in (data as ComplementoDetail) ? (data as ComplementoDetail).fotos : undefined) ||
+    []
+  ) as Foto[]
+
+  
+  useEffect(() => {
+    if (!heroImage) {
+      setDisplayImage('/vite.svg')
+      return
+    }
+    let cancelled = false
+    const img = new Image()
+
+    
+    if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
+    imageTimeoutRef.current = window.setTimeout(() => {
+      if (!cancelled) setDisplayImage('/vite.svg')
+    }, 2000) 
+
+    img.onload = () => {
+      if (cancelled) return
+      if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
+      setDisplayImage(heroImage)
+    }
+    img.onerror = () => {
+      if (cancelled) return
+      if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
+      setDisplayImage('/vite.svg')
+    }
+    img.src = heroImage
+
+    return () => {
+      cancelled = true
+      if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
+    }
+  }, [heroImage])
 
   useEffect(() => {
     const load = async () => {
@@ -137,13 +181,67 @@ export default function Producto() {
                   </Button>
                   <Box
                     component="img"
-                    src={heroImage ?? '/vite.svg'}
+                    src={displayImage}
                     alt={data?.nombre ?? 'Producto'}
-                    sx={{ width: '100%', height: 400, objectFit: 'contain', borderRadius: 2, p: 6, bgcolor: '#0f1625' }}
+                    sx={{ width: '100%', height: 400, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625', display: 'block' }}
                     onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
                   />
-                  {tipo && <Chip label={tipo.charAt(0).toUpperCase() + tipo.slice(1)} color="primary" sx={{ position: 'absolute', right: 16, top: 56 }} />}
+                  {tipo && (
+                    <Chip
+                      label={tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                      color="primary"
+                      sx={{ position: 'absolute', right: 16, top: 16, zIndex: 1 }}
+                    />
+                  )}
                 </Box> 
+                {/* Mini galería de thumbnails */}
+                {fotos && fotos.length > 0 && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 1,
+                      overflowX: 'auto',
+                      pb: 1,
+                      px: 0.5,
+                      scrollPaddingLeft: 8,
+                      '&::-webkit-scrollbar': { height: 6 },
+                      '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 3 },
+                    }}
+                  >
+                    {fotos.map((f) => {
+                      const isSelected = !!heroImage && f.url === heroImage
+                      return (
+                        <Box
+                          key={f.id}
+                          onClick={() => setHeroImage(f.url)}
+                          sx={{
+                            width: 88,
+                            height: 56,
+                            borderRadius: 1,
+                            overflow: 'hidden',
+                            cursor: 'pointer',
+                            boxSizing: 'border-box',
+                            border: isSelected ? '2px solid' : '1px solid',
+                            borderColor: isSelected ? 'primary.main' : 'rgba(255,255,255,0.2)',
+                            opacity: isSelected ? 1 : 0.85,
+                            transition: 'opacity .15s ease, outline-color .15s ease',
+                            '&:hover': { opacity: 1 },
+                            flex: '0 0 auto',
+                            backgroundColor: '#0f1625',
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={f.url}
+                            alt="thumbnail"
+                            sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
+                          />
+                        </Box>
+                      )
+                    })}
+                  </Box>
+                )}
               </Box>
 
               {/* Right - details */}
@@ -175,7 +273,7 @@ export default function Producto() {
                   sx={{ py: 1.5, fontWeight: 700 }}
                   onClick={() => {
                     if (!tipo || !id) return
-                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: heroImage ?? '/vite.svg' } })
+                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: displayImage } })
                   }}
                 >
                   Comprar
