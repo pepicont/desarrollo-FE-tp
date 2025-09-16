@@ -141,6 +141,9 @@ export default function MisComprasPage() {
   const [productTypeFilter, setProductTypeFilter] = useState("")
   const [companyFilter, setCompanyFilter] = useState("")
   const [companies, setCompanies] = useState<Company[]>([])
+  
+  const PAGE_SIZE = 24
+  const [page, setPage] = useState(1)
 
 //Fetch al back para traerse las compras del usuario
   useEffect(() => {
@@ -371,6 +374,11 @@ export default function MisComprasPage() {
   };
 
   const filteredVentas = getFilteredVentas();
+  const totalPages = Math.max(1, Math.ceil(filteredVentas.length / PAGE_SIZE))
+  const paginatedVentas = filteredVentas.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // Reiniciar página al cambiar filtros o resultados
+  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, productTypeFilter, companyFilter, ventas.length])
 
   // Función para limpiar todos los filtros
   const clearFilters = () => {
@@ -470,7 +478,7 @@ export default function MisComprasPage() {
             </Box>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {filteredVentas.map((venta) => (
+              {paginatedVentas.map((venta) => (
                 <Card
                   key={venta.id}
                   sx={{
@@ -573,6 +581,18 @@ export default function MisComprasPage() {
                   </CardContent>
                 </Card>
               ))}
+              {/* Paginación al pie con flechas */}
+              {filteredVentas.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
+                  <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+                    ← Anterior
+                  </Button>
+                  <Typography variant="body2" color="text.secondary">Página {page} de {totalPages}</Typography>
+                  <Button variant="outlined" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+                    Siguiente →
+                  </Button>
+                </Box>
+              )}
             </Box>
           )}
             </>

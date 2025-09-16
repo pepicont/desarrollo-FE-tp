@@ -107,6 +107,9 @@ export default function MisResenasPage() {
   // Estados para alertas de éxito y eliminación
   const [successAlert, setSuccessAlert] = useState(false);
   const [deleteAlert, setDeleteAlert] = useState(false);
+  
+  const PAGE_SIZE = 24;
+  const [page, setPage] = useState(1);
 
   // Cargar reseñas del usuario autenticado
   useEffect(() => {
@@ -220,6 +223,11 @@ export default function MisResenasPage() {
 
   // Obtener reseñas filtradas
   const filteredResenias = filterReseniasByDate(resenias);
+  const totalPages = Math.max(1, Math.ceil(filteredResenias.length / PAGE_SIZE));
+  const paginatedResenias = filteredResenias.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Volver a la primera página al cambiar el filtro
+  useEffect(() => { setPage(1) }, [dateFilter, resenias.length]);
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: Resenia["venta"]) => {
@@ -551,7 +559,7 @@ export default function MisResenasPage() {
             </Box>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {filteredResenias.map((resenia) => (
+              {paginatedResenias.map((resenia) => (
                 <Card
                   key={resenia.id}
                   sx={{
@@ -635,6 +643,18 @@ export default function MisResenasPage() {
                   </CardContent>
                 </Card>
               ))}
+              {/* Paginación al pie con flechas */}
+              {filteredResenias.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
+                  <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+                    ← Anterior
+                  </Button>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Página {page} de {totalPages}</Typography>
+                  <Button variant="outlined" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+                    Siguiente →
+                  </Button>
+                </Box>
+              )}
             </Box>
           )}
         </Container>

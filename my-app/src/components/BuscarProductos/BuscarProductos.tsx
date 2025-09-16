@@ -73,7 +73,8 @@ export default function BuscarProductos() {
   const [error, setError] = useState<string | null>(null)
   const [companies, setCompanies] = useState<Company[]>([])
   const [page, setPage] = useState<number>(Number(params.get('page')) || 1)
-  const [limit, setLimit] = useState<number>(Number(params.get('limit')) || 12)
+  const LIMIT = 24
+  const [totalCount, setTotalCount] = useState<number>(0)
 
   useEffect(() => {
     const load = async () => {
@@ -103,11 +104,12 @@ export default function BuscarProductos() {
         const edad = ageFilter ? Number(ageFilter) : undefined
         if (!Number.isNaN(edad!) && edad !== undefined) params.edadMax = edad
 
-    params.page = page
-    params.limit = limit
+  params.page = page
+  params.limit = LIMIT
 
-        const res = await searchService.search(params)
-        setItems(res.data)
+    const res = await searchService.search(params)
+    setItems(res.data)
+    setTotalCount(res.count)
       } catch (e: unknown) {
         console.error('Error buscando productos', e)
         setError('No se pudieron cargar los productos')
@@ -116,7 +118,12 @@ export default function BuscarProductos() {
       }
     }
     load()
-  }, [location.search, priceFilter, companyFilter, productTypeFilter, ageFilter, page, limit])
+  }, [location.search, priceFilter, companyFilter, productTypeFilter, ageFilter, page])
+
+  
+  useEffect(() => {
+    setPage(1)
+  }, [location.search, priceFilter, companyFilter, productTypeFilter, ageFilter])
 
   // Cargar compañías para el Select
   useEffect(() => {
@@ -271,6 +278,27 @@ export default function BuscarProductos() {
               </Box>
             ))}
           </Box>
+
+          
+          {!loading && !error && items.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 4 }}>
+              <Button
+                variant="outlined"
+                disabled={page <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+              >
+                ← Anterior
+              </Button>
+              <Typography sx={{ color: 'white' }}>Página {page}</Typography>
+              <Button
+                variant="outlined"
+                disabled={page * LIMIT >= totalCount || items.length < LIMIT}
+                onClick={() => setPage(p => p + 1)}
+              >
+                Siguiente →
+              </Button>
+            </Box>
+          )}
         </Container>
 
         <Drawer
@@ -364,27 +392,6 @@ export default function BuscarProductos() {
               >
                 Borrar filtros
               </Button>
-          {/* Paginación básica */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
-              Anterior
-            </Button>
-            <TextField
-              size="small"
-              value={page}
-              onChange={(e) => setPage(Math.max(1, Number(e.target.value) || 1))}
-              sx={{ width: 80 }}
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-            />
-            <Select size="small" value={String(limit)} onChange={(e) => setLimit(Number(e.target.value))}>
-              <MenuItem value={12}>12</MenuItem>
-              <MenuItem value={24}>24</MenuItem>
-              <MenuItem value={48}>48</MenuItem>
-            </Select>
-            <Button variant="outlined" onClick={() => setPage(p => p + 1)}>
-              Siguiente
-            </Button>
-          </Box>
             </Box>
           </Box>
         </Drawer>
