@@ -180,12 +180,35 @@ export default function Producto() {
                     Volver
                   </Button>
                   <Box
-                    component="img"
-                    src={displayImage}
-                    alt={data?.nombre ?? 'Producto'}
-                    sx={{ width: '100%', height: 400, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625', display: 'block' }}
-                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
-                  />
+                    sx={{
+                      width: '100%',
+                      height: { xs: 'auto', sm: 400 },
+                      minHeight: { xs: 200, sm: 400 },
+                      aspectRatio: { xs: '16/9', sm: 'auto' },
+                      position: 'relative',
+                      borderRadius: 2,
+                      bgcolor: '#0f1625',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={displayImage}
+                      alt={data?.nombre ?? 'Producto'}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        maxHeight: { xs: 300, sm: 400 },
+                        objectFit: { xs: 'contain', sm: 'cover' },
+                        display: 'block',
+                        background: 'transparent',
+                      }}
+                      onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
+                    />
+                  </Box>
                   {tipo && (
                     <Chip
                       label={tipo.charAt(0).toUpperCase() + tipo.slice(1)}
@@ -234,7 +257,7 @@ export default function Producto() {
                             component="img"
                             src={f.url}
                             alt="thumbnail"
-                            sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            sx={{ width: '100%', height: '100%', objectFit: { xs: 'contain', sm: 'cover' }, display: 'block' }}
                             onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
                           />
                         </Box>
