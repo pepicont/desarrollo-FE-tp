@@ -343,10 +343,7 @@ export default function Home() {
                   key={item.id}
                   sx={{
                     transform: `translateX(${(index - currentSlide) * 100}%)`,
-                    cursor: tipoFiltro ? "pointer" : "default",
-                  }}
-                  onClick={() => {
-                    if (tipoFiltro) navigate(`/productos?tipo=${tipoFiltro}`)
+                    cursor: 'default',
                   }}
                 >
                   <Box
@@ -378,6 +375,26 @@ export default function Home() {
                         {item.title}
                       </Typography>
                       <Typography variant="h6">{item.description}</Typography>
+                      {tipoFiltro && (
+                        <Box sx={{ mt: 2 }}>
+                          <Button
+                            variant="contained"
+                            size="medium"
+                            sx={{
+                              textTransform: 'none',
+                              borderRadius: 2,
+                              backgroundColor: '#2c5aa0',
+                              '&:hover': { backgroundColor: '#1e3d6f' },
+                              boxShadow: 'none',
+                            }}
+                            onClick={() => {
+                              navigate(`/productos?tipo=${tipoFiltro}`)
+                            }}
+                          >
+                            Explorar más
+                          </Button>
+                        </Box>
+                      )}
                     </Box>
                   </Box>
                 </CarouselSlide>
