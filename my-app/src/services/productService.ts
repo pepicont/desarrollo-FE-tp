@@ -30,8 +30,6 @@ export type ServicioDetail = {
   monto: number
   compania: CompaniaRef
   categorias: CategoriaRef[]
-  fechaLanzamiento: string
-  edadPermitida: number
   fotos?: Foto[]
 }
 
@@ -43,8 +41,6 @@ export type ComplementoDetail = {
   compania: CompaniaRef
   categorias: CategoriaRef[]
   juego: { id: number; nombre: string }
-  fechaLanzamiento: string
-  edadPermitida: number
   fotos?: Foto[]
 }
 
