@@ -445,7 +445,13 @@ export default function MisComprasPage() {
             </Box>
           ) : error ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2 }}
+                action={
+                  <Button color="inherit" size="small" onClick={() => window.location.reload()}>
+                    Reintentar
+                  </Button>
+                }
+              >
                 {error}
               </Alert>
             </Box>
