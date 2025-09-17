@@ -36,6 +36,7 @@ import avatar2 from "../../assets/fifa24.jpg"
 import avatar3 from "../../assets/mw3.jpg"
 import { authService } from "../../services/authService"
 import { getUserProfile, updateUserProfile } from "../../services/profileService"
+import { mailService } from '../../services/mailService'
 
 const darkTheme = createTheme({
   palette: {
@@ -209,6 +210,10 @@ export default function Profile() {
         }
         return;
       }
+      // Guardar mail y username viejos antes de actualizar el estado
+      const oldEmail = userData.email;
+      const oldUsername = userData.username;
+
       // Si todo ok
       setUserData(editData);
       setIsEditing(false);
@@ -236,6 +241,19 @@ export default function Profile() {
         } catch (e) {
           // Si hay error, no romper la app
           console.error('No se pudo actualizar la variable user en storage:', e);
+        }
+      }
+
+      // Notificar al mail anterior si se cambió mail o contraseña
+      if (
+        oldEmail !== editData.email ||
+        (showPasswordFields && newPassword)
+      ) {
+        try {
+          await mailService.notifyCredentialsChange(oldEmail, oldUsername)
+        } catch (e) {
+          // No bloquear el guardado si falla el mail
+          console.error('Error enviando mail de cambio de credenciales:', e)
         }
       }
     } catch (error: unknown) {

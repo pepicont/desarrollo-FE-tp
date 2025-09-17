@@ -3,6 +3,8 @@ import NavBar from '../navBar/navBar'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { mpConfirm, mpResult, getVenta } from '../../services/checkoutService'
+import { mailService } from '../../services/mailService'
+
 
 const darkTheme = createTheme({
   palette: { mode: 'dark', background: { default: '#141926', paper: '#1e2532' }, primary: { main: '#4a90e2' } },
@@ -94,6 +96,26 @@ export default function CheckoutSuccess() {
     if (paymentId || (new URLSearchParams(location.search).get('provider') === 'mp')) return 'Mercado Pago'
     return state.metodoPago === 'mp' ? 'Mercado Pago' : 'Stripe'
   }, [location.search, state.metodoPago])
+
+  // Enviar mail de confirmación de compra al usuario una sola vez
+  const [mailSent, setMailSent] = useState(false);
+  useEffect(() => {
+    if (mailSent) return;
+    if (!venta || !venta.codActivacion) return;
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    } catch { /* empty */ }
+    const email = user?.mail;
+    const nombre = user?.nombre;
+    const producto = state?.nombre || persisted?.nombre || `${(state?.tipo ?? persisted?.tipo) || '—'} #${(state?.id ?? persisted?.id) ?? '—'}`;
+    const codigo = venta.codActivacion;
+    if (email && nombre && producto && codigo) {
+      mailService.paymentConfirmation(email, nombre, producto, codigo)
+        .then(() => setMailSent(true))
+        .catch(() => {});
+    }
+  }, [venta, mailSent, state?.nombre, state?.tipo, state?.id, persisted?.nombre, persisted?.tipo, persisted?.id]);
 
   return (
     <ThemeProvider theme={darkTheme}>

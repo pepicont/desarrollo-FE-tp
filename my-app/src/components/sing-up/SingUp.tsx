@@ -339,8 +339,15 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       if (response.ok) {
         setRegisterSuccess(true)
         setRegisterError("")
-        
-        
+        // Enviar mail de bienvenida
+        try {
+          await import('../../services/mailService').then(({ mailService }) =>
+            mailService.welcome(formData.email, formData.name)
+          )
+        } catch (e) {
+          // No bloquear registro si falla el mail
+          console.error('Error enviando mail de bienvenida:', e)
+        }
         // Redirigir al login después de 2 segundos para que el usuario pueda iniciar sesión
         setTimeout(() => {
           window.location.href = '/login'
