@@ -266,11 +266,6 @@ export default function MisResenasPage() {
   useEffect(() => { setPage(1) }, [searchQuery, dateFilter, resenias.length, itemsPerPage]);
 
   // Función para limpiar todos los filtros
-  const clearFilters = () => {
-    setSearchQuery("");
-    setTempSearchQuery("");
-    setDateFilter("todas");
-  };
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: Resenia["venta"]) => {

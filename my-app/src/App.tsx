@@ -12,6 +12,7 @@ import MisResenias from './components/Mis resenias/MisResenias.tsx'
 import Profile from './components/Profile/Profile.tsx'
 import BuscarProductos from './components/BuscarProductos/BuscarProductos.tsx'
 import AboutUs from './components/aboutUs/aboutUs.tsx';
+import Usuarios from './components/Usuarios/Usuarios.tsx';
 import ProtectedRoute from './components/shared-theme/ProtectedRoute.tsx';
 function App() {
   return (
@@ -49,6 +50,9 @@ function App() {
           <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
+        } />
+        <Route path="/usuarios" element={
+            <Usuarios />
         } />
       </Routes>
       </Router>
