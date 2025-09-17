@@ -135,9 +135,9 @@ const carouselItems = [
   },
   {
     id: 3,
-    title: "Streaming",
+    title: "Servicios",
   image: servicios,
-    description: "Los mejores servicios de streaming para poder seguir viendo tus series",
+    description: "Los mejores servicios de streaming y gaming para poder seguir disfrutando de tus contenidos favoritos",
     badge: "OFERTA",
   },
 ]
@@ -482,7 +482,7 @@ export default function Home() {
             </Typography>
             <Typography variant="body1" sx={{ lineHeight: 1.8, color: "#B0BEC5" }}>
               Somos tu portal de confianza para videojuegos, donde encontrarás los mejores títulos, DLC exclusivos y
-              membresías premium para las plataformas de streaming más populares. Nuestro sistema de códigos de cupón te
+              membresías premium para servicios de streaming y gaming. Nuestro sistema de códigos de cupón te
               permite acceder instantáneamente a tus compras, mientras que nuestra comunidad de jugadores comparte
               reseñas auténticas para ayudarte a tomar las mejores decisiones.
             </Typography>
