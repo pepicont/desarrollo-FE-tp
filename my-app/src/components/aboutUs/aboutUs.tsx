@@ -131,7 +131,7 @@ export default function AboutUs() {
                 Nuestra Misión
               </Typography>
               <Typography variant="body1" sx={{ color: "#B0BEC5", fontSize: "1.1rem", lineHeight: 1.8, mb: 3 }}>
-                En Portal Videojuegos, nos dedicamos a conectar a los gamers con los mejores títulos, complementos y
+                En Portal Videojuegos, nos dedicamos a conectar a los gamers con los mejores títulos, complementos,
                 experiencias de streaming y membresías gaming del mercado. Creemos que cada jugador merece acceso fácil y confiable a su
                 contenido favorito.
               </Typography>
