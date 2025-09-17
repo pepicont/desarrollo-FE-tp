@@ -86,7 +86,13 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   }, [isLoading]);
 
   const handleClickOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setEmailError(false);
+    setEmailErrorMessage('');
+    setPasswordError(false);
+    setPasswordErrorMessage('');
+  };
 
   // Forzar logout al entrar a la pantalla
   useEffect(() => {

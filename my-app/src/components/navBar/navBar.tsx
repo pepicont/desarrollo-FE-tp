@@ -413,7 +413,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <TextField
                 fullWidth
-                label="Email"
+                label="Email para contactarte"
                 type="email"
                 value={userEmail || formData.email}
                 onChange={handleInputChange("email")}
@@ -524,7 +524,12 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={loading || !formData.email || !formData.asunto || !formData.descripcion}
+              disabled={
+                loading ||
+                (!userEmail && !formData.email) ||
+                !formData.asunto ||
+                !formData.descripcion
+              }
               sx={{
                 backgroundColor: "#4A90E2",
                 "&:hover": {
@@ -555,21 +560,54 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: { xs: "80%", sm: "400px" },
-            bgcolor: "#1e2532",
+            width: { xs: "90%", sm: "500px" },
+            bgcolor: "#232b3b",
             border: "1px solid #2A3441",
             borderRadius: 2,
             boxShadow: 24,
-            p: 4,
-            textAlign: "center",
+            p: 0,
+            overflow: "hidden"
           }}
         >
-          <Typography id="modal-resultado-envio" variant="h6" sx={{ color: resultModal.success ? "#4A90E2" : "#FF5252", fontWeight: "bold", mb: 2 }}>
-            {resultModal.success ? "Mail enviado exitosamente" : "Error al enviar el mail"}
-          </Typography>
-          <Button variant="contained" onClick={() => setResultModal({ open: false, success: false })} sx={{ mt: 2 }}>
-            Cerrar
-          </Button>
+          {/* Header */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", bgcolor: "#293042", p: 2 }}>
+            <Typography id="modal-resultado-envio" variant="h5" component="h2" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
+              Confirmación de envío
+            </Typography>
+            <IconButton onClick={() => setResultModal({ open: false, success: false })} sx={{ color: "#B0BEC5", "&:hover": { color: "#FFFFFF" } }}>
+              <Close />
+            </IconButton>
+          </Box>
+          <Box sx={{ borderBottom: "1px solid #3a4256" }} />
+
+          {/* Cuerpo */}
+          <Box sx={{ bgcolor: "#1e2532", p: 3, textAlign: "left" }}>
+            <Typography sx={{ color: "#B0BEC5", fontWeight: 400, mb: 2 }}>
+              Consulta enviada con éxito.<br></br> Recibirás una respuesta por parte de nuestros administradores a la brevedad.
+            </Typography>
+          </Box>
+          <Box sx={{ borderBottom: "1px solid #3a4256" }} />
+          {/* Botón */}
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", bgcolor: "#293042", p: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setResultModal({ open: false, success: false })}
+              sx={{
+                borderColor: "#bdbdbd",
+                color: "#bdbdbd",
+                backgroundColor: "transparent",
+                fontWeight: 400,
+                boxShadow: "none",
+                '&:hover': {
+                  borderColor: "#757575",
+                  backgroundColor: "rgba(189,189,189,0.08)",
+                  color: "#757575",
+                },
+              }}
+            >
+              Cerrar
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </Box>
