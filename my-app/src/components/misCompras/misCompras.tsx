@@ -284,7 +284,39 @@ export default function MisComprasPage() {
       return;
     } catch (error) {
       console.error('Error al crear reseña:', error);
-      setError("Error al crear la reseña");
+      // Mostrar razones de moderación si vienen del backend
+      const humanizeReason = (key: string) => {
+        const map: Record<string, string> = {
+          'harassment': 'acoso',
+          'harassment/threatening': 'acoso o amenazas',
+          'hate': 'discurso de odio',
+          'hate/threatening': 'odio o amenazas',
+          'self-harm': 'autolesiones',
+          'sexual': 'contenido sexual',
+          'sexual/minors': 'contenido sexual relacionado con menores',
+          'violence': 'violencia',
+          'violence/graphic': 'violencia gráfica',
+          'self-harm/intent': 'intención de autolesión',
+          'self-harm/instructions': 'instrucciones de autolesión',
+        }
+        return map[key] || key
+      }
+      try {
+        // error proviene de createResenia: throw await response.json()
+        const err = error as unknown as { reasons?: string[]; message?: string }
+        const reasons: string[] | undefined = err?.reasons
+        const msg: string | undefined = err?.message
+        if (Array.isArray(reasons) && reasons.length > 0) {
+          const pretty = reasons.map(humanizeReason).join(', ')
+          setError(`No pudimos publicar tu reseña porque contiene: ${pretty}. Por favor, reformúlala y vuelve a intentar.`)
+        } else if (typeof msg === 'string' && msg.trim().length > 0) {
+          setError(msg)
+        } else {
+          setError("Error al crear la reseña. Intenta nuevamente.")
+        }
+      } catch {
+        setError("Error al crear la reseña. Intenta nuevamente.")
+      }
     } finally {
       setCreateReviewLoading(false);
     }
