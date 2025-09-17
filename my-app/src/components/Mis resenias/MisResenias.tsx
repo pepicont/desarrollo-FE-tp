@@ -16,11 +16,14 @@ import {
   FormControl,
   Select,
   MenuItem,
+  TextField,
+  InputAdornment,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
 import EditIcon from "@mui/icons-material/Edit"
+import SearchIcon from "@mui/icons-material/Search"
 import { useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
 import { updateResenia, deleteResenia } from "../../services/reseniasService"
@@ -103,6 +106,9 @@ export default function MisResenasPage() {
   
   // Estado para el filtro de fecha
   const [dateFilter, setDateFilter] = useState<string>("todas")
+  
+  const [searchQuery, setSearchQuery] = useState("")
+  const [tempSearchQuery, setTempSearchQuery] = useState("")
 
   // Estados para alertas de éxito y eliminación
   const [successAlert, setSuccessAlert] = useState(false);
@@ -110,6 +116,13 @@ export default function MisResenasPage() {
   
   const PAGE_SIZE = 24;
   const [page, setPage] = useState(1);
+
+  // Sincronizar tempSearchQuery con searchQuery cuando se limpia desde clearFilters
+  useEffect(() => {
+    if (searchQuery === "") {
+      setTempSearchQuery("");
+    }
+  }, [searchQuery]);
 
   // Cargar reseñas del usuario autenticado
   useEffect(() => {
@@ -186,48 +199,77 @@ export default function MisResenasPage() {
     return date.toLocaleDateString("es-ES")
   }
 
-  // Función para filtrar reseñas por fecha
-  const filterReseniasByDate = (resenias: Resenia[]) => {
-    if (dateFilter === "todas") return resenias;
+  // Función de filtrado avanzado
+  const getFilteredResenias = () => {
+    return resenias.filter((resenia: Resenia) => {
+      // Obtener nombre del producto inline
+      const productName = resenia.venta.juego?.nombre || 
+                         resenia.venta.servicio?.nombre || 
+                         resenia.venta.complemento?.nombre || 
+                         "Producto desconocido";
+      
+      // Filtro por búsqueda de texto
+      const matchesSearch = searchQuery === "" || 
+        productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resenia.detalle.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const now = new Date();
-    
-    return resenias.filter((resenia) => {
-      const reseniaDate = new Date(resenia.fecha);
-      switch (dateFilter) {
-        case "este-mes":
-          return reseniaDate.getMonth() === now.getMonth() && 
-                 reseniaDate.getFullYear() === now.getFullYear();
-        case "mes-pasado": {
-          const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
-          return reseniaDate.getMonth() === lastMonth.getMonth() && 
-                 reseniaDate.getFullYear() === lastMonth.getFullYear();
+      // Filtro por fecha
+      let matchesDate = true;
+      if (dateFilter !== "todas") {
+        const reseniaDate = new Date(resenia.fecha);
+        const now = new Date();
+        
+        switch (dateFilter) {
+          case "este-mes":
+            matchesDate = reseniaDate.getMonth() === now.getMonth() && 
+                         reseniaDate.getFullYear() === now.getFullYear();
+            break;
+          case "mes-pasado": {
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
+            matchesDate = reseniaDate.getMonth() === lastMonth.getMonth() && 
+                         reseniaDate.getFullYear() === lastMonth.getFullYear();
+            break;
+          }
+          case String(new Date().getFullYear()):
+            matchesDate = reseniaDate.getFullYear() === new Date().getFullYear();
+            break;
+          case "2024":
+            matchesDate = reseniaDate.getFullYear() === 2024;
+            break;
+          case "2023":
+            matchesDate = reseniaDate.getFullYear() === 2023;
+            break;
+          case "2022":
+            matchesDate = reseniaDate.getFullYear() === 2022;
+            break;
+          case "2021":
+            matchesDate = reseniaDate.getFullYear() === 2021;
+            break;
+          case "anteriores":
+            matchesDate = reseniaDate.getFullYear() <= 2020;
+            break;
+          default:
+            matchesDate = true;
         }
-        case String(new Date().getFullYear()):
-          return reseniaDate.getFullYear() === new Date().getFullYear();
-        case "2024":
-          return reseniaDate.getFullYear() === 2024;
-        case "2023":
-          return reseniaDate.getFullYear() === 2023;
-        case "2022":
-          return reseniaDate.getFullYear() === 2022;
-        case "2021":
-          return reseniaDate.getFullYear() === 2021;
-        case "anteriores":
-          return reseniaDate.getFullYear() <= 2020;
-        default:
-          return true;
       }
+
+      return matchesSearch && matchesDate;
     });
   };
 
-  // Obtener reseñas filtradas
-  const filteredResenias = filterReseniasByDate(resenias);
+  const filteredResenias = getFilteredResenias();
   const totalPages = Math.max(1, Math.ceil(filteredResenias.length / PAGE_SIZE));
   const paginatedResenias = filteredResenias.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Volver a la primera página al cambiar el filtro
-  useEffect(() => { setPage(1) }, [dateFilter, resenias.length]);
+  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, resenias.length]);
+
+  // Función para limpiar todos los filtros
+  const clearFilters = () => {
+    setSearchQuery("");
+    setTempSearchQuery("");
+    setDateFilter("todas");
+  };
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: Resenia["venta"]) => {
@@ -469,6 +511,34 @@ export default function MisResenasPage() {
             <Typography variant="h5" sx={{ color: "primary.main", fontWeight: "bold" }}>
               Gracias por contribuir a la comunidad
             </Typography>
+          </Box>
+
+          {/* Barra de búsqueda */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              placeholder="Buscar en mis reseñas..."
+              value={tempSearchQuery}
+              onChange={(e) => setTempSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSearchQuery(tempSearchQuery);
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "background.paper",
+                  borderRadius: 3,
+                },
+              }}
+            />
           </Box>
 
           {/* Título con filtro centrado y botón Nueva reseña */}

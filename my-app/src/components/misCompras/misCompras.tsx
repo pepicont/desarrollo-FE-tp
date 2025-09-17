@@ -134,6 +134,7 @@ export default function MisComprasPage() {
   }
   
   const [searchQuery, setSearchQuery] = useState("")
+  const [tempSearchQuery, setTempSearchQuery] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   
   // Estados para filtros avanzados
@@ -144,6 +145,13 @@ export default function MisComprasPage() {
   
   const PAGE_SIZE = 24
   const [page, setPage] = useState(1)
+
+  // Sincronizar tempSearchQuery con searchQuery cuando se limpia desde clearFilters
+  useEffect(() => {
+    if (searchQuery === "") {
+      setTempSearchQuery("");
+    }
+  }, [searchQuery]);
 
 //Fetch al back para traerse las compras del usuario
   useEffect(() => {
@@ -415,6 +423,7 @@ export default function MisComprasPage() {
   // Función para limpiar todos los filtros
   const clearFilters = () => {
     setSearchQuery("");
+    setTempSearchQuery("");
     setDateFilter("");
     setProductTypeFilter("");
     setCompanyFilter("");
@@ -455,8 +464,13 @@ export default function MisComprasPage() {
             <TextField
               fullWidth
               placeholder="Buscar en mis compras..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={tempSearchQuery}
+              onChange={(e) => setTempSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSearchQuery(tempSearchQuery);
+                }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
