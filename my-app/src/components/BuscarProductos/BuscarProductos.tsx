@@ -9,6 +9,7 @@ import NavBar from "../navBar/navBar"
 import { useLocation, useNavigate } from "react-router-dom"
 import { searchService, type SearchItem, type SearchParams } from "../../services/searchService"
 import { companyService, type Company } from "../../services/companyService"
+import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -395,6 +396,7 @@ export default function BuscarProductos() {
             </Box>
           </Box>
         </Drawer>
+        <Footer />
       </Box>
     </ThemeProvider>
   )

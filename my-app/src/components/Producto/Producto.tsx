@@ -5,6 +5,7 @@ import NavBar from '../navBar/navBar'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail, type Foto } from '../../services/productService'
 import { getReviewsByProduct, type ProductReview } from '../../services/reseniasService'
+import Footer from '../footer/footer'
 
 const darkTheme = createTheme({
   palette: {
@@ -384,6 +385,7 @@ export default function Producto() {
             </Box>
           </Container>
         )}
+        <Footer />
       </Box>
     </ThemeProvider>
   )

@@ -32,6 +32,7 @@ import juegos from "../../assets/carousel-juegos.png"
 import servicios from "../../assets/carousel-servicios.jpg"
 import complementos from "../../assets/carousel-complementos.jpg"
 import { useNavigate } from "react-router-dom"
+import Footer from "../footer/footer"
 
 const darkTheme = createTheme({
   palette: {
@@ -496,7 +497,7 @@ export default function Home() {
             </Button>
           </Paper>
         </Box>
-      
+        <Footer />  
       </Box>
     </ThemeProvider>
   )

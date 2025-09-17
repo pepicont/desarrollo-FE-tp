@@ -37,6 +37,7 @@ import avatar3 from "../../assets/mw3.jpg"
 import { authService } from "../../services/authService"
 import { getUserProfile, updateUserProfile } from "../../services/profileService"
 import { mailService } from '../../services/mailService'
+import Footer from "../footer/footer"
 
 const darkTheme = createTheme({
   palette: {
@@ -325,6 +326,7 @@ export default function Profile() {
           <Container maxWidth="lg" sx={{ py: 4, mt: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
             <CircularProgress size={60} />
           </Container>
+          <Footer />
         </Box>
       </ThemeProvider>
     )
@@ -344,6 +346,7 @@ export default function Profile() {
               </Alert>
             )}
           </Container>
+          <Footer />
         </Box>
       </ThemeProvider>
     )
@@ -615,6 +618,7 @@ export default function Profile() {
             </Box>
           </Box>
         </Container>
+        {/* <Footer /> */}
       </Box>
 
       {/* Modal de confirmación para cambio de email */}

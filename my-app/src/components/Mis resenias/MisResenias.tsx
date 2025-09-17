@@ -26,6 +26,7 @@ import { authService } from "../../services/authService"
 import { updateResenia, deleteResenia } from "../../services/reseniasService"
 import { getUserResenias } from "../../services/reseniasService"
 import ReviewModal from "../shared-components/ReviewModal"
+//import Footer from "../footer/footer"
 
 const darkTheme = createTheme({
   palette: {
@@ -445,6 +446,8 @@ export default function MisResenasPage() {
               {error}
             </Alert>
           </Container>
+          {/* Footer compartido */}
+          {/* <Footer /> */}
         </Box>
       </ThemeProvider>
     )
@@ -689,9 +692,7 @@ export default function MisResenasPage() {
             </Box>
           )}
         </Container>
-      </Box>
-
-      {/* Modal Reutilizable */}
+        {/* Modal Reutilizable */}
       {currentProductData && (
         <ReviewModal
           open={isReviewModalOpen}
@@ -716,6 +717,9 @@ export default function MisResenasPage() {
           }
         />
       )}
+      {/* Footer compartido */}
+      {/* <Footer /> */}
+      </Box>
     </ThemeProvider>
   )
 }

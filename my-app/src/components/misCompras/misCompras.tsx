@@ -31,6 +31,7 @@ import { checkUserReviewForPurchase, createResenia } from "../../services/reseni
 import { companyService, type Company } from "../../services/companyService"
 import { useNavigate } from "react-router-dom"
 import ReviewModal from "../shared-components/ReviewModal"
+//import Footer from "../footer/footer"
 
 const darkTheme = createTheme({
   palette: {
@@ -433,8 +434,8 @@ export default function MisComprasPage() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
-  {/* Shared NavBar */}
-  <NavBar />
+        {/* Shared NavBar */}
+        <NavBar />
 
         {/* Contenido principal */}
         <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
@@ -749,6 +750,8 @@ export default function MisComprasPage() {
             </Box>
           </Box>
         </Drawer>
+        {/* Footer */}
+        {/* <Footer /> */}
       </Box>
     </ThemeProvider>
   )

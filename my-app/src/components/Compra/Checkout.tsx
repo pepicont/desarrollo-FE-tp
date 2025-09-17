@@ -5,6 +5,7 @@ import mpLogo from '../../assets/mercadopago.png'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { startCheckout, simulateSuccess, type TipoProducto, mpStartPreference } from '../../services/checkoutService'
 import axios from 'axios'
+import Footer from '../footer/footer.tsx'
 
 const darkTheme = createTheme({
   palette: { mode: 'dark', background: { default: '#141926', paper: '#1e2532' }, primary: { main: '#4a90e2' } },
@@ -110,7 +111,7 @@ export default function Checkout() {
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
         <NavBar />
-  <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
+        <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
           <Typography variant="h4" fontWeight={700} gutterBottom>Checkout</Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -179,6 +180,7 @@ export default function Checkout() {
             </Button>
           </Box>          
         </Container>
+        <Footer />
       </Box>
     </ThemeProvider>
   )

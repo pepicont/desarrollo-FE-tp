@@ -14,6 +14,7 @@ import CssBaseline from "@mui/material/CssBaseline"
 import { CheckCircle, AttachMoney, People, SportsEsports, Movie } from "@mui/icons-material"
 import Logo from "../../assets/logo.jpg"
 import NavBar from "../navBar/navBar.tsx"
+import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -248,7 +249,7 @@ export default function AboutUs() {
         </Container>
 
         {/* Footer */}
-        
+        <Footer />
       </Box>
     </ThemeProvider>
   )

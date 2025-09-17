@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { mpConfirm, mpResult, getVenta } from '../../services/checkoutService'
 import { mailService } from '../../services/mailService'
+import Footer from '../footer/footer.tsx'
 
 
 const darkTheme = createTheme({
@@ -168,6 +169,7 @@ export default function CheckoutSuccess() {
             <Button variant="contained" onClick={() => navigate('/')}>Ir al inicio</Button>
           </Box>
         </Container>
+        <Footer />
       </Box>
     </ThemeProvider>
   )
