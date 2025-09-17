@@ -299,7 +299,38 @@ export default function MisResenasPage() {
       handleReviewModalClose();
     } catch (error) {
       console.error('Error al guardar la reseña:', error);
-      setError("Error al guardar la reseña");
+      // Mostrar razones de moderación si vienen del backend
+      const humanizeReason = (key: string) => {
+        const map: Record<string, string> = {
+          'harassment': 'acoso',
+          'harassment/threatening': 'acoso o amenazas',
+          'hate': 'discurso de odio',
+          'hate/threatening': 'odio o amenazas',
+          'self-harm': 'autolesiones',
+          'sexual': 'contenido sexual',
+          'sexual/minors': 'contenido sexual relacionado con menores',
+          'violence': 'violencia',
+          'violence/graphic': 'violencia gráfica',
+          'self-harm/intent': 'intención de autolesión',
+          'self-harm/instructions': 'instrucciones de autolesión',
+        }
+        return map[key] || key
+      }
+      try {
+        const err = error as unknown as { reasons?: string[]; message?: string }
+        const reasons: string[] | undefined = err?.reasons
+        const msg: string | undefined = err?.message
+        if (Array.isArray(reasons) && reasons.length > 0) {
+          const pretty = reasons.map(humanizeReason).join(', ')
+          setError(`No pudimos guardar tu reseña porque contiene: ${pretty}. Por favor, reformúlala y vuelve a intentar.`)
+        } else if (typeof msg === 'string' && msg.trim().length > 0) {
+          setError(msg)
+        } else {
+          setError("Error al guardar la reseña. Intenta nuevamente.")
+        }
+      } catch {
+        setError("Error al guardar la reseña. Intenta nuevamente.")
+      }
     }
   }
 
