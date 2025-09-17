@@ -37,6 +37,8 @@ import {
 import { styled } from "@mui/material/styles"
 import imgLogo from "../../assets/logo-navbar.png"
 import { useState } from "react"
+import CircularProgress from "@mui/material/CircularProgress"
+import { mailService } from "../../services/mailService"
 import {authService} from "../../services/authService"
 
 
@@ -170,14 +172,15 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
   }
 
   const [modalOpen, setModalOpen] = useState(false)
-    const [formData, setFormData] = useState({
-      email: "",
-      asunto: "",
-      descripcion: "",
-    })
-  
-     const [emailError, setEmailError] = useState(false);
-     const [emailErrorMessage, setEmailErrorMessage] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    asunto: "",
+    descripcion: "",
+  })
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resultModal, setResultModal] = useState<{ open: boolean; success: boolean }>({ open: false, success: false });
     const handleOpenModal = () => setModalOpen(true)
      // Función de validación de email
      const validateEmail = (email: string) => {
@@ -203,11 +206,25 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
       }))
     }
   
-    const handleSubmit = () => {
-
-      console.log("Formulario enviado:", formData)
-       if (!validateEmail(formData.email)) return;
-      handleCloseModal()
+    const handleSubmit = async () => {
+      const emailToSend = userEmail || formData.email;
+      if (!validateEmail(emailToSend)) return;
+      setLoading(true);
+      try {
+        await mailService.sendMail({
+          mail: emailToSend,
+          asunto: formData.asunto,
+          detalle: formData.descripcion,
+        });
+        setLoading(false);
+        handleCloseModal();
+        setResultModal({ open: true, success: true });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        setLoading(false);
+        handleCloseModal();
+        setResultModal({ open: true, success: false });
+      }
     }
 
     const user = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -358,42 +375,41 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
         </MenuItem>
         <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
       </Menu>
-      <Modal
-          open={modalOpen}
-          onClose={handleCloseModal}
-          aria-labelledby="modal-consulta-titulo"
-          aria-describedby="modal-consulta-descripcion"
-        >
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: { xs: "90%", sm: "500px" },
-              bgcolor: "#1e2532",
-              border: "1px solid #2A3441",
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            {/* Header del modal con X para cerrar */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-              <Typography
-                id="modal-consulta-titulo"
-                variant="h5"
-                component="h2"
-                sx={{ color: "#FFFFFF", fontWeight: "bold" }}
-              >
-                Enviar Consulta
-              </Typography>
-              <IconButton onClick={handleCloseModal} sx={{ color: "#B0BEC5", "&:hover": { color: "#FFFFFF" } }}>
-                <Close />
-              </IconButton>
-            </Box>
 
-            {/* Formulario */}
+      <Modal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-consulta-titulo"
+        aria-describedby="modal-consulta-descripcion"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "90%", sm: "500px" },
+            bgcolor: "#232b3b",
+            border: "1px solid #2A3441",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 0,
+            overflow: "hidden"
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", bgcolor: "#293042", p: 2 }}>
+            <Typography id="modal-consulta-titulo" variant="h5" component="h2" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
+              Enviar Consulta
+            </Typography>
+            <IconButton onClick={handleCloseModal} sx={{ color: "#B0BEC5", "&:hover": { color: "#FFFFFF" } }}>
+              <Close />
+            </IconButton>
+          </Box>
+          <Box sx={{ borderBottom: "1px solid #3a4256" }} />
+
+          {/* Formulario */}
+          <Box sx={{ bgcolor: "#1e2532", p: 3 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <TextField
                 fullWidth
@@ -426,7 +442,6 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                   },
                 }}
               />
-
               <TextField
                 fullWidth
                 label="Asunto de la consulta"
@@ -454,7 +469,6 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                   },
                 }}
               />
-
               <TextField
                 fullWidth
                 label="Descripción"
@@ -484,44 +498,80 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                   },
                 }}
               />
-
-              {/* Botones */}
-              <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
-                <Button
-                  variant="outlined"
-                  onClick={handleCloseModal}
-                  sx={{
-                    borderColor: "#2A3441",
-                    color: "#B0BEC5",
-                    "&:hover": {
-                      borderColor: "#B0BEC5",
-                      color: "#FFFFFF",
-                    },
-                  }}
-                >
-                  Cerrar
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={!formData.email || !formData.asunto || !formData.descripcion}
-                  sx={{
-                    backgroundColor: "#4A90E2",
-                    "&:hover": {
-                      backgroundColor: "#357ABD",
-                    },
-                    "&:disabled": {
-                      backgroundColor: "#2A3441",
-                      color: "#666",
-                    },
-                  }}
-                >
-                  Enviar
-                </Button>
-              </Box>
             </Box>
           </Box>
-        </Modal>
+          <Box sx={{ borderBottom: "1px solid #3a4256" }} />
+          {/* Botones */}
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", bgcolor: "#293042", p: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={handleCloseModal}
+              sx={{
+                borderColor: "#bdbdbd",
+                color: "#bdbdbd",
+                backgroundColor: "transparent",
+                fontWeight: 400,
+                boxShadow: "none",
+                '&:hover': {
+                  borderColor: "#757575",
+                  backgroundColor: "rgba(189,189,189,0.08)",
+                  color: "#757575",
+                },
+              }}
+            >
+              Cerrar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={loading || !formData.email || !formData.asunto || !formData.descripcion}
+              sx={{
+                backgroundColor: "#4A90E2",
+                "&:hover": {
+                  backgroundColor: "#357ABD",
+                },
+                "&:disabled": {
+                  backgroundColor: "#2A3441",
+                  color: "#666",
+                },
+              }}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+            >
+              {loading ? "Enviando..." : "Enviar"}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+        {/* Modal de resultado de envío */}
+      <Modal
+        open={resultModal.open}
+        onClose={() => setResultModal({ open: false, success: false })}
+        aria-labelledby="modal-resultado-envio"
+        aria-describedby="modal-resultado-envio-desc"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "80%", sm: "400px" },
+            bgcolor: "#1e2532",
+            border: "1px solid #2A3441",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            textAlign: "center",
+          }}
+        >
+          <Typography id="modal-resultado-envio" variant="h6" sx={{ color: resultModal.success ? "#4A90E2" : "#FF5252", fontWeight: "bold", mb: 2 }}>
+            {resultModal.success ? "Mail enviado exitosamente" : "Error al enviar el mail"}
+          </Typography>
+          <Button variant="contained" onClick={() => setResultModal({ open: false, success: false })} sx={{ mt: 2 }}>
+            Cerrar
+          </Button>
+        </Box>
+      </Modal>
     </Box>
     
   )
