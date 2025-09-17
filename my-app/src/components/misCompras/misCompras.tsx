@@ -29,6 +29,7 @@ import { authService } from "../../services/authService"
 import { getUserPurchases } from "../../services/comprasService.ts"
 import { checkUserReviewForPurchase, createResenia } from "../../services/reseniasService.ts"
 import { companyService, type Company } from "../../services/companyService"
+import ModernPagination from "../shared-components/ModernPagination"
 import { useNavigate } from "react-router-dom"
 import ReviewModal from "../shared-components/ReviewModal"
 
@@ -143,7 +144,7 @@ export default function MisComprasPage() {
   const [companyFilter, setCompanyFilter] = useState("")
   const [companies, setCompanies] = useState<Company[]>([])
   
-  const PAGE_SIZE = 24
+  const [itemsPerPage, setItemsPerPage] = useState(15)
   const [page, setPage] = useState(1)
 
   // Sincronizar tempSearchQuery con searchQuery cuando se limpia desde clearFilters
@@ -414,11 +415,11 @@ export default function MisComprasPage() {
   };
 
   const filteredVentas = getFilteredVentas();
-  const totalPages = Math.max(1, Math.ceil(filteredVentas.length / PAGE_SIZE))
-  const paginatedVentas = filteredVentas.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(filteredVentas.length / itemsPerPage))
+  const paginatedVentas = filteredVentas.slice((page - 1) * itemsPerPage, page * itemsPerPage)
 
-  // Reiniciar página al cambiar filtros o resultados
-  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, productTypeFilter, companyFilter, ventas.length])
+  // Reiniciar página al cambiar filtros, resultados o items per page
+  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, productTypeFilter, companyFilter, ventas.length, itemsPerPage])
 
   // Función para limpiar todos los filtros
   const clearFilters = () => {
@@ -493,23 +494,88 @@ export default function MisComprasPage() {
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
                 Mis compras
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body2" sx={{ color: "#6b7280" }}>
                 Mostrando {filteredVentas.length} de {ventas.length} compras
               </Typography>
             </Box>
 
-            <Button
-              variant="outlined"
-              startIcon={<FilterListIcon />}
-              onClick={() => setIsFiltersOpen(true)}
-              sx={{
-                borderColor: "#4b5563",
-                color: "white",
-                "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
-              }}
-            >
-              FILTROS
-            </Button>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              {/* Selector de items per page */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  Mostrar:
+                </Typography>
+                <FormControl size="small">
+                  <Select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setPage(1);
+                      setItemsPerPage(Number(e.target.value));
+                    }}
+                    sx={{
+                      minWidth: 70,
+                      height: 32,
+                      backgroundColor: '#2a3441',
+                      borderRadius: 2,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                      },
+                      '& .MuiSelect-select': {
+                        color: '#9ca3af',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        padding: '6px 8px',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: '#6b7280',
+                      },
+                      '&:hover': {
+                        backgroundColor: '#374151',
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: '#1e2532',
+                          border: '1px solid #374151',
+                          borderRadius: 2,
+                          '& .MuiMenuItem-root': {
+                            color: 'white',
+                            fontSize: '0.875rem',
+                            '&:hover': {
+                              backgroundColor: '#374151',
+                            },
+                            '&.Mui-selected': {
+                              backgroundColor: '#3a7bd5',
+                              '&:hover': {
+                                backgroundColor: '#2c5aa0',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem value={15}>15</MenuItem>
+                    <MenuItem value={30}>30</MenuItem>
+                    <MenuItem value={50}>50</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Button
+                variant="outlined"
+                startIcon={<FilterListIcon />}
+                onClick={() => setIsFiltersOpen(true)}
+                sx={{
+                  borderColor: "#4b5563",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+                }}
+              >
+                FILTROS
+              </Button>
+            </Box>
           </Box>
 
           {/* Lista de compras */}
@@ -627,17 +693,13 @@ export default function MisComprasPage() {
                   </CardContent>
                 </Card>
               ))}
-              {/* Paginación al pie con flechas */}
+              {/* Paginación moderna */}
               {filteredVentas.length > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
-                  <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
-                    ← Anterior
-                  </Button>
-                  <Typography variant="body2" color="text.secondary">Página {page} de {totalPages}</Typography>
-                  <Button variant="outlined" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
-                    Siguiente →
-                  </Button>
-                </Box>
+                <ModernPagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
               )}
             </Box>
           )}

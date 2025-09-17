@@ -29,6 +29,7 @@ import { authService } from "../../services/authService"
 import { updateResenia, deleteResenia } from "../../services/reseniasService"
 import { getUserResenias } from "../../services/reseniasService"
 import ReviewModal from "../shared-components/ReviewModal"
+import ModernPagination from "../shared-components/ModernPagination"
 
 const darkTheme = createTheme({
   palette: {
@@ -109,12 +110,12 @@ export default function MisResenasPage() {
   
   const [searchQuery, setSearchQuery] = useState("")
   const [tempSearchQuery, setTempSearchQuery] = useState("")
+  const [itemsPerPage, setItemsPerPage] = useState(15)
 
   // Estados para alertas de éxito y eliminación
   const [successAlert, setSuccessAlert] = useState(false);
   const [deleteAlert, setDeleteAlert] = useState(false);
   
-  const PAGE_SIZE = 24;
   const [page, setPage] = useState(1);
 
   // Sincronizar tempSearchQuery con searchQuery cuando se limpia desde clearFilters
@@ -258,11 +259,11 @@ export default function MisResenasPage() {
   };
 
   const filteredResenias = getFilteredResenias();
-  const totalPages = Math.max(1, Math.ceil(filteredResenias.length / PAGE_SIZE));
-  const paginatedResenias = filteredResenias.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(filteredResenias.length / itemsPerPage));
+  const paginatedResenias = filteredResenias.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   // Volver a la primera página al cambiar el filtro
-  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, resenias.length]);
+  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, resenias.length, itemsPerPage]);
 
   // Función para limpiar todos los filtros
   const clearFilters = () => {
@@ -641,11 +642,82 @@ export default function MisResenasPage() {
             </Button>
           </Box>
 
-          {/* Contador */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          {/* Contador y selector de items por página */}
+          <Box sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
+          }}>
+            <Typography variant="body2" sx={{ color: "#6b7280" }}>
               Mostrando {filteredResenias.length} de {resenias.length} reseñas
             </Typography>
+            
+            {/* Selector de items per page */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                Mostrar:
+              </Typography>
+              <FormControl size="small">
+                <Select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    setPage(1);  // Primero resetear la página
+                    setItemsPerPage(newValue);  // Luego cambiar los items
+                  }}
+                  sx={{
+                    minWidth: 70,
+                    height: 32,
+                    backgroundColor: '#2a3441',
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '& .MuiSelect-select': {
+                      color: '#9ca3af',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      padding: '6px 8px',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#6b7280',
+                    },
+                    '&:hover': {
+                      backgroundColor: '#374151',
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#1e2532',
+                        border: '1px solid #374151',
+                        borderRadius: 2,
+                        '& .MuiMenuItem-root': {
+                          color: 'white',
+                          fontSize: '0.875rem',
+                          '&:hover': {
+                            backgroundColor: '#374151',
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: '#3a7bd5',
+                            '&:hover': {
+                              backgroundColor: '#2c5aa0',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value={15}>15</MenuItem>
+                  <MenuItem value={30}>30</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
           {/* Lista de reseñas */}
@@ -744,17 +816,13 @@ export default function MisResenasPage() {
                   </CardContent>
                 </Card>
               ))}
-              {/* Paginación al pie con flechas */}
+              {/* Paginación moderna */}
               {filteredResenias.length > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
-                  <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
-                    ← Anterior
-                  </Button>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Página {page} de {totalPages}</Typography>
-                  <Button variant="outlined" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
-                    Siguiente →
-                  </Button>
-                </Box>
+                <ModernPagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
               )}
             </Box>
           )}

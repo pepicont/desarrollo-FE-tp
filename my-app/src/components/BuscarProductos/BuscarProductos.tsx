@@ -9,6 +9,7 @@ import NavBar from "../navBar/navBar"
 import { useLocation, useNavigate } from "react-router-dom"
 import { searchService, type SearchItem, type SearchParams } from "../../services/searchService"
 import { companyService, type Company } from "../../services/companyService"
+import ModernPagination from "../shared-components/ModernPagination"
 
 const darkTheme = createTheme({
   palette: {
@@ -73,7 +74,7 @@ export default function BuscarProductos() {
   const [error, setError] = useState<string | null>(null)
   const [companies, setCompanies] = useState<Company[]>([])
   const [page, setPage] = useState<number>(Number(params.get('page')) || 1)
-  const LIMIT = 24
+  const [itemsPerPage, setItemsPerPage] = useState(15)
   const [totalCount, setTotalCount] = useState<number>(0)
 
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function BuscarProductos() {
         if (!Number.isNaN(edad!) && edad !== undefined) params.edadMax = edad
 
   params.page = page
-  params.limit = LIMIT
+  params.limit = itemsPerPage
 
     const res = await searchService.search(params)
     setItems(res.data)
@@ -118,7 +119,7 @@ export default function BuscarProductos() {
       }
     }
     load()
-  }, [location.search, priceFilter, companyFilter, productTypeFilter, ageFilter, page])
+  }, [location.search, priceFilter, companyFilter, productTypeFilter, ageFilter, page, itemsPerPage])
 
   
   useEffect(() => {
@@ -203,19 +204,84 @@ export default function BuscarProductos() {
               </Typography>
             </Box>
 
-            <Button
-              variant="outlined"
-              startIcon={<FilterList />}
-              onClick={() => setIsFiltersOpen(true)}
-              sx={{
-                borderColor: "#4b5563",
-                color: "white",
-                mt: { xs: 2, sm: 0 },
-                "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              {/* Selector de items per page */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  Mostrar:
+                </Typography>
+                <FormControl size="small">
+                  <Select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setPage(1);
+                      setItemsPerPage(Number(e.target.value));
+                    }}
+                    sx={{
+                      minWidth: 70,
+                      height: 32,
+                      backgroundColor: '#2a3441',
+                      borderRadius: 2,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                      },
+                      '& .MuiSelect-select': {
+                        color: '#9ca3af',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        padding: '6px 8px',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: '#6b7280',
+                      },
+                      '&:hover': {
+                        backgroundColor: '#374151',
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: '#1e2532',
+                          border: '1px solid #374151',
+                          borderRadius: 2,
+                          '& .MuiMenuItem-root': {
+                            color: 'white',
+                            fontSize: '0.875rem',
+                            '&:hover': {
+                              backgroundColor: '#374151',
+                            },
+                            '&.Mui-selected': {
+                              backgroundColor: '#3a7bd5',
+                              '&:hover': {
+                                backgroundColor: '#2c5aa0',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem value={15}>15</MenuItem>
+                    <MenuItem value={30}>30</MenuItem>
+                    <MenuItem value={50}>50</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Button
+                variant="outlined"
+                startIcon={<FilterList />}
+                onClick={() => setIsFiltersOpen(true)}
+                sx={{
+                  borderColor: "#4b5563",
+                  color: "white",
+                  mt: { xs: 2, sm: 0 },
+                  "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
               FILTROS
             </Button>
+            </Box>
           </Box>
 
           <Box
@@ -281,23 +347,11 @@ export default function BuscarProductos() {
 
           
           {!loading && !error && items.length > 0 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 4 }}>
-              <Button
-                variant="outlined"
-                disabled={page <= 1}
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-              >
-                ← Anterior
-              </Button>
-              <Typography sx={{ color: 'white' }}>Página {page}</Typography>
-              <Button
-                variant="outlined"
-                disabled={page * LIMIT >= totalCount || items.length < LIMIT}
-                onClick={() => setPage(p => p + 1)}
-              >
-                Siguiente →
-              </Button>
-            </Box>
+            <ModernPagination
+              currentPage={page}
+              totalPages={Math.ceil(totalCount / itemsPerPage)}
+              onPageChange={setPage}
+            />
           )}
         </Container>
 
