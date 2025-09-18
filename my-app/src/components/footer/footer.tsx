@@ -7,7 +7,7 @@ import './footer.css';
 const navLinks = [
   { to: '/productos', label: 'Productos' },
   { to: '/mis-compras', label: 'Mis Compras' },
-  { to: '/mis-resenias', label: 'Mis Reseñas' },
+  { to: '/mis-resenas', label: 'Mis Reseñas' },
   { to: '/perfil', label: 'Perfil' },
   { to: '/about-us', label: 'Sobre Nosotros' },
 ];

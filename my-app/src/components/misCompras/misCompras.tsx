@@ -339,7 +339,7 @@ export default function MisComprasPage() {
 
   // Función de filtrado avanzado
   const getFilteredVentas = () => {
-    return ventas.filter((venta: Venta) => {
+    const filtered = ventas.filter((venta: Venta) => {
       const productName = getProductName(venta);
       
       // Filtro por búsqueda de texto
@@ -412,6 +412,15 @@ export default function MisComprasPage() {
       }
 
       return matchesSearch && matchesDate && matchesProductType && matchesCompany;
+    });
+
+    
+    return filtered.sort((a, b) => {
+      const ta = new Date(a.fecha).getTime();
+      const tb = new Date(b.fecha).getTime();
+      const safeA = Number.isNaN(ta) ? 0 : ta;
+      const safeB = Number.isNaN(tb) ? 0 : tb;
+      return safeB - safeA; 
     });
   };
 

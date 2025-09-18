@@ -31,6 +31,9 @@ import {
   Close as CloseIcon,
   SportsEsports as SportsEsportsIcon,
   Home as HomeIcon,
+  Business as BusinessIcon,
+  Category as CategoryIcon,
+  Person as PersonIcon,
   Close,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
@@ -39,6 +42,7 @@ import { useState } from "react"
 import CircularProgress from "@mui/material/CircularProgress"
 import { mailService } from "../../services/mailService"
 import {authService} from "../../services/authService"
+
 
 
 
@@ -59,15 +63,25 @@ const StyledListItem = styled(ListItem)<{ isActive?: boolean }>(() => ({
   },
 }))
 
-
-
-const baseMenuItems = [
+// Menú para usuarios normales
+const userMenuItems = [
   { text: "Home", icon: <HomeIcon />, href: "/" },
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Mis compras", icon: <ShoppingBagIcon />, href: "/mis-compras" },
   { text: "Mis reseñas", icon: <ReviewIcon />, href: "/mis-resenas" },
   { text: "Acerca de nosotros", icon: <InfoIcon />, href: "/about-us" },
   { text: "Contáctenos", icon: <ContactIcon /> },
+  { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
+]
+
+// Menú para administradores
+const adminMenuItems = [
+  { text: "Home", icon: <HomeIcon />, href: "/" },
+  { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
+  { text: "Usuarios", icon: <PersonIcon />, href: "/admin/usuarios" },
+  { text: "Reseñas", icon: <ReviewIcon />, href: "/admin/resenias" },
+  { text: "Compañías", icon: <BusinessIcon />, href: "/admin/companias" },
+  { text: "Categorías", icon: <CategoryIcon />, href: "/admin/categorias" },
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
@@ -93,6 +107,14 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     }
     return !!user && !!token;
   });
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  
+  React.useEffect(() => {
+    if (!isLoggedIn) {
+      setIsAdmin(false);
+      return;
+    }
+  }, [isLoggedIn]);
 
   // Elimina el estado local 'nombre' y usa una función para obtener el nombre actual
   function getNombreUsuario() {
@@ -100,11 +122,39 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     if (user) {
       const parsed = JSON.parse(user);
       const fullName = parsed.nombre || "Usuario sin nombre";
+      // Verificar si es administrador
+      setIsAdmin(parsed.tipoUsuario === 'admin');
       return fullName.split(" ")[0];
     }
     return "Usuario sin nombre";
   }
 
+
+  // Función para obtener el menú según el tipo de usuario
+  const getCurrentMenuItems = () => {
+    return isAdmin ? adminMenuItems : userMenuItems;
+  };
+
+  // Actualizar activeItem cuando cambie el tipo de usuario
+  React.useEffect(() => {
+    try {
+      const path = window.location.pathname
+      if (path.startsWith("/productos") || path.startsWith("/producto")) {
+        setActiveItem("Productos")
+        return
+      }
+      
+      const currentMenu = isAdmin ? adminMenuItems : userMenuItems
+      const items = currentMenu.filter((i) => i.href && !i.isLogout)
+      const match = items
+        .slice()
+        .sort((a, b) => (b.href!.length - a.href!.length))
+        .find((i) => (i.href === "/" ? path === "/" : path.startsWith(i.href!)))
+      setActiveItem(match?.text ?? "Home")
+    } catch {
+      setActiveItem("Home")
+    }
+  }, [isAdmin]);
 
   const [activeItem, setActiveItem] = React.useState<string>(() => {
     try {
@@ -112,7 +162,8 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
       if (path.startsWith("/productos") || path.startsWith("/producto")) {
         return "Productos"
       }
-      const items = baseMenuItems.filter((i) => i.href && !i.isLogout)
+      // Usar menú de usuario por defecto en la inicialización
+      const items = userMenuItems.filter((i) => i.href && !i.isLogout)
       const match = items
         .slice()
         .sort((a, b) => (b.href!.length - a.href!.length))
@@ -325,7 +376,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             </Typography>
           </Box>
           <List sx={{ pt: 1 }}>
-            {baseMenuItems
+            {getCurrentMenuItems()
               .filter((item) => !item.isLogout || isLoggedIn)
               .map((item) => (
                 <StyledListItem

@@ -79,3 +79,59 @@ export async function deleteResenia(token: string, reseniaId: number) {
   if (!response.ok) throw await response.json();
   return await response.json();
 }
+
+export async function deleteReseniaAsAdmin(token: string, reseniaId: number) {
+  const response = await fetch(`http://localhost:3000/api/resenia/admin/${reseniaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) throw await response.json();
+  return await response.json();
+}
+
+export type AdminResenia = {
+  id: number;
+  detalle: string;
+  puntaje: number;
+  fecha: string;
+  usuario: {
+    id: number;
+    nombreUsuario: string;
+    nombre?: string;
+  };
+  venta: {
+    id: number;
+    fecha: string;
+    juego?: {
+      id: number;
+      nombre: string;
+      imagen?: string;
+    };
+    servicio?: {
+      id: number;
+      nombre: string;
+      imagen?: string;
+    };
+    complemento?: {
+      id: number;
+      nombre: string;
+      imagen?: string;
+    };
+  };
+}
+
+export async function getAllResenasAdmin(token: string): Promise<AdminResenia[]> {
+  const response = await fetch('http://localhost:3000/api/resenia/admin/all', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) throw await response.json();
+  const json = await response.json();
+  return json.data as AdminResenia[];
+}

@@ -2,23 +2,23 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
-export interface Company {
+export interface Category {
   id: number;
   nombre: string;
   detalle: string;
 }
 
-export interface CompanyListResponse {
+export interface CategoryListResponse {
   message: string;
-  data: Company[];
+  data: Category[];
 }
 
 const api = axios.create({ baseURL: API_BASE_URL });
 
-// Servicio para obtener todas las compañías (solo admin)
-export async function getAllCompaniesAdmin(token: string): Promise<Company[]> {
+// Servicio para obtener todas las categorías (solo admin)
+export async function getAllCategoriesAdmin(token: string): Promise<Category[]> {
   try {
-    const response = await fetch('http://localhost:3000/api/compania', {
+    const response = await fetch('http://localhost:3000/api/categoria', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -35,17 +35,17 @@ export async function getAllCompaniesAdmin(token: string): Promise<Company[]> {
     }
 
     const json = await response.json();
-    return json.data as Company[];
+    return json.data as Category[];
   } catch (error) {
-    console.error('Error en getAllCompaniesAdmin:', error);
+    console.error('Error en getAllCategoriesAdmin:', error);
     throw error;
   }
 }
 
-// Servicio para eliminar una compañía (solo admin)
-export async function deleteCompanyAsAdmin(token: string, companiaId: number) {
+// Servicio para eliminar una categoría (solo admin)
+export async function deleteCategoryAsAdmin(token: string, categoriaId: number) {
   try {
-    const response = await fetch(`http://localhost:3000/api/compania/${companiaId}`, {
+    const response = await fetch(`http://localhost:3000/api/categoria/${categoriaId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -63,21 +63,21 @@ export async function deleteCompanyAsAdmin(token: string, companiaId: number) {
 
     return response.json();
   } catch (error) {
-    console.error('Error en deleteCompanyAsAdmin:', error);
+    console.error('Error en deleteCategoryAsAdmin:', error);
     throw error;
   }
 }
 
-// Servicio para crear una nueva compañía (solo admin)
-export async function createCompany(token: string, companyData: { nombre: string; detalle: string }): Promise<Company> {
+// Servicio para crear una nueva categoría (solo admin)
+export async function createCategory(token: string, categoryData: { nombre: string; detalle: string }): Promise<Category> {
   try {
-    const response = await fetch('http://localhost:3000/api/compania', {
+    const response = await fetch('http://localhost:3000/api/categoria', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(companyData),
+      body: JSON.stringify(categoryData),
     });
 
     if (!response.ok) {
@@ -89,16 +89,16 @@ export async function createCompany(token: string, companyData: { nombre: string
     }
 
     const json = await response.json();
-    return json.data as Company;
+    return json.data as Category;
   } catch (error) {
-    console.error('Error en createCompany:', error);
+    console.error('Error en createCategory:', error);
     throw error;
   }
 }
 
-export const companyService = {
-  async getAll(): Promise<Company[]> {
-    const res = await api.get<CompanyListResponse>('/compania');
+export const categoryService = {
+  async getAll(): Promise<Category[]> {
+    const res = await api.get<CategoryListResponse>('/categoria');
     return res.data.data;
   },
 };

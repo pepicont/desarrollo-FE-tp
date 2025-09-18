@@ -11,8 +11,12 @@ import MisResenias from './components/Mis resenias/MisResenias.tsx'
 import Profile from './components/Profile/Profile.tsx'
 import BuscarProductos from './components/BuscarProductos/BuscarProductos.tsx'
 import AboutUs from './components/aboutUs/aboutUs.tsx';
-import Usuarios from './components/Usuarios/Usuarios.tsx';
+import AdminUsuarios from './components/admin/AdminUsuarios.tsx';
+import AdminResenias from './components/admin/AdminResenias.tsx';
+import AdminCompanias from './components/admin/AdminCompanias.tsx';
+import AdminCategorias from './components/admin/AdminCategorias.tsx';
 import ProtectedRoute from './components/shared-theme/ProtectedRoute.tsx';
+import ProtectedAdminRoute from './components/shared-theme/ProtectedAdminRoute.tsx';
 
 
 
@@ -51,8 +55,25 @@ function App() {
             <Profile />
           </ProtectedRoute>
         } />
-        <Route path="/usuarios" element={
-            <Usuarios />
+        <Route path="/admin/usuarios" element={
+          <ProtectedAdminRoute>
+            <AdminUsuarios />
+          </ProtectedAdminRoute>
+        } />
+        <Route path="/admin/resenias" element={
+          <ProtectedAdminRoute>
+            <AdminResenias />
+          </ProtectedAdminRoute>
+        } />
+        <Route path="/admin/companias" element={
+          <ProtectedAdminRoute>
+            <AdminCompanias />
+          </ProtectedAdminRoute>
+        } />
+        <Route path="/admin/categorias" element={
+          <ProtectedAdminRoute>
+            <AdminCategorias />
+          </ProtectedAdminRoute>
         } />
       </Routes>
       </Router>

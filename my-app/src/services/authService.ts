@@ -18,11 +18,13 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string; 
+  token: string;
   user: {
     id: number;
     mail: string;
     nombre: string;
+    tipoUsuario: string;
+    urlFoto: string;
   };
 }
 
@@ -32,6 +34,8 @@ export interface VerifyTokenResponse {
     id: number;
     mail: string;
     nombre: string;
+    tipoUsuario: string;
+    urlFoto: string;
   };
 }
 
@@ -100,6 +104,28 @@ export const authService = {
       this.logout();
       return false;
     }
+  },
+
+  // Función para obtener la información del usuario actual
+  async getCurrentUser(): Promise<VerifyTokenResponse['user'] | null> {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const response = await this.verifyToken(token);
+      return response.user;
+    } catch {
+      this.logout();
+      return null;
+    }
+  },
+
+  // Función para verificar si el usuario es administrador
+  async isAdmin(): Promise<boolean> {
+    const user = await this.getCurrentUser();
+    return user?.tipoUsuario === 'admin';
   },
 
   
