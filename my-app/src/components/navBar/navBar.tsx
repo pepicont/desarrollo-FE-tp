@@ -114,6 +114,13 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
       setIsAdmin(false);
       return;
     }
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (user) {
+      const parsed = JSON.parse(user);
+      setIsAdmin(parsed.tipoUsuario === 'admin');
+    } else {
+      setIsAdmin(false);
+    }
   }, [isLoggedIn]);
 
   // Elimina el estado local 'nombre' y usa una función para obtener el nombre actual
@@ -122,8 +129,6 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     if (user) {
       const parsed = JSON.parse(user);
       const fullName = parsed.nombre || "Usuario sin nombre";
-      // Verificar si es administrador
-      setIsAdmin(parsed.tipoUsuario === 'admin');
       return fullName.split(" ")[0];
     }
     return "Usuario sin nombre";

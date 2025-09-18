@@ -237,7 +237,7 @@ export default function Home() {
     <ThemeProvider theme={darkTheme}>
   <CssBaseline />
   <Box sx={{ flexGrow: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
-    <NavBar />
+   <NavBar />
     {/*<NavBar onCartClick={handleCartToggle} cartCount={cartCount} />
 
         <Drawer anchor="right" open={cartOpen} onClose={handleCartToggle}>
