@@ -20,7 +20,7 @@ const darkTheme = createTheme({
   },
 })
 
-type Review = { id: number; user: string; rating: number; date: string; comment: string }
+type Review = { id: number; user: string; rating: number; date: string; comment: string; avatarUrl?: string }
 
 type ProductoTipo = 'juego' | 'servicio' | 'complemento'
 
@@ -140,6 +140,7 @@ export default function Producto() {
     rating: r.puntaje,
     date: new Date(r.fecha).toLocaleDateString(),
     comment: r.detalle,
+    avatarUrl: r.usuario?.urlFoto,
   }))
 
   const avgRating = reviews.length
@@ -281,23 +282,28 @@ export default function Producto() {
                 </Button>
 
                 <Box sx={{ mt: 3 }}>
-
-
-                  <Box sx={{ display: 'grid', gap: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CalendarMonth fontSize="small" color="disabled" />
-                      <Typography>Lanzado el {data && 'fechaLanzamiento' in data && (data as JuegoDetail).fechaLanzamiento ? new Date((data as JuegoDetail).fechaLanzamiento).toLocaleDateString() : '(fecha)'}</Typography>
-                      
+                  {tipo === 'juego' && data && (
+                    <Box sx={{ display: 'grid', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CalendarMonth fontSize="small" color="disabled" />
+                        <Typography>Lanzado el {data && 'fechaLanzamiento' in data && (data as JuegoDetail).fechaLanzamiento ? new Date((data as JuegoDetail).fechaLanzamiento).toLocaleDateString() : '(fecha)'}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Person fontSize="small" color="disabled" />
+                        <Typography>Edad permitida: {data && 'edadPermitida' in data && typeof (data as JuegoDetail).edadPermitida === 'number' ? (data as JuegoDetail).edadPermitida + '+' : '(edad)+'}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Category fontSize="small" color="disabled" />
+                        <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : '(categorias)'}</Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Person fontSize="small" color="disabled" />
-                      <Typography>Edad permitida: {data && 'edadPermitida' in data && typeof (data as JuegoDetail).edadPermitida === 'number' ? (data as JuegoDetail).edadPermitida + '+' : '(edad)+'}</Typography>
-                    </Box>
+                  )}
+                  {(tipo === 'servicio' || tipo === 'complemento') && data && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Category fontSize="small" color="disabled" />
                       <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : '(categorias)'}</Typography>
                     </Box>
-                  </Box>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -314,50 +320,7 @@ export default function Producto() {
               </Card>
             </Box>
 
-            {/* Características */}
-            <Box sx={{ mt: 6 }}>
-              <Typography variant="h5" fontWeight={700} gutterBottom>
-                Información sobre el producto
-              </Typography>
-              <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: '1fr', maxWidth: 600, minWidth: 0, width: '100%', mx: 'auto', textAlign: 'center' }}>
-                {tipo === 'juego' && data && 'fechaLanzamiento' in data && (
-                  <Card>
-                    <CardContent>
-                      {'fechaLanzamiento' in data && (data as JuegoDetail).fechaLanzamiento && (
-                        <Typography color="text.secondary">Lanzamiento: {new Date((data as JuegoDetail).fechaLanzamiento).toLocaleDateString()}</Typography>
-                      )}
-                      {'edadPermitida' in data && typeof (data as JuegoDetail).edadPermitida === 'number' && (
-                        <Typography color="text.secondary">Edad permitida: {(data as JuegoDetail).edadPermitida}+</Typography>
-                      )}
-                      {Array.isArray((data as JuegoDetail).categorias) && (data as JuegoDetail).categorias.length > 0 && (
-                        <Typography color="text.secondary">Categorías: {(data as JuegoDetail).categorias.map((c) => c.nombre).join(', ')}</Typography>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-                {tipo === 'servicio' && data && (
-                  <Card>
-                    <CardContent>
-                      {Array.isArray((data as ServicioDetail).categorias) && (data as ServicioDetail).categorias.length > 0 && (
-                        <Typography color="text.secondary">Categorías: {(data as ServicioDetail).categorias.map((c) => c.nombre).join(', ')}</Typography>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-                {tipo === 'complemento' && data && (
-                  <Card>
-                    <CardContent>
-                      {'juego' in data && (data as ComplementoDetail).juego && (
-                        <Typography color="text.secondary">Juego: {(data as ComplementoDetail).juego.nombre}</Typography>
-                      )}
-                      {Array.isArray((data as ComplementoDetail).categorias) && (data as ComplementoDetail).categorias.length > 0 && (
-                        <Typography color="text.secondary">Categorías: {(data as ComplementoDetail).categorias.map((c) => c.nombre).join(', ')}</Typography>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </Box>
-            </Box>
+            
 
             {/* Opiniones */}
             <Box sx={{ mt: 6 }} ref={reviewsRef}>
@@ -372,7 +335,7 @@ export default function Producto() {
                   <Card key={r.id}>
                     <CardContent>
                       <Box sx={{ display: 'flex', gap: 2 }}>
-                        <Avatar>{r.user?.[0] ?? '?'}</Avatar>
+                        <Avatar src={r.avatarUrl}>{!r.avatarUrl && (r.user?.[0] ?? '?')}</Avatar>
                         <Box sx={{ flex: 1 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                             <Rating size="small" value={r.rating} readOnly />

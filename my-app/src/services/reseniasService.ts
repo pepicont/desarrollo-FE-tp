@@ -28,7 +28,7 @@ export type ProductReview = {
   detalle: string;
   puntaje: number;
   fecha: string;
-  usuario: { id: number; nombreUsuario: string };
+  usuario: { id: number; nombreUsuario: string; urlFoto?: string };
 }
 
 export async function getReviewsByProduct(tipo: 'juego' | 'servicio' | 'complemento', id: number): Promise<ProductReview[]> {
