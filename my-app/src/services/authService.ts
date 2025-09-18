@@ -123,7 +123,7 @@ export const authService = {
   // Función para verificar si el usuario es administrador
   async isAdmin(): Promise<boolean> {
     const user = await this.getCurrentUser();
-    return user?.tipoUsuario === 'Administrador';
+    return user?.tipoUsuario === 'admin';
   },
 
   

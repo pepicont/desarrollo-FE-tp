@@ -120,7 +120,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
         setNombre(firstName);
         
         // Verificar si es administrador
-        setIsAdmin(parsed.tipoUsuario === 'Administrador');
+        setIsAdmin(parsed.tipoUsuario === 'admin');
       } catch (error) {
         console.error('Error parsing user data:', error);
         setIsAdmin(false);
