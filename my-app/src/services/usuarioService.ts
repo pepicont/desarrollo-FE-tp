@@ -6,7 +6,9 @@ export interface Usuario {
   fechaCreacion: string
   nombre: string
   fechaNacimiento: string
-  contrasenia?: string  // Solo para updates, nunca se recibe del backend
+  contrasenia?: string,
+  tipoUsuario: 'admin' | 'cliente';
+  urlFoto?: string;  // Solo para updates, nunca se recibe del backend
 }
 
 // Servicio para obtener todos los usuarios (solo admin)

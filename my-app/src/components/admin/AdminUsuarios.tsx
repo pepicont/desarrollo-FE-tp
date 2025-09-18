@@ -61,6 +61,7 @@ export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   
   // Estados para el modal de confirmación de eliminación
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -192,8 +193,10 @@ export default function UsuariosPage() {
       setUsuarios(prev => prev.filter(user => user.id !== userToDelete.id))
       
       // Cerrar modal y limpiar
-      setDeleteModalOpen(false)
-      setUserToDelete(null)
+  setDeleteModalOpen(false)
+  setUserToDelete(null)
+  setSuccess("Usuario borrado con éxito")
+  setTimeout(() => setSuccess(""), 3000)
       
     } catch (error: unknown) {
       console.error('Error al eliminar usuario:', error)
@@ -230,6 +233,12 @@ export default function UsuariosPage() {
             </Box>
           ) : (
             <>
+              {/* Alerta de éxito */}
+              {success && (
+                <Alert severity="success" sx={{ mb: 2, maxWidth: 600, mx: "auto" }}>
+                  {success}
+                </Alert>
+              )}
               {/* Barra de búsqueda */}
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ maxWidth: 600, mx: "auto" }}>
@@ -377,6 +386,7 @@ export default function UsuariosPage() {
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 3, flex: 1 }}>
                             <Avatar 
+                              src={usuario.urlFoto}
                               sx={{ 
                                 width: 48, 
                                 height: 48, 
@@ -384,8 +394,9 @@ export default function UsuariosPage() {
                                 fontSize: '1.1rem',
                                 fontWeight: 600 
                               }}
+                              alt={usuario.nombre}
                             >
-                              {getInitials(usuario.nombre)}
+                              {!usuario.urlFoto && getInitials(usuario.nombre)}
                             </Avatar>
 
                             <Box sx={{ 
@@ -417,30 +428,36 @@ export default function UsuariosPage() {
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
                                   Fecha de creación
                                 </Typography>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                  <CalendarIcon sx={{ fontSize: 16, color: "#6b7280" }} />
-                                  <Typography variant="body1" sx={{ color: "white" }}>
-                                    {formatDate(usuario.fechaCreacion)}
-                                  </Typography>
+                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: "center" }}>
+                                    <CalendarIcon sx={{ fontSize: 16, color: "#6b7280" }} />
+                                    <Typography variant="body1" sx={{ color: "white" }}>
+                                      {formatDate(usuario.fechaCreacion)}
+                                    </Typography>
+                                  </Box>
                                 </Box>
                               </Box>
                             </Box>
                           </Box>
 
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            startIcon={<DeleteIcon />}
-                            onClick={() => handleDeleteUser(usuario.id)}
-                            sx={{
-                              bgcolor: '#dc2626',
-                              '&:hover': { bgcolor: '#b91c1c' },
-                              textTransform: 'none',
-                            }}
-                          >
-                            Eliminar
-                          </Button>
+                          {usuario.tipoUsuario !== 'admin' ? (
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDeleteUser(usuario.id)}
+                              sx={{
+                                bgcolor: '#dc2626',
+                                '&:hover': { bgcolor: '#b91c1c' },
+                                textTransform: 'none',
+                              }}
+                            >
+                              Eliminar
+                            </Button>
+                          ) : (
+                            <Box sx={{ width: 120, height: 40 }} />
+                          )}
                         </Box>
                       </CardContent>
                     </Card>
