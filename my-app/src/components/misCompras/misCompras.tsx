@@ -128,9 +128,9 @@ export default function MisComprasPage() {
   
   const navigate = useNavigate()
   // Navegación a la página de producto
-  const handleProductClick = (productId: number | null, productName: string) => {
-    if (productId !== null) {
-      navigate("/producto", { state: { productId, productName } })
+  const handleProductClick = (productId: number | null, productType?: string) => {
+    if (productId !== null && productType) {
+      navigate("/producto", { state: { id: productId, tipo: productType} })
     }
   }
   
@@ -561,7 +561,7 @@ export default function MisComprasPage() {
                           }}
                           onClick={() => handleProductClick(
                             getProductId(venta),
-                            getProductName(venta)
+                            venta.juego ? "juego" : venta.servicio ? "servicio" : venta.complemento ? "complemento" : undefined
                           )}
                         >
                           {(getProductName(venta)) ?? "Producto desconocido"}

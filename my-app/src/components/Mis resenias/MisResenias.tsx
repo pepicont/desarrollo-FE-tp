@@ -248,10 +248,18 @@ export default function MisResenasPage() {
     return '/vite.svg'
   }
 
-  const handleProductClick = (productId: number, productName: string) => {
-    // Navega a la página de producto; enviamos estado por si se quiere usar luego
-    navigate("/producto", { state: { productId, productName } })
-  }
+  const handleProductClick = (ventaId: number) => {
+    // Detectar tipo de producto
+    const resenia = resenias.find(r => r.venta.id === ventaId);
+    if (resenia){
+    let tipo: 'juego' | 'servicio' | 'complemento' | undefined;
+    if (resenia?.venta.juego) tipo = 'juego';
+    else if (resenia?.venta.servicio) tipo = 'servicio';
+    else if (resenia?.venta.complemento) tipo = 'complemento';
+    if (ventaId && tipo) {
+      navigate('/producto', { state: { id: resenia.venta[tipo]?.id, tipo} });
+    }
+  }}
 
   // Funciones para el modal reutilizable
   const handleEditClick = (reseniaId: number) => {
@@ -627,7 +635,7 @@ export default function MisResenasPage() {
                             textDecoration: "underline",
                             "&:hover": { color: "#6ba3f0" },
                           }}
-                          onClick={() => handleProductClick(resenia.venta.id, getProductName(resenia.venta))}
+                          onClick={() => handleProductClick(resenia.venta.id)}
                         >
                           {getProductName(resenia.venta)}
                         </Typography>
