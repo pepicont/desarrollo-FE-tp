@@ -32,6 +32,7 @@ import {
   Close as CloseIcon,
   SportsEsports as SportsEsportsIcon,
   Home as HomeIcon,
+  Business as BusinessIcon,
   Close,
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
@@ -77,6 +78,7 @@ const adminMenuItems = [
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Usuarios", icon: <PersonIcon />, href: "/admin/usuarios" },
   { text: "Reseñas", icon: <ReviewIcon />, href: "/admin/resenias" },
+  { text: "Compañías", icon: <BusinessIcon />, href: "/admin/companias" },
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
