@@ -372,6 +372,7 @@ export default function AdminCompaniasPage() {
                   <Button
                     variant="contained"
                     onClick={() => setAddModalOpen(true)}
+                    startIcon={<BusinessIcon />}
                     sx={{
                       background: "#3a7bd5",
                       color: "white",
@@ -381,12 +382,12 @@ export default function AdminCompaniasPage() {
                       borderRadius: 2,
                       textTransform: "none",
                       boxShadow: "none",
+                      transition: "all 0.3s ease",
                       "&:hover": {
                         background: "#2c5aa0",
                         boxShadow: "none",
                         transform: "none",
                       },
-                      transition: "all 0.3s ease",
                     }}
                   >
                     Agregar Compañía
