@@ -31,9 +31,6 @@ import MailIcon from "@mui/icons-material/Mail"
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
 import EditIcon from "@mui/icons-material/Edit"
 import KeyIcon from '@mui/icons-material/Key';
-import avatar1 from "../../assets/cyberpunk.jpg"
-import avatar2 from "../../assets/fifa24.jpg"
-import avatar3 from "../../assets/mw3.jpg"
 import { authService } from "../../services/authService"
 import { getUserProfile, updateUserProfile } from "../../services/profileService"
 import { mailService } from '../../services/mailService'
@@ -48,7 +45,33 @@ const darkTheme = createTheme({
   },
 })
 
-const preloadedAvatars = [avatar1, avatar2, avatar3]
+// Lista de 24 avatares públicos (Cloudinary)
+const avatarOptions = [
+  { name: "Astro", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/astro.png" },
+  { name: "G.O.A.T", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/avatar_cabra.jpg" },
+  { name: "Calamardo", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/calamardo.jpg" },
+  { name: "Daft Punk", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/daft_punk.jpg" },
+  { name: "Doom", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/doom.jpg" },
+  { name: "Dune", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/dune.jpg" },
+  { name: "Ghost", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/ghost.jpg" },
+  { name: "Hagrid", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/hagrid.jpg" },
+  { name: "Harry Potter", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/harry_potter.png" },
+  { name: "Jake", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/jake.png" },
+  { name: "Jawa", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/jawa.png" },
+  { name: "Linux", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/linux.png" },
+  { name: "Mart McFly", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/mart_mcfly.jpg" },
+  { name: "Minion", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/minion.jpg" },
+  { name: "R6", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/r6.jpg" },
+  { name: "Rabbit", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/rabbit.png" },
+  { name: "Silksong", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/silksong.jpg" },
+  { name: "Soldier", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/soldier.jpg" },
+  { name: "Stormtrooper", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/stormtrooper.jpg" },
+  { name: "Terrorist", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/terrorist.jpg" },
+  { name: "TF2", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/tf2.png" },
+  { name: "Tron", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/tron.jpg" },
+  { name: "WW1", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/ww1.png" },
+  { name: "Yoda", url: "https://res.cloudinary.com/dbrfi383s/image/upload/usuario/yoda.jpg" },
+];
 
 export default function Profile() {
   // Estado para mostrar los campos de contraseña
@@ -71,7 +94,8 @@ export default function Profile() {
   };
 
   const [isEditing, setIsEditing] = useState(false)
-  const [selectedAvatar, setSelectedAvatar] = useState<string>(preloadedAvatars[0])
+  // El valor inicial se setea al cargar el perfil
+  const [selectedAvatar, setSelectedAvatar] = useState<string>("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -88,6 +112,7 @@ export default function Profile() {
     email: "",
     birthDate: "",
     accountCreated: "",
+    avatarUrl: "", // url_foto
   })
 
   const [editData, setEditData] = useState(userData)
@@ -113,9 +138,11 @@ export default function Profile() {
           email: profile.mail,
           birthDate: formatUTCDate(profile.fechaNacimiento),
           accountCreated: formatUTCDate(profile.fechaCreacion),
+          avatarUrl: profile.urlFoto || avatarOptions[0].url,
         }
         setUserData(updatedUserData)
         setEditData(updatedUserData)
+  setSelectedAvatar(profile.urlFoto || avatarOptions[0].url)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError('Error al cargar el perfil')
@@ -182,6 +209,7 @@ export default function Profile() {
         nombreUsuario: editData.username,
         mail: editData.email,
         fechaNacimiento: editData.birthDate,
+        urlFoto: selectedAvatar,
       }
 
       // Usar el servicio updateUserProfile
@@ -211,12 +239,13 @@ export default function Profile() {
         }
         return;
       }
+
       // Guardar mail y username viejos antes de actualizar el estado
       const oldEmail = userData.email;
       const oldUsername = userData.username;
 
       // Si todo ok
-      setUserData(editData);
+      setUserData({ ...editData, avatarUrl: selectedAvatar });
       setIsEditing(false);
       setSuccessMessage('Perfil actualizado correctamente');
       setNewPassword("");
@@ -237,6 +266,7 @@ export default function Profile() {
             const userObj = JSON.parse(userRaw);
             userObj.mail = editData.email;
             userObj.nombre = editData.realName;
+            userObj.urlFoto = selectedAvatar; // Actualiza la foto en storage
             storage.setItem('user', JSON.stringify(userObj));
           }
         } catch (e) {
@@ -387,7 +417,7 @@ export default function Profile() {
               <Card sx={{ bgcolor: "background.paper", border: "1px solid #2a3441" }}>
                 <CardContent sx={{ p: 3, textAlign: "center" }}>
                   <Box sx={{ mb: 3 }}>
-                    <Avatar src={selectedAvatar} alt="Foto de perfil" sx={{ width: 128, height: 128, mx: "auto" }} />
+                    <Avatar src={selectedAvatar || userData.avatarUrl || avatarOptions[0].url} alt="Foto de perfil" sx={{ width: 128, height: 128, mx: "auto" }} />
                     {isEditing && (
                       <Box sx={{ mt: 2 }}>
                         <FormControl fullWidth size="small">
@@ -397,10 +427,17 @@ export default function Profile() {
                             label="Seleccionar foto"
                             value={selectedAvatar}
                             onChange={(e) => setSelectedAvatar(e.target.value as string)}
+                            renderValue={(selected) => {
+                              const found = avatarOptions.find(a => a.url === selected);
+                              return found ? found.name : "Seleccionar foto";
+                            }}
                           >
-                            {preloadedAvatars.map((avatar, index) => (
-                              <MenuItem key={avatar} value={avatar}>
-                                Avatar {index + 1}
+                            {avatarOptions.map((avatar) => (
+                              <MenuItem key={avatar.url} value={avatar.url}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Avatar src={avatar.url} alt={avatar.name} sx={{ width: 32, height: 32 }} />
+                                  <span>{avatar.name}</span>
+                                </Box>
                               </MenuItem>
                             ))}
                           </Select>

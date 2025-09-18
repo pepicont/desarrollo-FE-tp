@@ -22,7 +22,6 @@ import {
 import {
   Menu as MenuIcon,
   Search as SearchIcon,
-  Person as PersonIcon,
   Info as InfoIcon,
   /*ShoppingCart as ShoppingCartIcon,*/
   ShoppingBag as ShoppingBagIcon,
@@ -94,19 +93,18 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     }
     return !!user && !!token;
   });
-  const [nombre, setNombre] = React.useState("Usuario sin nombre");
-  
-  React.useEffect(() => {
-    if (!isLoggedIn) return;  // Si no está logueado, no hacer nada
 
+  // Elimina el estado local 'nombre' y usa una función para obtener el nombre actual
+  function getNombreUsuario() {
     const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (user) {
       const parsed = JSON.parse(user);
       const fullName = parsed.nombre || "Usuario sin nombre";
-      const firstName = fullName.split(" ")[0];
-      setNombre(firstName);
+      return fullName.split(" ")[0];
     }
-  }, [isLoggedIn]);
+    return "Usuario sin nombre";
+  }
+
 
   const [activeItem, setActiveItem] = React.useState<string>(() => {
     try {
@@ -229,10 +227,12 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
 
     const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     let userEmail = "";
+    let avatarUrl: string | undefined = undefined;
     if (user) {
        try {
     const parsed = JSON.parse(user);
     userEmail = parsed.mail || parsed.email || "";
+    avatarUrl = parsed.avatarUrl || parsed.urlFoto;
   } catch {console.log("Error parsing user data")}
             }
 
@@ -297,12 +297,11 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
               </IconButton>
             )} */}
             <Typography variant="body1" className="hide-on-mobile" sx={{ mr: 1 }}>
-              Hola, {nombre}!
+              Hola, {getNombreUsuario()}!
             </Typography>
             <IconButton color="inherit" onClick={handleProfileMenuOpen}>
-              <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
-                <PersonIcon />
-              </Avatar>
+              {/* Mostrar siempre el avatar del usuario */}
+              <Avatar src={avatarUrl} sx={{ width: 32, height: 32 }} />
             </IconButton>
           </Box>}
 
@@ -614,3 +613,4 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     
   )
 }
+
