@@ -23,3 +23,28 @@ export async function updateUserProfile(token: string, userId: number, updateDat
   if (!response.ok) throw await response.json();
   return await response.json();
 }
+
+export async function signupUser({ email, password, name, username, birthDate }: {
+  email: string;
+  password: string;
+  name: string;
+  username: string;
+  birthDate: string;
+}) {
+  const response = await fetch('http://localhost:3000/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mail: email,
+      contrasenia: password,
+      nombre: name,
+      nombreUsuario: username,
+      fechaNacimiento: birthDate,
+    })
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw result;
+  }
+  return result;
+}

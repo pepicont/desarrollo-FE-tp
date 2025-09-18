@@ -27,6 +27,7 @@ import AppTheme from '../shared-theme/AppTheme'
 import { SitemarkIcon } from "../sign-in/components/CustomIcons"
 import { useEffect } from "react"
 import { authService } from "../../services/authService.ts"
+import { signupUser } from '../../services/profileService';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -319,45 +320,32 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     try {
       console.log("Registration attempt:", formData)
 
-      // Llamada real al backend
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mail: formData.email,
-          contrasenia: formData.password,
-          nombre: formData.name,
-          nombreUsuario: formData.username,
-          fechaNacimiento: formData.birthDate
-        })
-      })
+      // Usar el servicio migrado
+      const result = await signupUser({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        username: formData.username,
+        birthDate: formData.birthDate
+      });
 
-      const result = await response.json()
-
-      if (response.ok) {
-        setRegisterSuccess(true)
-        setRegisterError("")
-        // Enviar mail de bienvenida
-        try {
-          await import('../../services/mailService').then(({ mailService }) =>
-            mailService.welcome(formData.email, formData.name)
-          )
-        } catch (e) {
-          // No bloquear registro si falla el mail
-          console.error('Error enviando mail de bienvenida:', e)
-        }
-        // Redirigir al login después de 2 segundos para que el usuario pueda iniciar sesión
-        setTimeout(() => {
-          window.location.href = '/login'
-        }, 2000)
-      } else {
-        setRegisterError(result.message || "Error en el registro")
+      setRegisterSuccess(true)
+      setRegisterError("")
+      // Enviar mail de bienvenida
+      try {
+        await import('../../services/mailService').then(({ mailService }) =>
+          mailService.welcome(result.email, result.name)
+        )
+      } catch (e) {
+        // No bloquear registro si falla el mail
+        console.error('Error enviando mail de bienvenida:', e)
       }
+      // Redirigir al login después de 2 segundos para que el usuario pueda iniciar sesión
+      setTimeout(() => {
+        window.location.href = '/login'
+      }, 2000)
     } catch (error: unknown) {
-      console.error("Error en registro:", error)
-      setRegisterError("Error de conexión. Verifica que el servidor esté ejecutándose.")
+      setRegisterError((error as Error)?.message || "Error en el registro")
     } finally {
       setIsLoading(false)
     }
