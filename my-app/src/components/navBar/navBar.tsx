@@ -60,15 +60,23 @@ const StyledListItem = styled(ListItem)<{ isActive?: boolean }>(() => ({
   },
 }))
 
-
-
-const baseMenuItems = [
+// Menú para usuarios normales
+const userMenuItems = [
   { text: "Home", icon: <HomeIcon />, href: "/" },
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Mis compras", icon: <ShoppingBagIcon />, href: "/mis-compras" },
   { text: "Mis reseñas", icon: <ReviewIcon />, href: "/mis-resenas" },
   { text: "Acerca de nosotros", icon: <InfoIcon />, href: "/about-us" },
   { text: "Contáctenos", icon: <ContactIcon /> },
+  { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
+]
+
+// Menú para administradores
+const adminMenuItems = [
+  { text: "Home", icon: <HomeIcon />, href: "/" },
+  { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
+  { text: "Usuarios", icon: <PersonIcon />, href: "/admin/usuarios" },
+  { text: "Reseñas", icon: <ReviewIcon />, href: "/admin/resenias" },
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
@@ -95,18 +103,56 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     return !!user && !!token;
   });
   const [nombre, setNombre] = React.useState("Usuario sin nombre");
+  const [isAdmin, setIsAdmin] = React.useState(false);
   
   React.useEffect(() => {
-    if (!isLoggedIn) return;  // Si no está logueado, no hacer nada
+    if (!isLoggedIn) {
+      setIsAdmin(false);
+      return;
+    }
 
     const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (user) {
-      const parsed = JSON.parse(user);
-      const fullName = parsed.nombre || "Usuario sin nombre";
-      const firstName = fullName.split(" ")[0];
-      setNombre(firstName);
+      try {
+        const parsed = JSON.parse(user);
+        const fullName = parsed.nombre || "Usuario sin nombre";
+        const firstName = fullName.split(" ")[0];
+        setNombre(firstName);
+        
+        // Verificar si es administrador
+        setIsAdmin(parsed.tipoUsuario === 'Administrador');
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        setIsAdmin(false);
+      }
     }
   }, [isLoggedIn]);
+
+  // Función para obtener el menú según el tipo de usuario
+  const getCurrentMenuItems = () => {
+    return isAdmin ? adminMenuItems : userMenuItems;
+  };
+
+  // Actualizar activeItem cuando cambie el tipo de usuario
+  React.useEffect(() => {
+    try {
+      const path = window.location.pathname
+      if (path.startsWith("/productos") || path.startsWith("/producto")) {
+        setActiveItem("Productos")
+        return
+      }
+      
+      const currentMenu = isAdmin ? adminMenuItems : userMenuItems
+      const items = currentMenu.filter((i) => i.href && !i.isLogout)
+      const match = items
+        .slice()
+        .sort((a, b) => (b.href!.length - a.href!.length))
+        .find((i) => (i.href === "/" ? path === "/" : path.startsWith(i.href!)))
+      setActiveItem(match?.text ?? "Home")
+    } catch {
+      setActiveItem("Home")
+    }
+  }, [isAdmin]);
 
   const [activeItem, setActiveItem] = React.useState<string>(() => {
     try {
@@ -114,7 +160,8 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
       if (path.startsWith("/productos") || path.startsWith("/producto")) {
         return "Productos"
       }
-      const items = baseMenuItems.filter((i) => i.href && !i.isLogout)
+      // Usar menú de usuario por defecto en la inicialización
+      const items = userMenuItems.filter((i) => i.href && !i.isLogout)
       const match = items
         .slice()
         .sort((a, b) => (b.href!.length - a.href!.length))
@@ -326,7 +373,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             </Typography>
           </Box>
           <List sx={{ pt: 1 }}>
-            {baseMenuItems
+            {getCurrentMenuItems()
               .filter((item) => !item.isLogout || isLoggedIn)
               .map((item) => (
                 <StyledListItem
