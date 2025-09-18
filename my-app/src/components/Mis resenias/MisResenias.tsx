@@ -16,17 +16,21 @@ import {
   FormControl,
   Select,
   MenuItem,
+  TextField,
+  InputAdornment,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
 import EditIcon from "@mui/icons-material/Edit"
+import SearchIcon from "@mui/icons-material/Search"
 import { useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
 import { updateResenia, deleteResenia } from "../../services/reseniasService"
 import { getUserResenias } from "../../services/reseniasService"
 import ReviewModal from "../shared-components/ReviewModal"
 //import Footer from "../footer/footer"
+import ModernPagination from "../shared-components/ModernPagination"
 
 const darkTheme = createTheme({
   palette: {
@@ -104,13 +108,23 @@ export default function MisResenasPage() {
   
   // Estado para el filtro de fecha
   const [dateFilter, setDateFilter] = useState<string>("todas")
+  
+  const [searchQuery, setSearchQuery] = useState("")
+  const [tempSearchQuery, setTempSearchQuery] = useState("")
+  const [itemsPerPage, setItemsPerPage] = useState(15)
 
   // Estados para alertas de éxito y eliminación
   const [successAlert, setSuccessAlert] = useState(false);
   const [deleteAlert, setDeleteAlert] = useState(false);
   
-  const PAGE_SIZE = 24;
   const [page, setPage] = useState(1);
+
+  // Sincronizar tempSearchQuery con searchQuery cuando se limpia desde clearFilters
+  useEffect(() => {
+    if (searchQuery === "") {
+      setTempSearchQuery("");
+    }
+  }, [searchQuery]);
 
   // Cargar reseñas del usuario autenticado
   useEffect(() => {
@@ -187,48 +201,72 @@ export default function MisResenasPage() {
     return date.toLocaleDateString("es-ES")
   }
 
-  // Función para filtrar reseñas por fecha
-  const filterReseniasByDate = (resenias: Resenia[]) => {
-    if (dateFilter === "todas") return resenias;
+  // Función de filtrado avanzado
+  const getFilteredResenias = () => {
+    return resenias.filter((resenia: Resenia) => {
+      // Obtener nombre del producto inline
+      const productName = resenia.venta.juego?.nombre || 
+                         resenia.venta.servicio?.nombre || 
+                         resenia.venta.complemento?.nombre || 
+                         "Producto desconocido";
+      
+      // Filtro por búsqueda de texto
+      const matchesSearch = searchQuery === "" || 
+        productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resenia.detalle.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const now = new Date();
-    
-    return resenias.filter((resenia) => {
-      const reseniaDate = new Date(resenia.fecha);
-      switch (dateFilter) {
-        case "este-mes":
-          return reseniaDate.getMonth() === now.getMonth() && 
-                 reseniaDate.getFullYear() === now.getFullYear();
-        case "mes-pasado": {
-          const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
-          return reseniaDate.getMonth() === lastMonth.getMonth() && 
-                 reseniaDate.getFullYear() === lastMonth.getFullYear();
+      // Filtro por fecha
+      let matchesDate = true;
+      if (dateFilter !== "todas") {
+        const reseniaDate = new Date(resenia.fecha);
+        const now = new Date();
+        
+        switch (dateFilter) {
+          case "este-mes":
+            matchesDate = reseniaDate.getMonth() === now.getMonth() && 
+                         reseniaDate.getFullYear() === now.getFullYear();
+            break;
+          case "mes-pasado": {
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
+            matchesDate = reseniaDate.getMonth() === lastMonth.getMonth() && 
+                         reseniaDate.getFullYear() === lastMonth.getFullYear();
+            break;
+          }
+          case String(new Date().getFullYear()):
+            matchesDate = reseniaDate.getFullYear() === new Date().getFullYear();
+            break;
+          case "2024":
+            matchesDate = reseniaDate.getFullYear() === 2024;
+            break;
+          case "2023":
+            matchesDate = reseniaDate.getFullYear() === 2023;
+            break;
+          case "2022":
+            matchesDate = reseniaDate.getFullYear() === 2022;
+            break;
+          case "2021":
+            matchesDate = reseniaDate.getFullYear() === 2021;
+            break;
+          case "anteriores":
+            matchesDate = reseniaDate.getFullYear() <= 2020;
+            break;
+          default:
+            matchesDate = true;
         }
-        case String(new Date().getFullYear()):
-          return reseniaDate.getFullYear() === new Date().getFullYear();
-        case "2024":
-          return reseniaDate.getFullYear() === 2024;
-        case "2023":
-          return reseniaDate.getFullYear() === 2023;
-        case "2022":
-          return reseniaDate.getFullYear() === 2022;
-        case "2021":
-          return reseniaDate.getFullYear() === 2021;
-        case "anteriores":
-          return reseniaDate.getFullYear() <= 2020;
-        default:
-          return true;
       }
+
+      return matchesSearch && matchesDate;
     });
   };
 
-  // Obtener reseñas filtradas
-  const filteredResenias = filterReseniasByDate(resenias);
-  const totalPages = Math.max(1, Math.ceil(filteredResenias.length / PAGE_SIZE));
-  const paginatedResenias = filteredResenias.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filteredResenias = getFilteredResenias();
+  const totalPages = Math.max(1, Math.ceil(filteredResenias.length / itemsPerPage));
+  const paginatedResenias = filteredResenias.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   // Volver a la primera página al cambiar el filtro
-  useEffect(() => { setPage(1) }, [dateFilter, resenias.length]);
+  useEffect(() => { setPage(1) }, [searchQuery, dateFilter, resenias.length, itemsPerPage]);
+
+  // Función para limpiar todos los filtros
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: Resenia["venta"]) => {
@@ -482,6 +520,34 @@ export default function MisResenasPage() {
             </Typography>
           </Box>
 
+          {/* Barra de búsqueda */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              placeholder="Buscar en mis reseñas..."
+              value={tempSearchQuery}
+              onChange={(e) => setTempSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSearchQuery(tempSearchQuery);
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "background.paper",
+                  borderRadius: 3,
+                },
+              }}
+            />
+          </Box>
+
           {/* Título con filtro centrado y botón Nueva reseña */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", flexGrow: 1 }}>
@@ -582,11 +648,82 @@ export default function MisResenasPage() {
             </Button>
           </Box>
 
-          {/* Contador */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          {/* Contador y selector de items por página */}
+          <Box sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
+          }}>
+            <Typography variant="body2" sx={{ color: "#6b7280" }}>
               Mostrando {filteredResenias.length} de {resenias.length} reseñas
             </Typography>
+            
+            {/* Selector de items per page */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                Mostrar:
+              </Typography>
+              <FormControl size="small">
+                <Select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    setPage(1);  // Primero resetear la página
+                    setItemsPerPage(newValue);  // Luego cambiar los items
+                  }}
+                  sx={{
+                    minWidth: 70,
+                    height: 32,
+                    backgroundColor: '#2a3441',
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '& .MuiSelect-select': {
+                      color: '#9ca3af',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      padding: '6px 8px',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#6b7280',
+                    },
+                    '&:hover': {
+                      backgroundColor: '#374151',
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#1e2532',
+                        border: '1px solid #374151',
+                        borderRadius: 2,
+                        '& .MuiMenuItem-root': {
+                          color: 'white',
+                          fontSize: '0.875rem',
+                          '&:hover': {
+                            backgroundColor: '#374151',
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: '#3a7bd5',
+                            '&:hover': {
+                              backgroundColor: '#2c5aa0',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value={15}>15</MenuItem>
+                  <MenuItem value={30}>30</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
           {/* Lista de reseñas */}
@@ -685,17 +822,13 @@ export default function MisResenasPage() {
                   </CardContent>
                 </Card>
               ))}
-              {/* Paginación al pie con flechas */}
+              {/* Paginación moderna */}
               {filteredResenias.length > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
-                  <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
-                    ← Anterior
-                  </Button>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Página {page} de {totalPages}</Typography>
-                  <Button variant="outlined" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
-                    Siguiente →
-                  </Button>
-                </Box>
+                <ModernPagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
               )}
             </Box>
           )}
