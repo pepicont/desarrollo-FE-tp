@@ -13,6 +13,7 @@ import BuscarProductos from './components/BuscarProductos/BuscarProductos.tsx'
 import AboutUs from './components/aboutUs/aboutUs.tsx';
 import Usuarios from './components/Usuarios/Usuarios.tsx';
 import ProtectedRoute from './components/shared-theme/ProtectedRoute.tsx';
+import ProtectedAdminRoute from './components/shared-theme/ProtectedAdminRoute.tsx';
 
 
 
@@ -52,7 +53,9 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path="/usuarios" element={
+          <ProtectedAdminRoute>
             <Usuarios />
+          </ProtectedAdminRoute>
         } />
       </Routes>
       </Router>
