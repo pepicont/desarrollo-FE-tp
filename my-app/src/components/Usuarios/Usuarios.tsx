@@ -16,6 +16,11 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material"
 import {
   Search as SearchIcon,
@@ -56,6 +61,11 @@ export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  
+  // Estados para el modal de confirmación de eliminación
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<Usuario | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   
   // Estados para búsqueda y filtros
   const [searchQuery, setSearchQuery] = useState("")
@@ -156,22 +166,47 @@ export default function UsuariosPage() {
     fetchUsuarios()
   }, [])
 
-  // Función para eliminar usuario
-  const handleDeleteUser = async (userId: number) => {
-    // TODO: Agregar confirmación modal
+  // Función para abrir modal de confirmación
+  const handleDeleteUser = (userId: number) => {
+    const usuario = usuarios.find(u => u.id === userId)
+    if (usuario) {
+      setUserToDelete(usuario)
+      setDeleteModalOpen(true)
+    }
+  }
+
+  // Función para confirmar eliminación
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
+
+    setDeleteLoading(true)
     try {
       const token = authService.getToken()
+      
       if (!token) {
         setError("No estás autenticado")
         return
       }
       
-      await deleteUsuario(token, userId)
-      setUsuarios(prev => prev.filter(user => user.id !== userId))
+      await deleteUsuario(token, userToDelete.id)
+      setUsuarios(prev => prev.filter(user => user.id !== userToDelete.id))
+      
+      // Cerrar modal y limpiar
+      setDeleteModalOpen(false)
+      setUserToDelete(null)
+      
     } catch (error: unknown) {
       console.error('Error al eliminar usuario:', error)
       setError("Error al eliminar el usuario")
+    } finally {
+      setDeleteLoading(false)
     }
+  }
+
+  // Función para cancelar eliminación
+  const cancelDeleteUser = () => {
+    setDeleteModalOpen(false)
+    setUserToDelete(null)
   }
 
   return (
@@ -425,6 +460,77 @@ export default function UsuariosPage() {
           )}
         </Container>
       </Box>
+
+      {/* Modal de confirmación para eliminar usuario */}
+      <Dialog
+        open={deleteModalOpen}
+        onClose={cancelDeleteUser}
+        PaperProps={{
+          sx: {
+            bgcolor: "#141926",
+            border: "2px solid #ef4444",
+            borderRadius: 3,
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: "#ef4444", fontWeight: "bold" }}>
+          ⚠️ Eliminar Usuario
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: "#b0b0b0" }}>
+            ¿Estás seguro de que quieres eliminar a <strong style={{ color: "#ffffff" }}>{userToDelete?.nombreUsuario}</strong>?
+            <br /><br />
+            Esta acción no se puede deshacer y eliminará todos los datos asociados al usuario.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{
+          p: 3,
+          gap: 2,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          width: '100%',
+        }}>
+          <Button 
+            onClick={cancelDeleteUser}
+            variant="outlined"
+            sx={{
+              color: "#b0b0b0",
+              borderColor: "#2a3441",
+              width: { xs: '100%', sm: 'auto' },
+              mb: { xs: 1, sm: 0 },
+              "&:hover": {
+                borderColor: "#4a90e2",
+                color: "#4a90e2",
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={confirmDeleteUser}
+            variant="contained"
+            disabled={deleteLoading}
+            sx={{
+              backgroundColor: "#ef4444",
+              width: { xs: '100%', sm: 'auto' },
+              mb: { xs: 1, sm: 0 },
+              "&:hover": {
+                backgroundColor: "#dc2626",
+              },
+            }}
+          >
+            {deleteLoading ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress size={20} color="inherit" />
+                <span>Eliminando...</span>
+              </Box>
+            ) : (
+              "Sí, eliminar"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   )
 }

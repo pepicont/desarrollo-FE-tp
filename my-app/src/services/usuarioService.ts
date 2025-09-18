@@ -39,8 +39,13 @@ export async function deleteUsuario(token: string, usuarioId: number): Promise<v
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw { status: response.status, ...error }
+    let errorData;
+    try {
+      errorData = await response.json()
+    } catch {
+      errorData = { message: `Error ${response.status}: ${response.statusText}` }
+    }
+    throw { status: response.status, ...errorData }
   }
 }
 
