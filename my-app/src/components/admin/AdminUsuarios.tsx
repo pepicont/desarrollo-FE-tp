@@ -486,7 +486,7 @@ export default function UsuariosPage() {
         <DialogActions sx={{
           p: 3,
           gap: 2,
-          display: 'flex',
+          display: 'flex', 
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: { xs: 'stretch', sm: 'center' },
           width: '100%',

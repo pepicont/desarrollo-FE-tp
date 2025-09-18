@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   Rating,
-  IconButton,
   CircularProgress,
   Alert,
   Button,
@@ -20,15 +19,19 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   Chip,
 } from "@mui/material"
+import {
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowDownward as ArrowDownIcon,
+} from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
-import DeleteIcon from "@mui/icons-material/Delete"
-import SearchIcon from "@mui/icons-material/Search"
-import WarningIcon from "@mui/icons-material/Warning"
 import { authService } from "../../services/authService"
 import { deleteReseniaAsAdmin, getAllResenasAdmin, type AdminResenia } from "../../services/reseniasService"
 import ModernPagination from "../shared-components/ModernPagination"
@@ -69,11 +72,18 @@ export default function AdminResenasPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [tempSearchQuery, setTempSearchQuery] = useState("")
   const [itemsPerPage, setItemsPerPage] = useState(15)
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc') // Por defecto más recientes primero
 
   // Estados para alertas
   const [deleteAlert, setDeleteAlert] = useState(false)
 
   const [page, setPage] = useState(1)
+
+  // Función para alternar el orden de clasificación
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')
+    setPage(1) // Reset page when changing sort
+  }
 
   // Sincronizar tempSearchQuery con searchQuery cuando se limpia
   useEffect(() => {
@@ -122,9 +132,9 @@ export default function AdminResenasPage() {
     return date.toLocaleDateString("es-ES")
   }
 
-  // Función de filtrado avanzado
+  // Función de filtrado y ordenamiento
   const getFilteredResenias = () => {
-    return resenias.filter((resenia: AdminResenia) => {
+    const filtered = resenias.filter((resenia: AdminResenia) => {
       // Obtener nombre del producto
       const productName =
         resenia.venta.juego?.nombre ||
@@ -181,6 +191,18 @@ export default function AdminResenasPage() {
 
       return matchesSearch && matchesDate
     })
+
+    // Aplicar ordenamiento
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.fecha).getTime()
+      const dateB = new Date(b.fecha).getTime()
+      
+      if (sortOrder === 'desc') {
+        return dateB - dateA // Más recientes primero
+      } else {
+        return dateA - dateB // Más antiguos primero
+      }
+    })
   }
 
   const filteredResenias = getFilteredResenias()
@@ -190,7 +212,7 @@ export default function AdminResenasPage() {
   // Volver a la primera página al cambiar el filtro
   useEffect(() => {
     setPage(1)
-  }, [searchQuery, dateFilter, resenias.length, itemsPerPage])
+  }, [searchQuery, dateFilter, resenias.length, itemsPerPage, sortOrder])
 
   // Extrae el nombre del producto de una venta
   const getProductName = (venta: AdminResenia["venta"]) => {
@@ -514,6 +536,19 @@ export default function AdminResenasPage() {
                 </Select>
               </FormControl>
             </Box>
+
+            <Button
+              variant="outlined"
+              startIcon={sortOrder === 'desc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
+              onClick={toggleSortOrder}
+              sx={{
+                borderColor: "#4b5563",
+                color: "white",
+                "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+              }}
+            >
+              {sortOrder === 'desc' ? 'Más antiguos' : 'Más recientes'}
+            </Button>
           </Box>
 
           {/* Lista de reseñas */}
@@ -615,28 +650,22 @@ export default function AdminResenasPage() {
                       </Box>
 
                       {/* Botón de eliminar */}
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <IconButton
-                          onClick={() => handleDeleteClick(resenia.id)}
-                          disabled={deleteLoading === resenia.id}
-                          sx={{
-                            bgcolor: "#d32f2f",
-                            color: "white",
-                            "&:hover": { bgcolor: "#b71c1c" },
-                            "&:disabled": { bgcolor: "#424242" },
-                            mb: 1,
-                          }}
-                        >
-                          {deleteLoading === resenia.id ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : (
-                            <DeleteIcon />
-                          )}
-                        </IconButton>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                          Eliminar
-                        </Typography>
-                      </Box>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        startIcon={deleteLoading === resenia.id ? <CircularProgress size={16} color="inherit" /> : <DeleteIcon />}
+                        onClick={() => handleDeleteClick(resenia.id)}
+                        disabled={deleteLoading === resenia.id}
+                        sx={{
+                          bgcolor: '#dc2626',
+                          '&:hover': { bgcolor: '#b91c1c' },
+                          textTransform: 'none',
+                          minWidth: 'auto',
+                        }}
+                      >
+                        {deleteLoading === resenia.id ? 'Eliminando...' : 'Eliminar'}
+                      </Button>
                     </Box>
                   </CardContent>
                 </Card>
@@ -656,34 +685,67 @@ export default function AdminResenasPage() {
           onClose={handleDeleteCancel}
           PaperProps={{
             sx: {
-              bgcolor: "#1e2532",
-              border: "1px solid #2a3441",
+              bgcolor: "#141926",
+              border: "2px solid #ef4444",
+              borderRadius: 3,
             },
           }}
         >
-          <DialogTitle sx={{ color: "white", display: "flex", alignItems: "center", gap: 1 }}>
-            <WarningIcon sx={{ color: "#ff9800" }} />
-            Confirmar Eliminación
+          <DialogTitle sx={{ color: "#ef4444", fontWeight: "bold" }}>
+            ⚠️ Eliminar Reseña
           </DialogTitle>
           <DialogContent>
-            <Typography sx={{ color: "text.secondary" }}>
-              ¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.
-            </Typography>
+            <DialogContentText sx={{ color: "#b0b0b0" }}>
+              ¿Estás seguro de que quieres eliminar esta reseña?
+              <br /><br />
+              Esta acción no se puede deshacer y eliminará todos los datos asociados a la reseña.
+            </DialogContentText>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleDeleteCancel} sx={{ color: "#9ca3af" }}>
+          <DialogActions sx={{
+            p: 3,
+            gap: 2,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            width: '100%',
+          }}>
+            <Button 
+              onClick={handleDeleteCancel}
+              variant="outlined"
+              sx={{
+                color: "#b0b0b0",
+                borderColor: "#2a3441",
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                "&:hover": {
+                  borderColor: "#4a90e2",
+                  color: "#4a90e2",
+                },
+              }}
+            >
               Cancelar
             </Button>
-            <Button
+            <Button 
               onClick={handleDeleteConfirm}
               variant="contained"
-              sx={{
-                bgcolor: "#d32f2f",
-                "&:hover": { bgcolor: "#b71c1c" },
-              }}
               disabled={deleteLoading !== null}
+              sx={{
+                backgroundColor: "#ef4444",
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                "&:hover": {
+                  backgroundColor: "#dc2626",
+                },
+              }}
             >
-              {deleteLoading !== null ? <CircularProgress size={20} color="inherit" /> : "Eliminar"}
+              {deleteLoading !== null ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  <span>Eliminando...</span>
+                </Box>
+              ) : (
+                "Sí, eliminar"
+              )}
             </Button>
           </DialogActions>
         </Dialog>
