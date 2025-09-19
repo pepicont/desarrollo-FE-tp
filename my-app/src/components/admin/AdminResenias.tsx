@@ -560,7 +560,7 @@ export default function AdminResenasPage() {
 
             <Button
               variant="outlined"
-              startIcon={sortOrder === 'desc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                startIcon={sortOrder === 'desc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
               onClick={toggleSortOrder}
               sx={{
                 borderColor: "#4b5563",
@@ -568,7 +568,7 @@ export default function AdminResenasPage() {
                 "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
-              {sortOrder === 'desc' ? 'Más antiguos' : 'Más recientes'}
+                {sortOrder === 'desc' ? 'Más recientes' : 'Más antiguos'}
             </Button>
           </Box>
 
