@@ -425,13 +425,13 @@ export default function AdminCategoriasPage() {
                                 </Typography>
                               </Box>
 
-                              <Box>
-                                <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5, textAlign: 'center' }}>
                                   Detalle
                                 </Typography>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: 'center' }}>
                                   <CategoryIcon sx={{ fontSize: 16, color: "#6b7280" }} />
-                                  <Typography variant="body1" sx={{ color: "white" }}>
+                                  <Typography variant="body1" sx={{ color: "white", textAlign: 'center' }}>
                                     {categoria.detalle}
                                   </Typography>
                                 </Box>
