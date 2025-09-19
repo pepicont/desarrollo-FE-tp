@@ -388,7 +388,7 @@ export default function AdminCompaniasPage() {
                       "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
                     }}
                   >
-                    {sortOrder === 'asc' ? 'Z-A' : 'A-Z'}
+                    {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
                   </Button>
 
                   {/* Botón Agregar Compañía */}
