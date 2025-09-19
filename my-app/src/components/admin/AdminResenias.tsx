@@ -73,6 +73,7 @@ export default function AdminResenasPage() {
   const [tempSearchQuery, setTempSearchQuery] = useState("")
   const [itemsPerPage, setItemsPerPage] = useState(15)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc') // Por defecto más recientes primero
+  const [sortBy, setSortBy] = useState<'fecha' | 'puntaje'>('fecha') // Nuevo: criterio de orden
 
   // Estados para alertas
   const [deleteAlert, setDeleteAlert] = useState(false)
@@ -208,13 +209,21 @@ export default function AdminResenasPage() {
 
     // Aplicar ordenamiento
     return filtered.sort((a, b) => {
-      const dateA = new Date(a.fecha).getTime()
-      const dateB = new Date(b.fecha).getTime()
-      
-      if (sortOrder === 'desc') {
-        return dateB - dateA // Más recientes primero
+      if (sortBy === 'fecha') {
+        const dateA = new Date(a.fecha).getTime()
+        const dateB = new Date(b.fecha).getTime()
+        if (sortOrder === 'desc') {
+          return dateB - dateA // Más recientes primero
+        } else {
+          return dateA - dateB // Más antiguos primero
+        }
       } else {
-        return dateA - dateB // Más antiguos primero
+        // Ordenar por puntaje
+        if (sortOrder === 'desc') {
+          return b.puntaje - a.puntaje // Mayor puntuación primero
+        } else {
+          return a.puntaje - b.puntaje // Menor puntuación primero
+        }
       }
     })
   }
@@ -496,7 +505,7 @@ export default function AdminResenasPage() {
               Mostrando {filteredResenias.length} de {resenias.length} reseñas
             </Typography>
 
-            {/* Selector de items per page */}
+            {/* Selector de items per page y orden */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>Mostrar:</Typography>
               <FormControl size="small">
@@ -556,11 +565,70 @@ export default function AdminResenasPage() {
                   <MenuItem value={50}>50</MenuItem>
                 </Select>
               </FormControl>
+
+              {/* Nuevo: selector de criterio de orden */}
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <Select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value as 'fecha' | 'puntaje')
+                    setPage(1)
+                  }}
+                  sx={{
+                    height: 32,
+                    backgroundColor: "#2a3441",
+                    borderRadius: 2,
+                    color: "#9ca3af",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                    "& .MuiSelect-select": {
+                      color: "#9ca3af",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      padding: "6px 8px",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      color: "#6b7280",
+                    },
+                    "&:hover": {
+                      backgroundColor: "#374151",
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: "#1e2532",
+                        border: "1px solid #374151",
+                        borderRadius: 2,
+                        "& .MuiMenuItem-root": {
+                          color: "white",
+                          fontSize: "0.875rem",
+                          "&:hover": {
+                            backgroundColor: "#374151",
+                          },
+                          "&.Mui-selected": {
+                            backgroundColor: "#3a7bd5",
+                            "&:hover": {
+                              backgroundColor: "#2c5aa0",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="fecha">Ordenar por fecha</MenuItem>
+                  <MenuItem value="puntaje">Ordenar por puntuación</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
 
             <Button
               variant="outlined"
-                startIcon={sortOrder === 'desc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
+              startIcon={sortOrder === 'desc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
               onClick={toggleSortOrder}
               sx={{
                 borderColor: "#4b5563",
@@ -568,7 +636,9 @@ export default function AdminResenasPage() {
                 "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
-                {sortOrder === 'desc' ? 'Más recientes' : 'Más antiguos'}
+              {sortBy === 'fecha'
+                ? sortOrder === 'desc' ? 'Más recientes' : 'Más antiguos'
+                : sortOrder === 'desc' ? 'Mayor puntuación' : 'Menor puntuación'}
             </Button>
           </Box>
 
