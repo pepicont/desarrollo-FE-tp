@@ -128,10 +128,10 @@ export default function ModernPagination({
       <Button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        startIcon={<ChevronLeft />}
-        sx={navButtonStyle(currentPage === 1)}
+        startIcon={<ChevronLeft sx={{ ml: 0, mr: 0 }} />}
+        sx={{ ...navButtonStyle(currentPage === 1), '& .MuiButton-startIcon': { mr: 0 } }}
       >
-        Anterior
+        <Box sx={{ display: { xs: 'none', sm: 'inline' }, p: 0, m: 0 }}>Anterior</Box>
       </Button>
 
       {/* Números de página */}
@@ -151,14 +151,14 @@ export default function ModernPagination({
       <Button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        endIcon={<ChevronRight />}
-        sx={navButtonStyle(currentPage === totalPages)}
+        endIcon={<ChevronRight sx={{ ml: 0, mr: 0 }} />}
+        sx={{ ...navButtonStyle(currentPage === totalPages), '& .MuiButton-endIcon': { ml: 0 } }}
       >
-        Siguiente
+        <Box sx={{ display: { xs: 'none', sm: 'inline' }, p: 0, m: 0 }}>Siguiente</Box>
       </Button>
 
       {/* Información de página */}
-      <Box sx={{ ml: 2, display: { xs: "none", sm: "block" } }}>
+      <Box sx={{ width: '100%', mt: 1, display: 'flex', justifyContent: 'center' }}>
         <Typography variant="body2" color="text.secondary">
           Página {currentPage} de {totalPages}
         </Typography>
