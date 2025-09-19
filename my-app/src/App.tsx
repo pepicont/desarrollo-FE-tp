@@ -15,6 +15,7 @@ import AdminUsuarios from './components/admin/AdminUsuarios.tsx';
 import AdminResenias from './components/admin/AdminResenias.tsx';
 import AdminCompanias from './components/admin/AdminCompanias.tsx';
 import AdminCategorias from './components/admin/AdminCategorias.tsx';
+import AdminCreateProduct from './components/admin/AdminCreateProduct.tsx';
 import ProtectedRoute from './components/shared-theme/ProtectedRoute.tsx';
 import ProtectedAdminRoute from './components/shared-theme/ProtectedAdminRoute.tsx';
 
@@ -73,6 +74,11 @@ function App() {
         <Route path="/admin/categorias" element={
           <ProtectedAdminRoute>
             <AdminCategorias />
+          </ProtectedAdminRoute>
+        } />
+        <Route path="/admin/create-product" element={
+          <ProtectedAdminRoute>
+            <AdminCreateProduct />
           </ProtectedAdminRoute>
         } />
       </Routes>

@@ -46,6 +46,34 @@ export type ComplementoDetail = {
 
 type ApiResponse<T> = { message: string; data: T }
 
+// Types for creating products
+export type CreateJuegoData = {
+  nombre: string
+  detalle: string
+  monto: number
+  categorias: number[]
+  compania: number
+  fechaLanzamiento: string
+  edadPermitida: number
+}
+
+export type CreateServicioData = {
+  nombre: string
+  detalle: string
+  monto: number
+  categorias: number[]
+  compania: number
+}
+
+export type CreateComplementoData = {
+  nombre: string
+  detalle: string
+  monto: number
+  categorias: number[]
+  compania: number
+  juego: number
+}
+
 const api = axios.create({ baseURL: API_BASE_URL })
 
 export const productService = {
@@ -74,5 +102,45 @@ export const productService = {
   },
   async removeFoto(tipo: 'juego'|'complemento'|'servicio', id: number, fotoId: number): Promise<void> {
     await api.delete(`/foto-producto/${tipo}/${id}/${fotoId}`)
+  },
+
+  // Create methods
+  async createJuego(data: CreateJuegoData, token: string): Promise<JuegoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+    const res = await api.post<ApiResponse<JuegoDetail>>('/juego', data, config)
+    return res.data.data
+  },
+
+  async createServicio(data: CreateServicioData, token: string): Promise<ServicioDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+    const res = await api.post<ApiResponse<ServicioDetail>>('/servicio', data, config)
+    return res.data.data
+  },
+
+  async createComplemento(data: CreateComplementoData, token: string): Promise<ComplementoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+    const res = await api.post<ApiResponse<ComplementoDetail>>('/complemento', data, config)
+    return res.data.data
+  },
+
+  // Helper method to get all juegos for complemento selection
+  async getAllJuegos(): Promise<JuegoDetail[]> {
+    const res = await api.get<ApiResponse<JuegoDetail[]>>('/juego')
+    return res.data.data
   },
 }
