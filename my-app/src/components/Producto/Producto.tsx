@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Chip, Avatar, Rating, Alert } from '@mui/material'
 import { ArrowBack, Person, CalendarMonth, Category, Edit } from '@mui/icons-material'
 import NavBar from '../navBar/navBar'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail, type Foto } from '../../services/productService'
 import { getReviewsByProduct, type ProductReview } from '../../services/reseniasService'
 import { authService } from '../../services/authService'
@@ -29,27 +29,11 @@ type ProductoData = JuegoDetail | ServicioDetail | ComplementoDetail
 
 export default function Producto() {
   const reviewsRef = useRef<HTMLDivElement>(null)
-  const location = useLocation()
+  const { tipo, id } = useParams<{ tipo: ProductoTipo; id: string }>()
   const navigate = useNavigate()
-
-  const [tipo, setTipo] = useState<ProductoTipo | null>(null)
-  const [id, setId] = useState<number | null>(null)
-  
-  useEffect(() => {
-    const search = new URLSearchParams(location.search)
-    const qTipo = search.get('tipo') as ProductoTipo | null
-    const qId = search.get('id') ? Number(search.get('id')) : null
-    const stTipo = (location.state as { id?: number; tipo?: ProductoTipo } | null)?.tipo ?? qTipo
-    const stId = typeof (location.state as { id?: number; tipo?: ProductoTipo } | null)?.id === 'number'
-      ? (location.state as { id?: number; tipo?: ProductoTipo })!.id
-      : qId
-    if (!stTipo || !stId) {
-      setError('Producto no especificado')
-      return
-    }
-    setTipo(stTipo)
-    setId(stId)
-  }, [location])
+  const parsedTipo = tipo as ProductoTipo | undefined
+  const parsedId = id ? Number(id) : undefined
+  // El resto del código puede usar parsedTipo y parsedId
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -110,21 +94,24 @@ export default function Producto() {
   }, [])
 
   useEffect(() => {
+    if (!parsedTipo || !parsedId || !['juego','servicio','complemento'].includes(parsedTipo)) {
+      setError('Producto no especificado o inexistente')
+      return
+    }
     const load = async () => {
-      if (!tipo || !id) return
       try {
         setLoading(true)
         setError(null)
         let res: ProductoData
-        if (tipo === 'juego') res = await productService.getJuego(id)
-        else if (tipo === 'servicio') res = await productService.getServicio(id)
-        else res = await productService.getComplemento(id)
+        if (parsedTipo === 'juego') res = await productService.getJuego(parsedId)
+        else if (parsedTipo === 'servicio') res = await productService.getServicio(parsedId)
+        else res = await productService.getComplemento(parsedId)
         setData(res)
         // Elegir imagen principal del producto si existe
         const fotos: Foto[] | undefined =
-          (tipo === 'juego' && (res as JuegoDetail).fotos) ||
-          (tipo === 'servicio' && (res as ServicioDetail).fotos) ||
-          (tipo === 'complemento' && (res as ComplementoDetail).fotos) ||
+          (parsedTipo === 'juego' && (res as JuegoDetail).fotos) ||
+          (parsedTipo === 'servicio' && (res as ServicioDetail).fotos) ||
+          (parsedTipo === 'complemento' && (res as ComplementoDetail).fotos) ||
           undefined
         if (Array.isArray(fotos) && fotos.length > 0) {
           const principal = fotos.find(f => f.esPrincipal)
@@ -133,7 +120,7 @@ export default function Producto() {
           setHeroImage(null)
         }
         // cargar reseñas reales
-        const revs = await getReviewsByProduct(tipo, id)
+        const revs = await getReviewsByProduct(parsedTipo, parsedId)
         setReviews(revs)
       } catch (e) {
         console.error(e)
@@ -143,7 +130,7 @@ export default function Producto() {
       }
     }
     load()
-  }, [tipo, id])
+  }, [parsedTipo, parsedId])
 
   const reviewsUi: Review[] = reviews.map(r => ({
     id: r.id,

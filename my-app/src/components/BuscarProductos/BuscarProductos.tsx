@@ -341,7 +341,7 @@ export default function BuscarProductos() {
             )}
             {!loading && !error && items.map((product) => (
               <Box key={`${product.tipo}-${product.id}`}>
-                <Card sx={{ cursor: "pointer", height: "100%" }} onClick={() => navigate('/producto', { state: { id: product.id, tipo: product.tipo } })}>
+                <Card sx={{ cursor: "pointer", height: "100%" }} onClick={() => navigate(`/producto/${product.tipo}/${product.id}`)}>
                   <Box sx={{ position: "relative" }}>
                     <Box
                       component="img"
@@ -377,7 +377,7 @@ export default function BuscarProductos() {
                           </>
                         )}
                       </Box>
-                      <Button variant="contained" size="small" onClick={(e) => { e.stopPropagation(); navigate('/producto', { state: { id: product.id, tipo: product.tipo } }) }}>
+                      <Button variant="contained" size="small" onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.tipo}/${product.id}`) }}>
                         Ver detalles
                       </Button>
                     </Box>

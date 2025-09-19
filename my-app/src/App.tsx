@@ -44,7 +44,7 @@ function App() {
             <CheckoutSuccess />
           </ProtectedRoute>
         } />
-        <Route path="/producto" element={<Producto />} />
+  <Route path="/producto/:tipo/:id" element={<Producto />} />
         <Route path="/productos" element={<BuscarProductos />} />
         <Route path="/mis-resenas" element={
           <ProtectedRoute>
