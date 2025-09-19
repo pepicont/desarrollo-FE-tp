@@ -340,20 +340,20 @@ export default function AdminCategoriasPage() {
                     onClick={() => setAddModalOpen(true)}
                     startIcon={<CategoryIcon />}
                     sx={{
-                      background: "linear-gradient(135deg, #3a7bd5, #2c5aa0)",
+                      background: "#3a7bd5",
                       color: "white",
-                      fontWeight: 600,
+                      fontWeight: "bold",
                       px: 3,
                       py: 1.5,
                       borderRadius: 2,
                       textTransform: "none",
                       boxShadow: "none",
+                      transition: "all 0.3s ease",
                       "&:hover": {
                         background: "#2c5aa0",
                         boxShadow: "none",
                         transform: "none",
                       },
-                      transition: "all 0.3s ease",
                     }}
                   >
                     Agregar Categoría
