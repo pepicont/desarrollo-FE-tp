@@ -176,6 +176,20 @@ export default function CheckoutSuccess() {
             }}
           >
               <Button
+                variant="contained"
+                onClick={() => navigate('/')}
+                sx={{
+                  fontSize: { xs: 15, sm: 16 },
+                  py: { xs: 1.2, sm: 1.5 },
+                  px: { xs: 0, sm: 2 },
+                  width: { xs: '100%', sm: 'auto' },
+                  fontWeight: 600,
+                  borderRadius: 2,
+                }}
+              >
+                Ir al inicio
+              </Button>
+              <Button
                 variant="outlined"
                 onClick={() => navigate('/mis-compras')}
                 sx={{
@@ -189,20 +203,6 @@ export default function CheckoutSuccess() {
                 }}
               >
                 Mis compras
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => navigate('/')}
-                sx={{
-                  fontSize: { xs: 15, sm: 16 },
-                  py: { xs: 1.2, sm: 1.5 },
-                  px: { xs: 0, sm: 2 },
-                  width: { xs: '100%', sm: 'auto' },
-                  fontWeight: 600,
-                  borderRadius: 2,
-                }}
-              >
-                Ir al inicio
               </Button>
           </Box>
         </Container>
