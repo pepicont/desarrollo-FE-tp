@@ -30,4 +30,8 @@ export const mailService = {
       codigo
     });
   },
+
+  async sendDeletedUserMail(mail: string, nombreUsuario: string, motivo: string) {
+    return axios.post(`${API_BASE_URL}/mail/deleted-user`, { mail, nombreUsuario, motivo });
+  },
 };

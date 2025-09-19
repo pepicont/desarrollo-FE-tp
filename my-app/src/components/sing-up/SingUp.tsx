@@ -28,6 +28,7 @@ import { SitemarkIcon } from "../sign-in/components/CustomIcons"
 import { useEffect } from "react"
 import { authService } from "../../services/authService.ts"
 import { signupUser } from '../../services/profileService';
+import { mailService } from '../../services/mailService';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -333,9 +334,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       setRegisterError("")
       // Enviar mail de bienvenida
       try {
-        await import('../../services/mailService').then(({ mailService }) =>
-          mailService.welcome(result.email, result.name)
-        )
+        await mailService.welcome(result.user.mail, result.user.nombre)
       } catch (e) {
         // No bloquear registro si falla el mail
         console.error('Error enviando mail de bienvenida:', e)

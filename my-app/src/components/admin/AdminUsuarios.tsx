@@ -35,6 +35,7 @@ import NavBar from "../navBar/navBar"
 import ModernPagination from "../shared-components/ModernPagination"
 import { authService } from "../../services/authService"
 import { getAllUsuarios, deleteUsuario, type Usuario as UsuarioAPI } from "../../services/usuarioService"
+import { mailService } from "../../services/mailService"
 
 const darkTheme = createTheme({
   palette: {
@@ -67,6 +68,7 @@ export default function UsuariosPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<Usuario | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteReason, setDeleteReason] = useState("")
   
   // Estados para búsqueda y filtros
   const [searchQuery, setSearchQuery] = useState("")
@@ -177,32 +179,33 @@ export default function UsuariosPage() {
   }
 
   // Función para confirmar eliminación
-  const confirmDeleteUser = async () => {
-    if (!userToDelete) return
-
-    setDeleteLoading(true)
+  const confirmDeleteUser = async (motivo: string) => {
+    if (!userToDelete) return;
+    setDeleteLoading(true);
     try {
-      const token = authService.getToken()
-      
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-      
-      await deleteUsuario(token, userToDelete.id)
-      setUsuarios(prev => prev.filter(user => user.id !== userToDelete.id))
-      
-      // Cerrar modal y limpiar
-  setDeleteModalOpen(false)
-  setUserToDelete(null)
-  setSuccess("Usuario borrado con éxito")
-  setTimeout(() => setSuccess(""), 3000)
-      
+      // Enviar mail de cuenta eliminada
+      try {
+        await mailService.sendDeletedUserMail(userToDelete.mail, userToDelete.nombreUsuario, motivo);
+      } catch (e) {
+        // Si falla el mail, igual continuar con el borrado
+        console.error("Error enviando mail de cuenta eliminada", e);
+      }
+      await deleteUsuario(token, userToDelete.id);
+      setUsuarios(prev => prev.filter(user => user.id !== userToDelete.id));
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
+      setSuccess("Usuario borrado con éxito");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (error: unknown) {
-      console.error('Error al eliminar usuario:', error)
-      setError("Error al eliminar el usuario")
+      console.error('Error al eliminar usuario:', error);
+      setError("Error al eliminar el usuario");
     } finally {
-      setDeleteLoading(false)
+      setDeleteLoading(false);
     }
   }
 
@@ -499,6 +502,14 @@ export default function UsuariosPage() {
             <br /><br />
             Esta acción no se puede deshacer y eliminará todos los datos asociados al usuario.
           </DialogContentText>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Opcional: Motivos del borrado"
+          value={deleteReason}
+          onChange={e => setDeleteReason(e.target.value)}
+          sx={{ mt: 2, mb: 1 }}
+        />
         </DialogContent>
         <DialogActions sx={{
           p: 3,
@@ -513,19 +524,19 @@ export default function UsuariosPage() {
             variant="outlined"
             sx={{
               color: "#b0b0b0",
-              borderColor: "#2a3441",
+              borderColor: "#b0b0b0",
               width: { xs: '100%', sm: 'auto' },
               mb: { xs: 1, sm: 0 },
               "&:hover": {
-                borderColor: "#4a90e2",
-                color: "#4a90e2",
+                borderColor: "#727272ff",
+                color: "#727272ff",
               },
             }}
           >
             Cancelar
           </Button>
           <Button 
-            onClick={confirmDeleteUser}
+            onClick={() => confirmDeleteUser(deleteReason)}
             variant="contained"
             disabled={deleteLoading}
             sx={{
