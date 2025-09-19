@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Chip, Avatar, Rating, Alert } from '@mui/material'
-import { ArrowBack, Person, CalendarMonth, Category } from '@mui/icons-material'
+import { ArrowBack, Person, CalendarMonth, Category, Edit } from '@mui/icons-material'
 import NavBar from '../navBar/navBar'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail, type Foto } from '../../services/productService'
 import { getReviewsByProduct, type ProductReview } from '../../services/reseniasService'
+import { authService } from '../../services/authService'
 import Footer from '../footer/footer'
 
 const darkTheme = createTheme({
@@ -56,6 +57,7 @@ export default function Producto() {
   const [reviews, setReviews] = useState<ProductReview[]>([])
   const [heroImage, setHeroImage] = useState<string | null>(null)
   const [displayImage, setDisplayImage] = useState<string>('/vite.svg')
+  const [isAdmin, setIsAdmin] = useState(false)
   const imageTimeoutRef = useRef<number | null>(null)
   
   const fotos: Foto[] = (
@@ -97,6 +99,15 @@ export default function Producto() {
       if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
     }
   }, [heroImage])
+
+  // Verificar si el usuario es admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const adminStatus = await authService.isAdmin()
+      setIsAdmin(adminStatus)
+    }
+    checkAdminStatus()
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -268,18 +279,48 @@ export default function Producto() {
                   <Typography variant="h4" fontWeight={800}>{data?.monto === 0 ? 'Gratuito' : `US$${data?.monto ?? ''}`}</Typography>
                 </Box>
 
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="warning"
-                  sx={{ py: 1.5, fontWeight: 700 }}
-                  onClick={() => {
-                    if (!tipo || !id) return
-                    navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: displayImage } })
-                  }}
-                >
-                  Comprar
-                </Button>
+                {/* Botón Comprar solo para usuarios normales */}
+                {!isAdmin && (
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="warning"
+                    sx={{ py: 1.5, fontWeight: 700 }}
+                    onClick={() => {
+                      if (!tipo || !id) return
+                      navigate('/checkout', { state: { tipo, id, nombre: data?.nombre, precio: data?.monto, imageUrl: displayImage } })
+                    }}
+                  >
+                    Comprar
+                  </Button>
+                )}
+
+                {/* Botón Modificar Producto para administradores */}
+                {isAdmin && (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<Edit />}
+                    sx={{ 
+                      mt: 2,
+                      py: 1.5, 
+                      fontWeight: 700,
+                      borderColor: "#4a90e2",
+                      color: "#4a90e2",
+                      "&:hover": {
+                        borderColor: "#357abd",
+                        backgroundColor: "rgba(74, 144, 226, 0.1)",
+                        color: "#357abd"
+                      }
+                    }}
+                    onClick={() => {
+                      if (!tipo || !id) return
+                      navigate(`/admin/edit-product/${tipo}/${id}`)
+                    }}
+                  >
+                    Modificar Producto
+                  </Button>
+                )}
 
                 <Box sx={{ mt: 3 }}>
                   {tipo === 'juego' && data && (

@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Button, TextField, Card, CardContent, Chip, Container, Box, InputAdornment, FormControl, InputLabel, Select, MenuItem, Typography, Drawer } from "@mui/material"
-import { Search, FilterList } from "@mui/icons-material"
+import { Search, FilterList, Add } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
 import { useLocation, useNavigate } from "react-router-dom"
 import { searchService, type SearchItem, type SearchParams } from "../../services/searchService"
 import { companyService, type Company } from "../../services/companyService"
+import { authService } from "../../services/authService"
 import Footer from "../footer/footer.tsx"
 import ModernPagination from "../shared-components/ModernPagination"
 
@@ -77,6 +78,16 @@ export default function BuscarProductos() {
   const [page, setPage] = useState<number>(Number(params.get('page')) || 1)
   const [itemsPerPage, setItemsPerPage] = useState(15)
   const [totalCount, setTotalCount] = useState<number>(0)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // Verificar si el usuario es admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const adminStatus = await authService.isAdmin()
+      setIsAdmin(adminStatus)
+    }
+    checkAdminStatus()
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -190,8 +201,8 @@ export default function BuscarProductos() {
             justifyContent: "space-between",
             alignItems: "center",
             mb: 3,
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 2, sm: 0 },
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 2, md: 2 },
           }}>
             <Box>
               <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 1 }}>
@@ -204,6 +215,34 @@ export default function BuscarProductos() {
                 {loading ? 'Cargando resultados...' : `Mostrando ${items.length} resultados`}
               </Typography>
             </Box>
+
+            {/* Botón Crear Producto para administradores */}
+            {isAdmin && (
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => navigate('/admin/create-product')}
+                sx={{
+                  background: "linear-gradient(135deg, #4a90e2, #357abd)",
+                  color: "white",
+                  fontWeight: "bold",
+                  px: 3,
+                  py: 1,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  fontSize: "0.95rem",
+                  boxShadow: "0 4px 12px rgba(74, 144, 226, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #357abd, #2c5aa0)",
+                    boxShadow: "0 6px 16px rgba(74, 144, 226, 0.4)",
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Crear Producto
+              </Button>
+            )}
 
             <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
               {/* Selector de items per page */}
@@ -276,14 +315,16 @@ export default function BuscarProductos() {
                 sx={{
                   borderColor: "#4b5563",
                   color: "white",
-                  mt: { xs: 2, sm: 0 },
                   "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
               }}
             >
               FILTROS
             </Button>
             </Box>
+
           </Box>
+
+
 
           <Box
             sx={{
