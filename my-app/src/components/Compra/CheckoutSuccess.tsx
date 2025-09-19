@@ -175,20 +175,7 @@ export default function CheckoutSuccess() {
               justifyContent: 'center',
             }}
           >
-              <Button
-                variant="contained"
-                onClick={() => navigate('/')}
-                sx={{
-                  fontSize: { xs: 15, sm: 16 },
-                  py: { xs: 1.2, sm: 1.5 },
-                  px: { xs: 0, sm: 2 },
-                  width: { xs: '100%', sm: 'auto' },
-                  fontWeight: 600,
-                  borderRadius: 2,
-                }}
-              >
-                Ir al inicio
-              </Button>
+              {/* En mobile: Inicio arriba, Mis compras abajo. En desktop: Mis compras izquierda, Inicio derecha */}
               <Button
                 variant="outlined"
                 onClick={() => navigate('/mis-compras')}
@@ -200,9 +187,25 @@ export default function CheckoutSuccess() {
                   fontWeight: 600,
                   borderWidth: 2,
                   borderRadius: 2,
+                  order: { xs: 2, sm: 1 },
                 }}
               >
                 Mis compras
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => navigate('/')}
+                sx={{
+                  fontSize: { xs: 15, sm: 16 },
+                  py: { xs: 1.2, sm: 1.5 },
+                  px: { xs: 0, sm: 2 },
+                  width: { xs: '100%', sm: 'auto' },
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  order: { xs: 1, sm: 2 },
+                }}
+              >
+                Ir al inicio
               </Button>
           </Box>
         </Container>
