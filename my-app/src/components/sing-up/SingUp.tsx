@@ -13,6 +13,7 @@ import TextField from "@mui/material/TextField"
 import Typography from "@mui/material/Typography"
 import Stack from "@mui/material/Stack"
 import MuiCard from "@mui/material/Card"
+import Modal from "@mui/material/Modal"
 import CircularProgress from "@mui/material/CircularProgress"
 import Alert from "@mui/material/Alert"
 import Stepper from "@mui/material/Stepper"
@@ -104,6 +105,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [confirmPasswordError, setConfirmPasswordError] = React.useState(false)
   const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState("")
   const [termsError, setTermsError] = React.useState(false)
+  const [termsModalOpen, setTermsModalOpen] = React.useState(false)
   
   // Estados del segundo paso
   const [usernameError, setUsernameError] = React.useState(false)
@@ -424,7 +426,27 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                   onChange={(e) => handleInputChange("acceptTerms", e.target.checked)}
                 />
               }
-              label="Acepto los términos y condiciones"
+              label={
+                <Box component="span">
+                  Acepto los{" "}
+                  <Link
+                    component="button"
+                    type="button"
+                    onClick={() => setTermsModalOpen(true)}
+                    sx={{
+                      color: 'primary.main',
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        color: '#1976d2',
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    términos y condiciones
+                  </Link>
+                </Box>
+              }
               sx={{ color: termsError ? 'error.main' : 'inherit' }}
             />
             {termsError && (
@@ -615,6 +637,129 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             </Box>
           )}
         </Card>
+
+        {/* Modal de Términos y Condiciones */}
+        <Modal
+          open={termsModalOpen}
+          onClose={() => setTermsModalOpen(false)}
+          aria-labelledby="modal-terminos-titulo"
+          aria-describedby="modal-terminos-descripcion"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "90%", sm: "80%", md: "70%" },
+              maxWidth: "800px",
+              maxHeight: "80vh",
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 0,
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
+            <Box sx={{ p: 3, borderBottom: "1px solid #ddd", textAlign: "center" }}>
+              <Typography id="modal-terminos-titulo" variant="h5" component="h2" sx={{ fontWeight: "bold" }}>
+                Términos y Condiciones
+              </Typography>
+            </Box>
+
+            {/* Contenido */}
+            <Box sx={{ p: 3, maxHeight: "60vh", overflowY: "auto" }}>
+              <Typography variant="body1" paragraph>
+                <strong>1. Aceptación de los términos</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                Al registrarte y utilizar nuestro portal de videojuegos, aceptas cumplir con estos términos y condiciones. Si no estás de acuerdo con alguno de estos términos, no debes utilizar nuestros servicios.
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>2. Normas de comportamiento</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                • Mantén un comportamiento respetuoso hacia otros usuarios<br/>
+                • No publiques contenido ofensivo, discriminatorio o inapropiado<br/>
+                • No uses lenguaje vulgar o amenazante en comentarios y reseñas<br/>
+                • Respeta las opiniones de otros usuarios, aunque no las compartas<br/>
+                • No hagas spam ni publiques contenido repetitivo
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>3. Uso de la cuenta</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                • Eres responsable de mantener la seguridad de tu cuenta<br/>
+                • No compartas tus credenciales con terceros<br/>
+                • Notifica inmediatamente cualquier uso no autorizado<br/>
+                • Proporciona información veraz y actualizada en tu perfil
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>4. Contenido y reseñas</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                • Las reseñas deben ser honestas y basadas en tu experiencia real<br/>
+                • No publiques reseñas falsas o manipuladas<br/>
+                • El contenido ofensivo será eliminado sin previo aviso<br/>
+                • Nos reservamos el derecho de moderar todas las publicaciones
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>5. Compras y pagos</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                • Todas las transacciones son finales una vez completadas<br/>
+                • Los precios pueden cambiar sin previo aviso<br/>
+                • Los métodos de pago deben ser legítimos y de tu propiedad<br/>
+                • Las claves de productos digitales no son reembolsables
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>6. Privacidad</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                Respetamos tu privacidad y protegemos tus datos personales según nuestra política de privacidad. No compartimos tu información con terceros sin tu consentimiento.
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>7. Suspensión y terminación</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                Nos reservamos el derecho de suspender o terminar cuentas que violen estos términos. Las violaciones graves pueden resultar en la prohibición permanente del servicio.
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>8. Limitación de responsabilidad</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                No somos responsables de daños indirectos, pérdida de datos o interrupciones del servicio. Nuestro servicio se proporciona "tal como está".
+              </Typography>
+
+              <Typography variant="body1" paragraph>
+                <strong>9. Modificaciones</strong>
+              </Typography>
+              <Typography variant="body2" paragraph>
+                Estos términos pueden modificarse en cualquier momento. Los cambios importantes serán notificados a los usuarios registrados.
+              </Typography>
+            </Box>
+
+            {/* Footer */}
+            <Box sx={{ p: 3, borderTop: "1px solid #ddd", textAlign: "center" }}>
+              <Button
+                variant="contained"
+                onClick={() => setTermsModalOpen(false)}
+                sx={{ minWidth: "120px" }}
+              >
+                Entendido
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
       </SignInContainer>
     </AppTheme>
     </LocalizationProvider>

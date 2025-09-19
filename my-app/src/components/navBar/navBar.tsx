@@ -38,7 +38,7 @@ import {
 } from "@mui/icons-material"
 import { styled } from "@mui/material/styles"
 import imgLogo from "../../assets/logo-navbar.png"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import CircularProgress from "@mui/material/CircularProgress"
 import { mailService } from "../../services/mailService"
 import {authService} from "../../services/authService"
@@ -96,6 +96,20 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
+  const searchRef = useRef<HTMLInputElement | null>(null)
+  // Cerrar search al hacer click fuera
+  useEffect(() => {
+    if (!searchOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        closeSearch();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searchOpen]);
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
   const [isLoggedIn, setIsLoggedIn] = React.useState(() => {
     const user = localStorage.getItem("user");
@@ -318,6 +332,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                   if (e.key === "Enter") onSubmitSearch()
                 }}
                 sx={{ width: { xs: "60vw", sm: "45vw", md: 440 } }}
+                inputRef={searchRef}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">

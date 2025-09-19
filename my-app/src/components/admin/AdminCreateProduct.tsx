@@ -538,8 +538,8 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📋 Información Básica
-            </Typography>
+                Información Básica
+              </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <TextField
                 label="Nombre del Juego"
@@ -599,7 +599,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📝 Descripción
+              Descripción
             </Typography>
             <TextField
               fullWidth
@@ -644,7 +644,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              🏢 Compañía y Categorización
+              Compañía y Categorización
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
@@ -731,7 +731,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📅 Detalles del Lanzamiento
+              Detalles del Lanzamiento
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }}>
@@ -819,7 +819,7 @@ export default function AdminCreateProductPage() {
               variant="contained"
               size="large"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AddIcon />}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : (!isEditMode && <AddIcon />)}
               sx={{
                 minWidth: "180px",
                 px: 3,
@@ -843,7 +843,7 @@ export default function AdminCreateProductPage() {
             >
               {loading 
                 ? (isEditMode ? "Actualizando Juego..." : "Creando Juego...") 
-                : (isEditMode ? "🎮 Actualizar Juego" : "🎮 Crear Juego")
+                : (isEditMode ? "Actualizar Juego" : "Crear Juego")
               }
             </Button>
           </Box>
@@ -909,7 +909,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📋 Información Básica
+              Información Básica
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <TextField
@@ -970,7 +970,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📝 Descripción del Servicio
+              Descripción del Servicio
             </Typography>
             <TextField
               fullWidth
@@ -1010,7 +1010,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              🏢 Clasificación
+              Clasificación
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
@@ -1110,7 +1110,7 @@ export default function AdminCreateProductPage() {
               variant="contained"
               size="large"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AddIcon />}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : (!isEditMode && <AddIcon />)}
               sx={{
                 minWidth: "180px",
                 px: 3,
@@ -1134,7 +1134,7 @@ export default function AdminCreateProductPage() {
             >
               {loading 
                 ? (isEditMode ? "Actualizando Servicio..." : "Creando Servicio...") 
-                : (isEditMode ? "⚙️ Actualizar Servicio" : "⚙️ Crear Servicio")
+                : (isEditMode ? "Actualizar Servicio" : "Crear Servicio")
               }
             </Button>
           </Box>
@@ -1200,7 +1200,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📋 Información Básica
+              Información Básica
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <TextField
@@ -1261,7 +1261,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              📝 Descripción del Complemento
+              Descripción del Complemento
             </Typography>
             <TextField
               fullWidth
@@ -1301,7 +1301,7 @@ export default function AdminCreateProductPage() {
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              🔗 Relaciones y Clasificación
+              Relaciones y Clasificación
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, mb: 3 }}>
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
@@ -1425,7 +1425,7 @@ export default function AdminCreateProductPage() {
               variant="contained"
               size="large"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AddIcon />}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : (!isEditMode && <AddIcon />)}
               sx={{
                 minWidth: "180px",
                 px: 3,
@@ -1449,7 +1449,7 @@ export default function AdminCreateProductPage() {
             >
               {loading 
                 ? (isEditMode ? "Actualizando Complemento..." : "Creando Complemento...") 
-                : (isEditMode ? "📦 Actualizar Complemento" : "📦 Crear Complemento")
+                : (isEditMode ? "Actualizar Complemento" : "Crear Complemento")
               }
             </Button>
           </Box>
