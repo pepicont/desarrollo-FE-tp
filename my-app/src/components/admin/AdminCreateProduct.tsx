@@ -19,6 +19,7 @@ import {
   Snackbar,
   CircularProgress,
   Chip,
+  FormLabel,
 } from "@mui/material"
 import {
   SportsEsports as GamepadIcon,
@@ -26,11 +27,16 @@ import {
   Settings as SettingsIcon,
   Add as AddIcon,
 } from "@mui/icons-material"
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
+import { useParams } from "react-router-dom"
 import { authService } from "../../services/authService"
-import { productService, type CreateJuegoData, type CreateServicioData, type CreateComplementoData } from "../../services/productService"
+import { productService, type CreateJuegoData, type CreateServicioData, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
 import { getAllCategoriesAdmin, type Category } from "../../services/categoryService"
 import { getAllCompaniesAdmin, type Company } from "../../services/companyService"
 
@@ -89,9 +95,25 @@ const ageRatings = [
   { value: 18, label: "AO (Adults Only 18+)" }
 ]
 
+// Función para mapear cualquier edad a la clasificación más cercana
+const mapAgeToRating = (age: number): number => {
+  if (age <= 5) return 0;        // Everyone
+  if (age <= 12) return 10;      // Everyone 10+
+  if (age <= 16) return 13;      // Teen
+  if (age <= 17) return 17;      // Mature 17+
+  return 18;                     // Adults Only 18+
+}
+
 export default function AdminCreateProductPage() {
+  const params = useParams<{ tipo: string; id: string }>()
+  const isEditMode = !!(params.tipo && params.id)
+  const editTipo = params.tipo as ProductType
+  const editId = params.id ? parseInt(params.id) : null
+  
   // Type selection state
-  const [selectedType, setSelectedType] = useState<ProductType | null>(null)
+  const [selectedType, setSelectedType] = useState<ProductType | null>(
+    isEditMode ? editTipo : null
+  )
   
   // Data states
   const [categories, setCategories] = useState<Category[]>([])
@@ -166,6 +188,59 @@ export default function AdminCreateProductPage() {
     loadData()
   }, [])
 
+  // Load product data for edit mode
+  useEffect(() => {
+    if (!isEditMode || !editId || !editTipo) return
+
+    const loadProductData = async () => {
+      try {
+        setLoading(true)
+
+        if (editTipo === 'juego') {
+          const productData = await productService.getJuego(editId)
+          // Mapear la edad de la BD a la clasificación más cercana
+          const mappedAge = mapAgeToRating(productData.edadPermitida)
+          
+          setJuegoForm({
+            nombre: productData.nombre || "",
+            detalle: productData.detalle || "",
+            monto: productData.monto?.toString() || "",
+            categorias: productData.categorias?.map((c: CategoriaRef) => c.id) || [],
+            compania: productData.compania?.id?.toString() || "",
+            fechaLanzamiento: productData.fechaLanzamiento || "",
+            edadPermitida: mappedAge.toString(),
+          })
+        } else if (editTipo === 'servicio') {
+          const productData = await productService.getServicio(editId)
+          setServicioForm({
+            nombre: productData.nombre || "",
+            detalle: productData.detalle || "",
+            monto: productData.monto?.toString() || "",
+            categorias: productData.categorias?.map((c: CategoriaRef) => c.id) || [],
+            compania: productData.compania?.id?.toString() || "",
+          })
+        } else if (editTipo === 'complemento') {
+          const productData = await productService.getComplemento(editId)
+          setComplementoForm({
+            nombre: productData.nombre || "",
+            detalle: productData.detalle || "",
+            monto: productData.monto?.toString() || "",
+            categorias: productData.categorias?.map((c: CategoriaRef) => c.id) || [],
+            compania: productData.compania?.id?.toString() || "",
+            juego: productData.juego?.id?.toString() || "",
+          })
+        }
+
+        setLoading(false)
+      } catch (err: unknown) {
+        setError("Error al cargar datos del producto: " + (err instanceof Error ? err.message : "Error desconocido"))
+        setLoading(false)
+      }
+    }
+
+    loadProductData()
+  }, [isEditMode, editId, editTipo])
+
   const handleSubmitJuego = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -185,11 +260,16 @@ export default function AdminCreateProductPage() {
         edadPermitida: parseInt(juegoForm.edadPermitida),
       }
 
-      await productService.createJuego(data, token)
-      setSuccess("Juego creado exitosamente")
-      resetForm()
+      if (isEditMode && editId) {
+        await productService.updateJuego(editId, data, token)
+        setSuccess("Juego actualizado exitosamente")
+      } else {
+        await productService.createJuego(data, token)
+        setSuccess("Juego creado exitosamente")
+        resetForm()
+      }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al crear el juego"
+      const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el juego`
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -213,11 +293,16 @@ export default function AdminCreateProductPage() {
         compania: parseInt(servicioForm.compania),
       }
 
-      await productService.createServicio(data, token)
-      setSuccess("Servicio creado exitosamente")
-      resetForm()
+      if (isEditMode && editId) {
+        await productService.updateServicio(editId, data, token)
+        setSuccess("Servicio actualizado exitosamente")
+      } else {
+        await productService.createServicio(data, token)
+        setSuccess("Servicio creado exitosamente")
+        resetForm()
+      }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al crear el servicio"
+      const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el servicio`
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -242,11 +327,16 @@ export default function AdminCreateProductPage() {
         juego: parseInt(complementoForm.juego),
       }
 
-      await productService.createComplemento(data, token)
-      setSuccess("Complemento creado exitosamente")
-      resetForm()
+      if (isEditMode && editId) {
+        await productService.updateComplemento(editId, data, token)
+        setSuccess("Complemento actualizado exitosamente")
+      } else {
+        await productService.createComplemento(data, token)
+        setSuccess("Complemento creado exitosamente")
+        resetForm()
+      }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al crear el complemento"
+      const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el complemento`
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -305,7 +395,7 @@ export default function AdminCreateProductPage() {
   const renderTypeSelector = () => (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h3" component="h1" align="center" sx={{ mb: 6, fontWeight: "bold" }}>
-        ¿Qué desea crear hoy?
+        {isEditMode ? `Editar ${editTipo?.charAt(0).toUpperCase()}${editTipo?.slice(1)}` : "¿Qué desea crear hoy?"}
       </Typography>
 
       <Box sx={{ 
@@ -422,10 +512,10 @@ export default function AdminCreateProductPage() {
             </Box>
             <Box>
               <Typography variant="h4" component="h2" sx={{ fontWeight: "bold", mb: 0.5 }}>
-                Crear Nuevo Juego
+                {isEditMode ? "Editar Juego" : "Crear Nuevo Juego"}
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Agrega un videojuego completo al catálogo
+                {isEditMode ? "Modifica los datos del videojuego" : "Agrega un videojuego completo al catálogo"}
               </Typography>
             </Box>
           </Box>
@@ -644,34 +734,42 @@ export default function AdminCreateProductPage() {
               📅 Detalles del Lanzamiento
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-              <TextField
-                label="Fecha de Lanzamiento"
-                type="date"
-                value={juegoForm.fechaLanzamiento}
-                onChange={(e) => setJuegoForm({ ...juegoForm, fechaLanzamiento: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-                required
-                sx={{ 
-                  flex: "1 1 250px", 
-                  minWidth: "250px",
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "#141926",
-                    "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
-                    "&:hover fieldset": { borderColor: "#4a90e2" },
-                    "&.Mui-focused fieldset": { 
-                      borderColor: "#4a90e2",
-                      boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
-                    },
-                  },
-                }}
-              />
+              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }}>
+                <FormLabel sx={{ color: "#b0b0b0", mb: 1, fontSize: "0.875rem" }}>Fecha de Lanzamiento</FormLabel>
+                <DatePicker
+                  value={juegoForm.fechaLanzamiento ? dayjs(juegoForm.fechaLanzamiento) : null}
+                  onChange={(newValue) => {
+                    const dateString = newValue ? newValue.format('YYYY-MM-DD') : ''
+                    setJuegoForm({ ...juegoForm, fechaLanzamiento: dateString })
+                  }}
+                  slotProps={{
+                    textField: {
+                      required: true,
+                      fullWidth: true,
+                      variant: "outlined",
+                      sx: {
+                        "& .MuiOutlinedInput-root": {
+                          bgcolor: "#141926",
+                          "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
+                          "&:hover fieldset": { borderColor: "#4a90e2" },
+                          "&.Mui-focused fieldset": { 
+                            borderColor: "#4a90e2",
+                            boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
+                          },
+                        },
+                      }
+                    }
+                  }}
+                  format="DD/MM/YYYY"
+                />
+              </FormControl>
 
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
-                <InputLabel sx={{ color: "#b0b0b0" }}>Clasificación por Edad</InputLabel>
+                <FormLabel sx={{ color: "#b0b0b0", mb: 1, fontSize: "0.875rem" }}>Clasificación por Edad</FormLabel>
                 <Select
                   value={juegoForm.edadPermitida}
-                  label="Clasificación por Edad"
                   onChange={(e) => setJuegoForm({ ...juegoForm, edadPermitida: e.target.value })}
+                  displayEmpty
                   sx={{
                     bgcolor: "#141926",
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -743,7 +841,10 @@ export default function AdminCreateProductPage() {
                 transition: "all 0.3s ease",
               }}
             >
-              {loading ? "Creando Juego..." : "🎮 Crear Juego"}
+              {loading 
+                ? (isEditMode ? "Actualizando Juego..." : "Creando Juego...") 
+                : (isEditMode ? "🎮 Actualizar Juego" : "🎮 Crear Juego")
+              }
             </Button>
           </Box>
         </Box>
@@ -782,10 +883,10 @@ export default function AdminCreateProductPage() {
             </Box>
             <Box>
               <Typography variant="h4" component="h2" sx={{ fontWeight: "bold", mb: 0.5 }}>
-                Crear Nuevo Servicio
+                {isEditMode ? "Editar Servicio" : "Crear Nuevo Servicio"}
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Agrega servicios de gaming o suscripciones
+                {isEditMode ? "Modifica los datos del servicio" : "Agrega servicios de gaming o suscripciones"}
               </Typography>
             </Box>
           </Box>
@@ -1031,7 +1132,10 @@ export default function AdminCreateProductPage() {
                 transition: "all 0.3s ease",
               }}
             >
-              {loading ? "Creando Servicio..." : "⚙️ Crear Servicio"}
+              {loading 
+                ? (isEditMode ? "Actualizando Servicio..." : "Creando Servicio...") 
+                : (isEditMode ? "⚙️ Actualizar Servicio" : "⚙️ Crear Servicio")
+              }
             </Button>
           </Box>
         </Box>
@@ -1070,10 +1174,10 @@ export default function AdminCreateProductPage() {
             </Box>
             <Box>
               <Typography variant="h4" component="h2" sx={{ fontWeight: "bold", mb: 0.5 }}>
-                Crear Nuevo Complemento
+                {isEditMode ? "Editar Complemento" : "Crear Nuevo Complemento"}
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Agrega DLC, expansiones o contenido adicional
+                {isEditMode ? "Modifica los datos del complemento" : "Agrega DLC, expansiones o contenido adicional"}
               </Typography>
             </Box>
           </Box>
@@ -1343,7 +1447,10 @@ export default function AdminCreateProductPage() {
                 transition: "all 0.3s ease",
               }}
             >
-              {loading ? "Creando Complemento..." : "📦 Crear Complemento"}
+              {loading 
+                ? (isEditMode ? "Actualizando Complemento..." : "Creando Complemento...") 
+                : (isEditMode ? "📦 Actualizar Complemento" : "📦 Crear Complemento")
+              }
             </Button>
           </Box>
         </Box>
@@ -1352,12 +1459,13 @@ export default function AdminCreateProductPage() {
   )
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      {/* Reutilizamos NavBar igual que otros componentes admin */}
-      <NavBar />
-      
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 8 }}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        {/* Reutilizamos NavBar igual que otros componentes admin */}
+        <NavBar />
+        
+        <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 8 }}>
         {!selectedType && renderTypeSelector()}
         {selectedType === "juego" && renderJuegoForm()}
         {selectedType === "servicio" && renderServicioForm()}
@@ -1395,5 +1503,6 @@ export default function AdminCreateProductPage() {
         </Snackbar>
       </Box>
     </ThemeProvider>
+    </LocalizationProvider>
   )
 }

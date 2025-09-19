@@ -81,6 +81,11 @@ function App() {
             <AdminCreateProduct />
           </ProtectedAdminRoute>
         } />
+        <Route path="/admin/edit-product/:tipo/:id" element={
+          <ProtectedAdminRoute>
+            <AdminCreateProduct />
+          </ProtectedAdminRoute>
+        } />
       </Routes>
       </Router>
     

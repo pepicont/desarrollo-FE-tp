@@ -143,4 +143,38 @@ export const productService = {
     const res = await api.get<ApiResponse<JuegoDetail[]>>('/juego')
     return res.data.data
   },
+
+  // Update methods
+  async updateJuego(id: number, data: CreateJuegoData, token: string): Promise<JuegoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+    const res = await api.put<ApiResponse<JuegoDetail>>(`/juego/${id}`, data, config)
+    return res.data.data
+  },
+
+  async updateServicio(id: number, data: CreateServicioData, token: string): Promise<ServicioDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+    const res = await api.put<ApiResponse<ServicioDetail>>(`/servicio/${id}`, data, config)
+    return res.data.data
+  },
+
+  async updateComplemento(id: number, data: CreateComplementoData, token: string): Promise<ComplementoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+    const res = await api.put<ApiResponse<ComplementoDetail>>(`/complemento/${id}`, data, config)
+    return res.data.data
+  },
 }
