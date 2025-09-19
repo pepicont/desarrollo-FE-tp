@@ -5,6 +5,7 @@ import NavBar from '../navBar/navBar'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { productService, type JuegoDetail, type ServicioDetail, type ComplementoDetail, type Foto } from '../../services/productService'
 import { getReviewsByProduct, type ProductReview } from '../../services/reseniasService'
+import ModernPagination from '../shared-components/ModernPagination'
 import { authService } from '../../services/authService'
 import Footer from '../footer/footer'
 
@@ -39,6 +40,10 @@ export default function Producto() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ProductoData | null>(null)
   const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [reviewsPage, setReviewsPage] = useState(1)
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1)
+  const [, setReviewsTotal] = useState(0)
+  const reviewsPerPage = 5
   const [heroImage, setHeroImage] = useState<string | null>(null)
   const [displayImage, setDisplayImage] = useState<string>('/vite.svg')
   const [isAdmin, setIsAdmin] = useState(false)
@@ -119,18 +124,35 @@ export default function Producto() {
         } else {
           setHeroImage(null)
         }
-        // cargar reseñas reales
-        const revs = await getReviewsByProduct(parsedTipo, parsedId)
-        setReviews(revs)
       } catch (e) {
         console.error(e)
         setError('No se pudo cargar el producto')
-      } finally {
-        setLoading(false)
       }
     }
     load()
   }, [parsedTipo, parsedId])
+
+  // Cargar reseñas paginadas
+  useEffect(() => {
+    if (!parsedTipo || !parsedId || !['juego','servicio','complemento'].includes(parsedTipo)) return
+    const loadReviews = async () => {
+      try {
+        const res = await getReviewsByProduct(parsedTipo, parsedId, reviewsPage, reviewsPerPage)
+        setReviews(res.data)
+        setReviewsTotalPages(res.totalPages)
+        setReviewsTotal(res.total)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        setReviews([])
+        setReviewsTotalPages(1)
+        setReviewsTotal(0)
+      } finally {
+        setLoading(false)
+      }
+    }
+    setLoading(true)
+    loadReviews()
+  }, [parsedTipo, parsedId, reviewsPage])
 
   const reviewsUi: Review[] = reviews.map(r => ({
     id: r.id,
@@ -378,6 +400,16 @@ export default function Producto() {
                     </CardContent>
                   </Card>
                 ))}
+                {reviewsTotalPages > 1 && (
+                  <ModernPagination
+                    currentPage={reviewsPage}
+                    totalPages={reviewsTotalPages}
+                    onPageChange={setReviewsPage}
+                    onScrollAfterChange={() => {
+                      reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }}
+                  />
+                )}
               </Box>
             </Box>
           </Container>

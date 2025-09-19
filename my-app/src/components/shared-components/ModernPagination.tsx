@@ -7,6 +7,7 @@ interface ModernPaginationProps {
   totalPages: number
   onPageChange: (page: number) => void
   maxVisiblePages?: number
+  onScrollAfterChange?: () => void // opcional, para scroll personalizado
 }
 
 export default function ModernPagination({
@@ -14,17 +15,22 @@ export default function ModernPagination({
   totalPages,
   onPageChange,
   maxVisiblePages = 5,
+  onScrollAfterChange,
 }: ModernPaginationProps) {
   const theme = useTheme()
 
   // Función para cambiar página y hacer scroll hacia arriba
   const handlePageChange = (page: number) => {
     onPageChange(page)
-    // Scroll suave hacia arriba
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
+    if (onScrollAfterChange) {
+      onScrollAfterChange()
+    } else {
+      // Scroll suave hacia arriba por defecto
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
   }
 
   // Generar números de página visibles

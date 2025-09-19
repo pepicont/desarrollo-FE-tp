@@ -31,11 +31,21 @@ export type ProductReview = {
   usuario: { id: number; nombreUsuario: string; urlFoto?: string };
 }
 
-export async function getReviewsByProduct(tipo: 'juego' | 'servicio' | 'complemento', id: number): Promise<ProductReview[]> {
-  const response = await fetch(`http://localhost:3000/api/resenia/by-product/${tipo}/${id}`);
+export async function getReviewsByProduct(
+  tipo: 'juego' | 'servicio' | 'complemento',
+  id: number,
+  page: number = 1,
+  limit: number = 10
+): Promise<{ data: ProductReview[]; page: number; totalPages: number; total: number }> {
+  const response = await fetch(`http://localhost:3000/api/resenia/by-product/${tipo}/${id}?page=${page}&limit=${limit}`);
   if (!response.ok) throw await response.json();
   const json = await response.json();
-  return json.data as ProductReview[];
+  return {
+    data: json.data as ProductReview[],
+    page: json.page,
+    totalPages: json.totalPages,
+    total: json.total
+  };
 }
 
 export async function checkUserReviewForPurchase(token: string, ventaId: number) {
