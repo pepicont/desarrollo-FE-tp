@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Box,
   Container,
@@ -58,6 +58,13 @@ export default function AdminCompaniasPage() {
   const [companias, setCompanias] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const errorAlertRef = useRef<HTMLDivElement | null>(null)
+  // Focus en alerta de error
+  useEffect(() => {
+    if (error && errorAlertRef.current) {
+      errorAlertRef.current.focus();
+    }
+  }, [error]);
   
   // Estados para el modal de confirmación de eliminación
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -155,48 +162,49 @@ export default function AdminCompaniasPage() {
     }
   }
 
+  // Alerta de éxito de borrado
+  const [deleteSuccess, setDeleteSuccess] = useState("");
+  const deleteSuccessRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (deleteSuccess && deleteSuccessRef.current) {
+      deleteSuccessRef.current.focus();
+    }
+  }, [deleteSuccess]);
   // Función para confirmar eliminación
   const confirmDeleteCompany = async () => {
-    if (!companyToDelete) return
-
-    setDeleteLoading(true)
+    if (!companyToDelete) return;
+    setDeleteLoading(true);
     try {
-      const token = authService.getToken()
-      
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-      
-      await deleteCompanyAsAdmin(token, companyToDelete.id)
-      setCompanias(prev => prev.filter(company => company.id !== companyToDelete.id))
-      
-      // Cerrar modal y limpiar
-      setDeleteModalOpen(false)
-      setCompanyToDelete(null)
-      
+      await deleteCompanyAsAdmin(token, companyToDelete.id);
+      setCompanias(prev => prev.filter(company => company.id !== companyToDelete.id));
+      setDeleteSuccess("Compañía eliminada correctamente");
+      setTimeout(() => setDeleteSuccess("") , 3000);
+      setDeleteModalOpen(false);
+      setCompanyToDelete(null);
     } catch (error: unknown) {
-      console.error('Error detallado al eliminar compañía:', error)
-      
-      // Mostrar error más específico
+      console.error('Error detallado al eliminar compañía:', error);
       if (error && typeof error === 'object' && 'status' in error) {
         if (error.status === 401) {
-          setError("Sesión expirada. Por favor, inicia sesión nuevamente.")
+          setError("Sesión expirada. Por favor, inicia sesión nuevamente.");
         } else if (error.status === 403) {
-          setError("No tienes permisos para eliminar compañías")
+          setError("No tienes permisos para eliminar compañías");
         } else if (error.status === 400 || error.status === 409) {
-          setError("No se puede eliminar esta compañía porque tiene productos asociados")
+          setError("No se puede eliminar esta compañía porque tiene productos asociados");
         } else {
-          setError(`Error al eliminar la compañía (${error.status})`)
+          setError(`Error al eliminar la compañía (${error.status})`);
         }
       } else {
-        setError(`Error al eliminar la compañía: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        setError(`Error al eliminar la compañía: ${error instanceof Error ? error.message : 'Error desconocido'}`);
       }
     } finally {
-      setDeleteLoading(false)
-      // Cerrar modal siempre, incluso cuando hay error
-      setDeleteModalOpen(false)
-      setCompanyToDelete(null)
+      setDeleteLoading(false);
+      setDeleteModalOpen(false);
+      setCompanyToDelete(null);
     }
   }
 
@@ -206,25 +214,26 @@ export default function AdminCompaniasPage() {
     setCompanyToDelete(null)
   }
 
+  // Alerta de éxito de creación
+  const [createSuccess, setCreateSuccess] = useState("");
   // Función para agregar compañía
   const handleAddCompany = async (companyData: { nombre: string; detalle: string }) => {
-    setAddLoading(true)
+    setAddLoading(true);
     try {
-      const token = authService.getToken()
-      
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-      
-      const newCompany = await createCompany(token, companyData)
-      setCompanias(prev => [...prev, newCompany])
-      
+      const newCompany = await createCompany(token, companyData);
+      setCompanias(prev => [...prev, newCompany]);
+      setCreateSuccess("Compañía creada correctamente");
+      setTimeout(() => setCreateSuccess("") , 3000);
     } catch (error: unknown) {
-      console.error('Error al crear compañía:', error)
-      setError("Error al crear la compañía")
+      console.error('Error al crear compañía:', error);
+      setError("Error al crear la compañía");
     } finally {
-      setAddLoading(false)
+      setAddLoading(false);
     }
   }
 
@@ -243,12 +252,26 @@ export default function AdminCompaniasPage() {
             </Box>
           ) : error ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2 }} ref={errorAlertRef} tabIndex={-1}>
                 {error}
               </Alert>
             </Box>
           ) : (
             <>
+              {deleteSuccess && (
+                <Box sx={{ textAlign: 'center', py: 1 }}>
+                  <Alert severity="success" sx={{ mb: 2 }} ref={deleteSuccessRef} tabIndex={-1}>
+                    {deleteSuccess}
+                  </Alert>
+                </Box>
+              )}
+              {createSuccess && (
+                <Box sx={{ textAlign: 'center', py: 1 }}>
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    {createSuccess}
+                  </Alert>
+                </Box>
+              )}
               {/* Barra de búsqueda */}
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ maxWidth: 600, mx: "auto" }}>

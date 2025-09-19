@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Box,
   Container,
@@ -63,6 +63,20 @@ export default function UsuariosPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const errorAlertRef = useRef<HTMLDivElement | null>(null)
+  const successAlertRef = useRef<HTMLDivElement | null>(null)
+  // Focus en alerta de error
+  useEffect(() => {
+    if (error && errorAlertRef.current) {
+      errorAlertRef.current.focus();
+    }
+  }, [error]);
+  // Focus en alerta de éxito
+  useEffect(() => {
+    if (success && successAlertRef.current) {
+      successAlertRef.current.focus();
+    }
+  }, [success]);
   
   // Estados para el modal de confirmación de eliminación
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -230,7 +244,7 @@ export default function UsuariosPage() {
             </Box>
           ) : error ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2 }} ref={errorAlertRef} tabIndex={-1}>
                 {error}
               </Alert>
             </Box>
@@ -238,7 +252,7 @@ export default function UsuariosPage() {
             <>
               {/* Alerta de éxito */}
               {success && (
-                <Alert severity="success" sx={{ mb: 2, maxWidth: 600, mx: "auto" }}>
+                <Alert severity="success" sx={{ mb: 2, maxWidth: 600, mx: "auto" }} ref={successAlertRef} tabIndex={-1}>
                   {success}
                 </Alert>
               )}

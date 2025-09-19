@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Box,
   Container,
@@ -76,6 +76,20 @@ export default function AdminResenasPage() {
 
   // Estados para alertas
   const [deleteAlert, setDeleteAlert] = useState(false)
+  const deleteAlertRef = useRef<HTMLDivElement | null>(null)
+  const errorAlertRef = useRef<HTMLDivElement | null>(null)
+  // Hacer focus en la alerta de error cuando aparece
+  useEffect(() => {
+    if (error && errorAlertRef.current) {
+      errorAlertRef.current.focus();
+    }
+  }, [error]);
+  // Hacer focus en la alerta cuando aparece
+  useEffect(() => {
+    if (deleteAlert && deleteAlertRef.current) {
+      deleteAlertRef.current.focus()
+    }
+  }, [deleteAlert])
 
   const [page, setPage] = useState(1)
 
@@ -322,6 +336,8 @@ export default function AdminResenasPage() {
                   </Button>
                 ) : null
               }
+              ref={errorAlertRef}
+              tabIndex={-1}
             >
               {error}
             </Alert>
@@ -342,7 +358,12 @@ export default function AdminResenasPage() {
         <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
           {/* Alerta de eliminación */}
           {deleteAlert && (
-            <Alert severity="success" sx={{ mb: 2, fontWeight: "bold" }}>
+            <Alert
+              severity="success"
+              sx={{ mb: 2, fontWeight: "bold" }}
+              ref={deleteAlertRef}
+              tabIndex={-1}
+            >
               Reseña eliminada correctamente
             </Alert>
           )}

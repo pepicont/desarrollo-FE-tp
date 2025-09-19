@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Box,
   Container,
@@ -58,6 +58,13 @@ export default function AdminCategoriasPage() {
   const [categorias, setCategorias] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const errorAlertRef = useRef<HTMLDivElement | null>(null)
+  // Focus en alerta de error
+  useEffect(() => {
+    if (error && errorAlertRef.current) {
+      errorAlertRef.current.focus();
+    }
+  }, [error]);
   
   // Estados para el modal de confirmación de eliminación
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -155,48 +162,49 @@ export default function AdminCategoriasPage() {
     }
   }
 
+  // Alerta de éxito de borrado
+  const [deleteSuccess, setDeleteSuccess] = useState("");
+  const deleteSuccessRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (deleteSuccess && deleteSuccessRef.current) {
+      deleteSuccessRef.current.focus();
+    }
+  }, [deleteSuccess]);
   // Función para confirmar eliminación
   const confirmDeleteCategory = async () => {
-    if (!categoryToDelete) return
-
-    setDeleteLoading(true)
+    if (!categoryToDelete) return;
+    setDeleteLoading(true);
     try {
-      const token = authService.getToken()
-      
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-      
-      await deleteCategoryAsAdmin(token, categoryToDelete.id)
-      setCategorias(prev => prev.filter(category => category.id !== categoryToDelete.id))
-      
-      // Cerrar modal y limpiar
-      setDeleteModalOpen(false)
-      setCategoryToDelete(null)
-      
+      await deleteCategoryAsAdmin(token, categoryToDelete.id);
+      setCategorias(prev => prev.filter(category => category.id !== categoryToDelete.id));
+      setDeleteSuccess("Categoría eliminada correctamente");
+      setTimeout(() => setDeleteSuccess("") , 3000);
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
     } catch (error: unknown) {
-      console.error('Error detallado al eliminar categoría:', error)
-      
-      // Mostrar error más específico
+      console.error('Error detallado al eliminar categoría:', error);
       if (error && typeof error === 'object' && 'status' in error) {
         if (error.status === 401) {
-          setError("Sesión expirada. Por favor, inicia sesión nuevamente.")
+          setError("Sesión expirada. Por favor, inicia sesión nuevamente.");
         } else if (error.status === 403) {
-          setError("No tienes permisos para eliminar categorías")
+          setError("No tienes permisos para eliminar categorías");
         } else if (error.status === 400 || error.status === 409) {
-          setError("No se puede eliminar esta categoría porque tiene productos asociados")
+          setError("No se puede eliminar esta categoría porque tiene productos asociados");
         } else {
-          setError(`Error al eliminar la categoría (${error.status})`)
+          setError(`Error al eliminar la categoría (${error.status})`);
         }
       } else {
-        setError(`Error al eliminar la categoría: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        setError(`Error al eliminar la categoría: ${error instanceof Error ? error.message : 'Error desconocido'}`);
       }
     } finally {
-      setDeleteLoading(false)
-      // Cerrar modal siempre, incluso cuando hay error
-      setDeleteModalOpen(false)
-      setCategoryToDelete(null)
+      setDeleteLoading(false);
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
     }
   }
 
@@ -206,25 +214,26 @@ export default function AdminCategoriasPage() {
     setCategoryToDelete(null)
   }
 
+  // Alerta de éxito de creación
+  const [createSuccess, setCreateSuccess] = useState("");
   // Función para agregar categoría
   const handleAddCategory = async (categoryData: { nombre: string; detalle: string }) => {
-    setAddLoading(true)
+    setAddLoading(true);
     try {
-      const token = authService.getToken()
-      
+      const token = authService.getToken();
       if (!token) {
-        setError("No estás autenticado")
-        return
+        setError("No estás autenticado");
+        return;
       }
-      
-      const newCategory = await createCategory(token, categoryData)
-      setCategorias(prev => [...prev, newCategory])
-      
+      const newCategory = await createCategory(token, categoryData);
+      setCategorias(prev => [...prev, newCategory]);
+      setCreateSuccess("Categoría creada correctamente");
+      setTimeout(() => setCreateSuccess("") , 3000);
     } catch (error: unknown) {
-      console.error('Error al crear categoría:', error)
-      setError("Error al crear la categoría")
+      console.error('Error al crear categoría:', error);
+      setError("Error al crear la categoría");
     } finally {
-      setAddLoading(false)
+      setAddLoading(false);
     }
   }
 
@@ -243,12 +252,26 @@ export default function AdminCategoriasPage() {
             </Box>
           ) : error ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2 }} ref={errorAlertRef} tabIndex={-1}>
                 {error}
               </Alert>
             </Box>
           ) : (
             <>
+              {deleteSuccess && (
+                <Box sx={{ textAlign: 'center', py: 1 }}>
+                  <Alert severity="success" sx={{ mb: 2 }} ref={deleteSuccessRef} tabIndex={-1}>
+                    {deleteSuccess}
+                  </Alert>
+                </Box>
+              )}
+              {createSuccess && (
+                <Box sx={{ textAlign: 'center', py: 1 }}>
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    {createSuccess}
+                  </Alert>
+                </Box>
+              )}
               {/* Barra de búsqueda */}
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ maxWidth: 600, mx: "auto" }}>
