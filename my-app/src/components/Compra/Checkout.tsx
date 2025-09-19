@@ -173,12 +173,50 @@ export default function Checkout() {
           </Card>
 
           {/* Acciones */}
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="outlined" onClick={() => navigate(-1)}>Volver</Button>
-            <Button variant="contained" disabled={loading} onClick={handlePay}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              gap: 2,
+              width: '100%',
+              alignItems: 'stretch',
+              justifyContent: 'center',
+              mt: 2,
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => navigate(-1)}
+              sx={{
+                fontSize: { xs: 15, sm: 16 },
+                py: { xs: 1.2, sm: 1.5 },
+                px: { xs: 0, sm: 2 },
+                width: { xs: '100%', sm: '225px' },
+                maxWidth: { sm: '225px' },
+                fontWeight: 600,
+                borderWidth: 2,
+                borderRadius: 2,
+              }}
+            >
+              Volver
+            </Button>
+            <Button
+              variant="contained"
+              disabled={loading}
+              onClick={handlePay}
+              sx={{
+                fontSize: { xs: 15, sm: 16 },
+                py: { xs: 1.2, sm: 1.5 },
+                px: { xs: 0, sm: 2 },
+                width: { xs: '100%', sm: '225px' },
+                maxWidth: { sm: '225px' },
+                fontWeight: 600,
+                borderRadius: 2,
+              }}
+            >
               {loading ? <CircularProgress size={20} /> : 'Pagar'}
             </Button>
-          </Box>          
+          </Box>
         </Container>
         <Footer />
       </Box>

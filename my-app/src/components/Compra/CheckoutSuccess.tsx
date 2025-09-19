@@ -164,9 +164,46 @@ export default function CheckoutSuccess() {
             </CardContent>
           </Card>
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-            <Button variant="outlined" onClick={() => navigate('/mis-compras')}>Mis compras</Button>
-            <Button variant="contained" onClick={() => navigate('/')}>Ir al inicio</Button>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2,
+              mt: 3,
+              width: '100%',
+              alignItems: 'stretch',
+              justifyContent: 'center',
+            }}
+          >
+              <Button
+                variant="outlined"
+                onClick={() => navigate('/mis-compras')}
+                sx={{
+                  fontSize: { xs: 15, sm: 16 },
+                  py: { xs: 1.2, sm: 1.5 },
+                  px: { xs: 0, sm: 2 },
+                  width: { xs: '100%', sm: 'auto' },
+                  fontWeight: 600,
+                  borderWidth: 2,
+                  borderRadius: 2,
+                }}
+              >
+                Mis compras
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => navigate('/')}
+                sx={{
+                  fontSize: { xs: 15, sm: 16 },
+                  py: { xs: 1.2, sm: 1.5 },
+                  px: { xs: 0, sm: 2 },
+                  width: { xs: '100%', sm: 'auto' },
+                  fontWeight: 600,
+                  borderRadius: 2,
+                }}
+              >
+                Ir al inicio
+              </Button>
           </Box>
         </Container>
         <Footer />
