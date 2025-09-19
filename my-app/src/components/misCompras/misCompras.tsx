@@ -131,7 +131,7 @@ export default function MisComprasPage() {
   // Navegación a la página de producto
   const handleProductClick = (productId: number | null, productType?: string) => {
     if (productId !== null && productType) {
-      navigate("/producto", { state: { id: productId, tipo: productType} })
+      navigate(`/producto/${productType}/${productId}`)
     }
   }
   

@@ -295,7 +295,7 @@ export default function MisResenasPage() {
     else if (resenia?.venta.servicio) tipo = 'servicio';
     else if (resenia?.venta.complemento) tipo = 'complemento';
     if (ventaId && tipo) {
-      navigate('/producto', { state: { id: resenia.venta[tipo]?.id, tipo} });
+      navigate(`/producto/${tipo}/${resenia.venta[tipo]?.id}`);
     }
   }}
 
