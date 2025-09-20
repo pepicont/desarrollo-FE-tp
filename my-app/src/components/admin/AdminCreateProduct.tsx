@@ -33,7 +33,7 @@ import dayjs from 'dayjs'
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
 import { productService, type CreateJuegoData, type CreateServicioData, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
 import { getAllCategoriesAdmin, type Category } from "../../services/categoryService"
@@ -103,23 +103,21 @@ const mapAgeToRating = (age: number): number => {
 }
 
 export default function AdminCreateProductPage() {
-  
+  const navigate = useNavigate();
+  const location = useLocation();
   // Error and success states - usando el mismo patrón que otros componentes admin
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(location.state?.success || "");
   // Ref para la alerta (ya no se usa para focus, pero se deja por si se quiere scrollIntoView)
-  const alertRef = useRef<HTMLDivElement | null>(null)
-  
-  const params = useParams<{ tipo: string; id: string }>()
-  const isEditMode = !!(params.tipo && params.id)
-  const editTipo = params.tipo as ProductType
-  const editId = params.id ? parseInt(params.id) : null
-  
-  
+  const alertRef = useRef<HTMLDivElement | null>(null);
+  const params = useParams<{ tipo: string; id: string }>();
+  const isEditMode = !!(params.tipo && params.id);
+  const editTipo = params.tipo as ProductType;
+  const editId = params.id ? parseInt(params.id) : null;
   // Type selection state
   const [selectedType, setSelectedType] = useState<ProductType | null>(
     isEditMode ? editTipo : null
-  )
+  );
   
   // Auto-hide alerts in type selector after 4s y scroll al top para todos los tipos (forzado)
   useEffect(() => {
@@ -135,6 +133,17 @@ export default function AdminCreateProductPage() {
       return () => clearTimeout(timer);
     }
   }, [selectedType, success, error]);
+
+  // Si llegamos aquí navegando con state.success (después de editar), mostrar alerta y limpiar el state
+  useEffect(() => {
+    type NavState = { success?: string }
+    const state = (location as unknown as { state?: NavState }).state
+    if (state && state.success) {
+      setSuccess(state.success)
+      // limpiar el state de la URL para que no vuelva a mostrarse si navegamos hacia atrás
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location, navigate])
 
   
   // Data states
@@ -279,11 +288,14 @@ export default function AdminCreateProductPage() {
       }
 
       if (isEditMode && editId) {
-        await productService.updateJuego(editId, data, token)
-        setSuccess("Juego actualizado exitosamente")
+        await productService.updateJuego(editId, data, token);
+        // Si venimos de una ruta previa (p. ej. el producto abierto en modal), volver atrás para cerrar el modal
+        if (window.history && window.history.length > 1) {
+          navigate(-1)
+        } 
       } else {
-        await productService.createJuego(data, token)
-        resetForm(() => setSuccess("Juego creado exitosamente"))
+        await productService.createJuego(data, token);
+        resetForm(() => setSuccess("Juego creado exitosamente"));
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el juego`
@@ -311,11 +323,13 @@ export default function AdminCreateProductPage() {
       }
 
       if (isEditMode && editId) {
-        await productService.updateServicio(editId, data, token)
-        setSuccess("Servicio actualizado exitosamente")
+        await productService.updateServicio(editId, data, token);
+        if (window.history && window.history.length > 1) {
+          navigate(-1)
+        }
       } else {
-        await productService.createServicio(data, token)
-        resetForm(() => setSuccess("Servicio creado exitosamente"))
+        await productService.createServicio(data, token);
+        resetForm(() => setSuccess("Servicio creado exitosamente"));
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el servicio`
@@ -347,11 +361,13 @@ export default function AdminCreateProductPage() {
       }
 
       if (isEditMode && editId) {
-        await productService.updateComplemento(editId, data, token)
-        setSuccess("Complemento actualizado exitosamente")
+        await productService.updateComplemento(editId, data, token);
+        if (window.history && window.history.length > 1) {
+          navigate(-1)
+        } 
       } else {
-        await productService.createComplemento(data, token)
-        resetForm(() => setSuccess("Complemento creado exitosamente"))
+        await productService.createComplemento(data, token);
+        resetForm(() => setSuccess("Complemento creado exitosamente"));
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el complemento`
@@ -391,25 +407,6 @@ export default function AdminCreateProductPage() {
     setTimeout(() => {
       if (callback) callback()
     }, 0)
-  }
-
-  if (dataLoading) {
-    return (
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <NavBar />
-        <Box sx={{ 
-          minHeight: "100vh", 
-          bgcolor: "background.default", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
-          pt: 8
-        }}>
-          <CircularProgress size={60} />
-        </Box>
-      </ThemeProvider>
-    )
   }
 
   const renderTypeSelector = () => (
@@ -834,7 +831,10 @@ export default function AdminCreateProductPage() {
               type="button"
               variant="outlined"
               size="large"
-              onClick={() => resetForm()}
+              onClick={() => {
+                resetForm()
+                if (isEditMode) navigate('/admin/create-product')
+              }}
               disabled={loading}
               sx={{
                 minWidth: "120px",
@@ -1125,7 +1125,10 @@ export default function AdminCreateProductPage() {
               type="button"
               variant="outlined"
               size="large"
-              onClick={() => resetForm()}
+              onClick={() => {
+                resetForm()
+                if (isEditMode) navigate('/admin/create-product')
+              }}
               disabled={loading}
               sx={{
                 minWidth: "120px",
@@ -1418,7 +1421,10 @@ export default function AdminCreateProductPage() {
               type="button"
               variant="outlined"
               size="large"
-              onClick={() => resetForm()}
+              onClick={() => {
+                resetForm()
+                if (isEditMode) navigate('/admin/create-product')
+              }}
               disabled={loading}
               sx={{
                 minWidth: "120px",
@@ -1475,6 +1481,24 @@ export default function AdminCreateProductPage() {
     </Container>
   )
 
+  if (dataLoading) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <NavBar />
+        <Box sx={{ 
+          minHeight: "100vh", 
+          bgcolor: "background.default", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          pt: 8
+        }}>
+          <CircularProgress size={60} />
+        </Box>
+      </ThemeProvider>
+    )
+  }
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ThemeProvider theme={darkTheme}>
@@ -1489,5 +1513,5 @@ export default function AdminCreateProductPage() {
         </Box>
       </ThemeProvider>
     </LocalizationProvider>
-  )
+  ) 
 }
