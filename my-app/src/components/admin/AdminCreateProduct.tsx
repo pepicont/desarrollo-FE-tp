@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {
   Box,
   Container,
@@ -16,7 +16,6 @@ import {
   Button,
   Paper,
   Alert,
-  Snackbar,
   CircularProgress,
   Chip,
   FormLabel,
@@ -105,15 +104,39 @@ const mapAgeToRating = (age: number): number => {
 }
 
 export default function AdminCreateProductPage() {
+  
+  // Error and success states - usando el mismo patrón que otros componentes admin
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  // Ref para la alerta (ya no se usa para focus, pero se deja por si se quiere scrollIntoView)
+  const alertRef = useRef<HTMLDivElement | null>(null)
+  
   const params = useParams<{ tipo: string; id: string }>()
   const isEditMode = !!(params.tipo && params.id)
   const editTipo = params.tipo as ProductType
   const editId = params.id ? parseInt(params.id) : null
   
+  
   // Type selection state
   const [selectedType, setSelectedType] = useState<ProductType | null>(
     isEditMode ? editTipo : null
   )
+  
+  // Auto-hide alerts in type selector after 4s y scroll al top para todos los tipos (forzado)
+  useEffect(() => {
+    if (!selectedType && (success || error)) {
+      // Forzar el scroll después de que el DOM se actualiza
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
+      const timer = setTimeout(() => {
+        setSuccess("");
+        setError("");
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedType, success, error]);
+
   
   // Data states
   const [categories, setCategories] = useState<Category[]>([])
@@ -152,9 +175,7 @@ export default function AdminCreateProductPage() {
     juego: "",
   })
   
-  // Error and success states - usando el mismo patrón que otros componentes admin
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+
 
   // Load initial data - mismo patrón que AdminCategorias
   useEffect(() => {
@@ -265,12 +286,11 @@ export default function AdminCreateProductPage() {
         setSuccess("Juego actualizado exitosamente")
       } else {
         await productService.createJuego(data, token)
-        setSuccess("Juego creado exitosamente")
-        resetForm()
+        resetForm(() => setSuccess("Juego creado exitosamente"))
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el juego`
-      setError(errorMessage)
+      resetForm(() => setError(errorMessage))
     } finally {
       setLoading(false)
     }
@@ -298,12 +318,11 @@ export default function AdminCreateProductPage() {
         setSuccess("Servicio actualizado exitosamente")
       } else {
         await productService.createServicio(data, token)
-        setSuccess("Servicio creado exitosamente")
-        resetForm()
+        resetForm(() => setSuccess("Servicio creado exitosamente"))
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el servicio`
-      setError(errorMessage)
+      resetForm(() => setError(errorMessage))
     } finally {
       setLoading(false)
     }
@@ -332,18 +351,17 @@ export default function AdminCreateProductPage() {
         setSuccess("Complemento actualizado exitosamente")
       } else {
         await productService.createComplemento(data, token)
-        setSuccess("Complemento creado exitosamente")
-        resetForm()
+        resetForm(() => setSuccess("Complemento creado exitosamente"))
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el complemento`
-      setError(errorMessage)
+      resetForm(() => setError(errorMessage))
     } finally {
       setLoading(false)
     }
   }
 
-  const resetForm = () => {
+  const resetForm = (callback?: () => void) => {
     setSelectedType(null)
     setJuegoForm({
       nombre: "",
@@ -371,6 +389,9 @@ export default function AdminCreateProductPage() {
     })
     setError("")
     setSuccess("")
+    setTimeout(() => {
+      if (callback) callback()
+    }, 0)
   }
 
   if (dataLoading) {
@@ -394,6 +415,25 @@ export default function AdminCreateProductPage() {
 
   const renderTypeSelector = () => (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Alertas arriba del título */}
+      {error && (
+        <Alert 
+          severity="error" 
+          sx={{ mb: 3, fontSize: 18, fontWeight: 600, textAlign: 'center' }}
+          ref={alertRef}
+        >
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert 
+          severity="success" 
+          sx={{ mb: 3, fontSize: 18, fontWeight: 600, textAlign: 'center' }}
+          ref={alertRef}
+        >
+          {success}
+        </Alert>
+      )}
       <Typography variant="h3" component="h1" align="center" sx={{ mb: 6, fontWeight: "bold" }}>
         {isEditMode ? `Editar ${editTipo?.charAt(0).toUpperCase()}${editTipo?.slice(1)}` : "¿Qué desea crear hoy?"}
       </Typography>
@@ -795,7 +835,7 @@ export default function AdminCreateProductPage() {
               type="button"
               variant="outlined"
               size="large"
-              onClick={resetForm}
+              onClick={() => resetForm()}
               disabled={loading}
               sx={{
                 minWidth: "120px",
@@ -1086,7 +1126,7 @@ export default function AdminCreateProductPage() {
               type="button"
               variant="outlined"
               size="large"
-              onClick={resetForm}
+              onClick={() => resetForm()}
               disabled={loading}
               sx={{
                 minWidth: "120px",
@@ -1401,7 +1441,7 @@ export default function AdminCreateProductPage() {
               type="button"
               variant="outlined"
               size="large"
-              onClick={resetForm}
+              onClick={() => resetForm()}
               disabled={loading}
               sx={{
                 minWidth: "120px",
@@ -1464,45 +1504,13 @@ export default function AdminCreateProductPage() {
         <CssBaseline />
         {/* Reutilizamos NavBar igual que otros componentes admin */}
         <NavBar />
-        
         <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 8 }}>
-        {!selectedType && renderTypeSelector()}
-        {selectedType === "juego" && renderJuegoForm()}
-        {selectedType === "servicio" && renderServicioForm()}
-        {selectedType === "complemento" && renderComplementoForm()}
-
-        {/* Reutilizamos el patrón de Snackbar de otros componentes admin */}
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={() => setError("")}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setError("")}
-            severity="error"
-            variant="filled"
-          >
-            {error}
-          </Alert>
-        </Snackbar>
-
-        <Snackbar
-          open={!!success}
-          autoHideDuration={4000}
-          onClose={() => setSuccess("")}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setSuccess("")}
-            severity="success"
-            variant="filled"
-          >
-            {success}
-          </Alert>
-        </Snackbar>
-      </Box>
-    </ThemeProvider>
+          {!selectedType && renderTypeSelector()}
+          {selectedType === "juego" && renderJuegoForm()}
+          {selectedType === "servicio" && renderServicioForm()}
+          {selectedType === "complemento" && renderComplementoForm()}
+        </Box>
+      </ThemeProvider>
     </LocalizationProvider>
   )
 }
