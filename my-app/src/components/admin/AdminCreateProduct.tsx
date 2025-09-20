@@ -82,7 +82,6 @@ interface ComplementoFormData {
   detalle: string
   monto: string
   categorias: number[]
-  compania: string
   juego: string
 }
 
@@ -141,7 +140,7 @@ export default function AdminCreateProductPage() {
   // Data states
   const [categories, setCategories] = useState<Category[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
-  const [juegos, setJuegos] = useState<Array<{id: number, nombre: string}>>([])
+  const [juegos, setJuegos] = useState<Array<{id: number, nombre: string, compania: { id: number, nombre: string }}>>([])
   
   // Loading states
   const [loading, setLoading] = useState(false)
@@ -171,7 +170,6 @@ export default function AdminCreateProductPage() {
     detalle: "",
     monto: "",
     categorias: [],
-    compania: "",
     juego: "",
   })
   
@@ -247,7 +245,6 @@ export default function AdminCreateProductPage() {
             detalle: productData.detalle || "",
             monto: productData.monto?.toString() || "",
             categorias: productData.categorias?.map((c: CategoriaRef) => c.id) || [],
-            compania: productData.compania?.id?.toString() || "",
             juego: productData.juego?.id?.toString() || "",
           })
         }
@@ -342,7 +339,10 @@ export default function AdminCreateProductPage() {
         detalle: complementoForm.detalle,
         monto: parseFloat(complementoForm.monto),
         categorias: complementoForm.categorias,
-        compania: parseInt(complementoForm.compania),
+        compania: (() => {
+          const selectedJuego = juegos.find(j => j.id === parseInt(complementoForm.juego));
+          return selectedJuego ? selectedJuego.compania.id : 0;
+        })(),
         juego: parseInt(complementoForm.juego),
       }
 
@@ -384,7 +384,6 @@ export default function AdminCreateProductPage() {
       detalle: "",
       monto: "",
       categorias: [],
-      compania: "",
       juego: "",
     })
     setError("")
@@ -1368,29 +1367,7 @@ export default function AdminCreateProductPage() {
                 </Select>
               </FormControl>
 
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
-                <InputLabel sx={{ color: "#b0b0b0" }}>Compañía</InputLabel>
-                <Select
-                  value={complementoForm.compania}
-                  label="Compañía"
-                  onChange={(e) => setComplementoForm({ ...complementoForm, compania: e.target.value })}
-                  sx={{
-                    bgcolor: "#141926",
-                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "#2a3441", borderWidth: "2px" },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#34d399" },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": { 
-                      borderColor: "#34d399",
-                      boxShadow: "0 0 0 3px rgba(52, 211, 153, 0.1)",
-                    },
-                  }}
-                >
-                  {companies.map((company) => (
-                    <MenuItem key={company.id} value={company.id.toString()}>
-                      {company.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+
             </Box>
 
             <FormControl fullWidth required>
