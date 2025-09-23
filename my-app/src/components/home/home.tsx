@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Chip,
   Button,
   Paper,
   ThemeProvider,
@@ -19,20 +18,21 @@ import CssBaseline from "@mui/material/CssBaseline"
 
 import {
   /*Close as CloseIcon,*/
-  Star,
   ArrowBackIos,
   ArrowForwardIos,
 } from "@mui/icons-material"
 import styled from "@emotion/styled"
-import cyberpunkImg from "../../assets/cyberpunk.jpg"
-import fifaImg from "../../assets/fifa24.jpg"
-import mw3Img from "../../assets/mw3.jpg"
+// import cyberpunkImg from "../../assets/cyberpunk.jpg"
+// import fifaImg from "../../assets/fifa24.jpg"
+// import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
 import juegos from "../../assets/carousel-juegos.png"
 import servicios from "../../assets/carousel-servicios.jpg"
 import complementos from "../../assets/carousel-complementos.jpg"
 import { useNavigate } from "react-router-dom"
 import Footer from "../footer/footer"
+import { getTopSellers, type TopSeller } from "../../services/topSellersService"
+import logo from "../../assets/logo.jpg"
 
 const darkTheme = createTheme({
   palette: {
@@ -143,44 +143,7 @@ const carouselItems = [
   },
 ]
 
-const featuredProducts = [
-  {
-    id: 1,
-    title: "The Legend of Zelda: Tears of the Kingdom",
-    price: "$59.99",
-    originalPrice: "$69.99",
-  image: cyberpunkImg,
-    rating: 4.9,
-    discount: 15,
-  },
-  {
-    id: 2,
-    title: "Spider-Man 2",
-    price: "$49.99",
-    originalPrice: "$59.99",
-  image: fifaImg,
-    rating: 4.8,
-    discount: 17,
-  },
-  {
-    id: 3,
-    title: "Baldur's Gate 3",
-    price: "$39.99",
-    originalPrice: "$59.99",
-  image: mw3Img,
-    rating: 4.9,
-    discount: 33,
-  },
-  {
-    id: 4,
-    title: "Hogwarts Legacy",
-    price: "$29.99",
-    originalPrice: "$49.99",
-  image: cyberpunkImg,
-    rating: 4.7,
-    discount: 40,
-  },
-]
+// Reemplazamos destacados hardcodeados por top sellers reales
 
 
 
@@ -189,6 +152,9 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const navigate = useNavigate()
   /*const [cartCount] = React.useState(3)*/
+  const [topSellers, setTopSellers] = React.useState<TopSeller[]>([])
+  const [loadingTop, setLoadingTop] = React.useState<boolean>(true)
+  const [errorTop, setErrorTop] = React.useState<string | null>(null)
 
   /*const cartItems = [
     {
@@ -219,6 +185,35 @@ export default function Home() {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length)
     }, 7000)
     return () => clearInterval(timer)
+  }, [])
+
+  React.useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        setLoadingTop(true)
+        const data = await getTopSellers({ tipo: 'todos', limit: 8 })
+        if (!cancelled) {
+          setTopSellers(data)
+          setErrorTop(null)
+        }
+      } catch (err: unknown) {
+        if (!cancelled) {
+          const hasMessage = (e: unknown): e is { message: string } => {
+            if (typeof e !== 'object' || e === null) return false
+            const maybe = e as Record<string, unknown>
+            return typeof maybe.message === 'string'
+          }
+          const msg = hasMessage(err)
+            ? err.message
+            : 'No se pudieron cargar los productos destacados'
+          setErrorTop(msg)
+        }
+      } finally {
+        if (!cancelled) setLoadingTop(false)
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   const nextSlide = () => {
@@ -406,76 +401,72 @@ export default function Home() {
           <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "#FFFFFF" }}>
             Productos Destacados
           </Typography>
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(4, 1fr)",
-              },
-              gap: 3,
-              mb: 6,
-            }}
-          >
-            {featuredProducts.map((product) => (
-              <Box key={product.id}>
-                <ProductCard>
-                  <Box sx={{ position: "relative" }}>
-                    <CardMedia
-                      component="img"
-                      height="300"
-                      image={product.image}
-                      alt={product.title}
-                      sx={{ width: "100%", objectFit: "cover" }}
-                      loading="lazy"
-                    />
-                    {product.discount > 0 && (
-                      <Chip
-                        label={`-${product.discount}%`}
-                        color="error"
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          fontWeight: "bold",
-                        }}
+          {loadingTop && (
+            <Typography sx={{ color: '#B0BEC5', mb: 2 }}>Cargando destacados…</Typography>
+          )}
+          {errorTop && !loadingTop && (
+            <Typography color="error" sx={{ mb: 2 }}>{errorTop}</Typography>
+          )}
+          {!loadingTop && !errorTop && (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(4, 1fr)",
+                },
+                gap: 3,
+                mb: 6,
+              }}
+            >
+              {topSellers.map((product) => (
+                <Box key={`${product.tipo}-${product.id}`}>
+                  <ProductCard sx={{ cursor: 'pointer' }} onClick={() => navigate(`/producto/${product.tipo}/${product.id}`)}>
+                    <Box sx={{ position: "relative" }}>
+                      <CardMedia
+                        component="img"
+                        height="300"
+                        image={product.imageUrl || logo}
+                        alt={product.nombre}
+                        sx={{ width: "100%", objectFit: "cover" }}
+                        loading="lazy"
                       />
-                    )}
-                  </Box>
-                  <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                    <Typography gutterBottom variant="h6" component="h3" sx={{ fontSize: "1rem", color: "#FFFFFF" }}>
-                      {product.title}
-                    </Typography>
-
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                      <Star sx={{ color: "gold", fontSize: 16, mr: 0.5 }} />
-                      <Typography variant="body2" sx={{ color: "#B0BEC5" }}>
-                        {product.rating}
+                      
+                    </Box>
+                    <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                      <Typography gutterBottom variant="h6" component="h3" sx={{ fontSize: "1rem", color: "#FFFFFF" }}>
+                        {product.nombre}
                       </Typography>
-                    </Box>
 
-                    <Box sx={{ mt: "auto" }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                        <Typography variant="h6" color="primary" sx={{ fontWeight: "bold" }}>
-                          {product.price}
+                      {product.compania?.nombre && (
+                        <Typography variant="body2" sx={{ color: "#B0BEC5", mb: 1 }}>
+                          {product.compania.nombre}
                         </Typography>
-                        {product.originalPrice !== product.price && (
-                          <Typography variant="body2" sx={{ textDecoration: "line-through", color: "#B0BEC5" }}>
-                            {product.originalPrice}
+                      )}
+
+                      <Box sx={{ mt: "auto" }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                          <Typography variant="h6" color="primary" sx={{ fontWeight: "bold" }}>
+                            {`$${Number(product.monto).toFixed(2)}`}
                           </Typography>
-                        )}
+                        </Box>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          size="small"
+                          sx={{ textTransform: "none" }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.tipo}/${product.id}`) }}
+                        >
+                          Ver Detalles
+                        </Button>
                       </Box>
-                      <Button variant="contained" fullWidth size="small" sx={{ textTransform: "none" }}>
-                        Ver Detalles
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </ProductCard>
-              </Box>
-            ))}
-          </Box>
+                    </CardContent>
+                  </ProductCard>
+                </Box>
+              ))}
+            </Box>
+          )}
 
           <Paper elevation={2} sx={{ p: 4, textAlign: "center", backgroundColor: "#1E2A3A", color: "#FFFFFF" }}>
             <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
