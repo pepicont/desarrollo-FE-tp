@@ -21,6 +21,7 @@ export type JuegoDetail = {
   fechaLanzamiento: string
   edadPermitida: number
   fotos?: Foto[]
+  ventasCount?: number
 }
 
 export type ServicioDetail = {
@@ -31,6 +32,7 @@ export type ServicioDetail = {
   compania: CompaniaRef
   categorias: CategoriaRef[]
   fotos?: Foto[]
+  ventasCount?: number
 }
 
 export type ComplementoDetail = {
@@ -42,6 +44,7 @@ export type ComplementoDetail = {
   categorias: CategoriaRef[]
   juego: { id: number; nombre: string }
   fotos?: Foto[]
+  ventasCount?: number
 }
 
 type ApiResponse<T> = { message: string; data: T }

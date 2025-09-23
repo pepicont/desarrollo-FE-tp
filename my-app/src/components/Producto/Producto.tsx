@@ -275,6 +275,16 @@ export default function Producto() {
                   {loading ? 'Cargando…' : (data?.nombre ?? 'Producto')}
                 </Typography>
                 <Typography color="text.secondary" sx={{ mb: 1 }}>{data?.compania?.nombre ?? ''}</Typography>
+                {(() => { const ventas = data?.ventasCount ?? 0; return ventas > 0 })() && (
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+                    <Chip
+                      label={`+${(() => { const ventas = data?.ventasCount ?? 0; return Math.max(5, Math.floor(ventas / 5) * 5) })()} vendidos`}
+                      color="success"
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Box>
+                )}
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Button onClick={goReviews} variant="text" color="inherit" sx={{ p: 0, minWidth: 0 }}>
