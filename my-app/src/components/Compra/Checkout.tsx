@@ -45,7 +45,10 @@ export default function Checkout() {
   }, [tipo, id])
 
   const handleSimulatePay = async () => {
-    if (!sessionId) return
+    if (!sessionId) {
+      setError('No se puede confirmar el pago porque falta la sesión de checkout')
+      return
+    }
     try {
       setLoading(true)
       setError(null)
@@ -91,8 +94,14 @@ export default function Checkout() {
           // 
         }
         const pref = await mpStartPreference(tipo, id)
+        const initPoint = pref?.init_point
+        if (!initPoint) throw new Error('Mercado Pago no devolvió un init_point')
+        if (initPoint.includes('fake-mercadopago')) {
+          await handleSimulatePay()
+          return
+        }
         // Redirigir a Mercado Pago
-        window.location.href = pref.init_point
+        window.location.assign(initPoint)
       } catch (e: unknown) {
         const isAx = axios.isAxiosError(e)
         const msg = isAx ? (e.response?.data?.message || e.message) : (e as Error)?.message
