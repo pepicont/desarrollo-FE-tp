@@ -94,16 +94,6 @@ export const productService = {
     const res = await api.get<ApiResponse<Foto[]>>(`/foto-producto/${tipo}/${id}`)
     return res.data.data
   },
-  async addFoto(tipo: 'juego'|'complemento'|'servicio', id: number, body: { url: string; esPrincipal?: boolean }): Promise<Foto> {
-    const res = await api.post<ApiResponse<Foto>>(`/foto-producto/${tipo}/${id}`, body)
-    return res.data.data
-  },
-  async setFotoPrincipal(tipo: 'juego'|'complemento'|'servicio', id: number, fotoId: number): Promise<void> {
-    await api.put(`/foto-producto/${tipo}/${id}/${fotoId}/principal`)
-  },
-  async removeFoto(tipo: 'juego'|'complemento'|'servicio', id: number, fotoId: number): Promise<void> {
-    await api.delete(`/foto-producto/${tipo}/${id}/${fotoId}`)
-  },
 
   // Create methods
   async createJuego(data: CreateJuegoData, token: string): Promise<JuegoDetail> {
