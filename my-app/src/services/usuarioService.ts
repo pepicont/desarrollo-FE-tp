@@ -1,3 +1,5 @@
+import { buildApiUrl } from './httpClient'
+
 // Interface para los datos del usuario
 export interface Usuario {
   id: number
@@ -13,7 +15,7 @@ export interface Usuario {
 
 // Servicio para obtener todos los usuarios (solo admin)
 export async function getAllUsuarios(token: string): Promise<Usuario[]> {
-  const response = await fetch('http://localhost:3000/api/usuario', {
+  const response = await fetch(buildApiUrl('/usuario'), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -32,7 +34,7 @@ export async function getAllUsuarios(token: string): Promise<Usuario[]> {
 
 // Servicio para eliminar un usuario (solo admin)
 export async function deleteUsuario(token: string, usuarioId: number): Promise<void> {
-  const response = await fetch(`http://localhost:3000/api/usuario/${usuarioId}`, {
+  const response = await fetch(buildApiUrl(`/usuario/${usuarioId}`), {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -53,7 +55,7 @@ export async function deleteUsuario(token: string, usuarioId: number): Promise<v
 
 // Servicio para obtener un usuario específico (solo admin)
 export async function getUsuarioById(token: string, usuarioId: number): Promise<Usuario> {
-  const response = await fetch(`http://localhost:3000/api/usuario/${usuarioId}`, {
+  const response = await fetch(buildApiUrl(`/usuario/${usuarioId}`), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -72,7 +74,7 @@ export async function getUsuarioById(token: string, usuarioId: number): Promise<
 
 // Servicio para actualizar un usuario (solo admin)
 export async function updateUsuario(token: string, usuarioId: number, usuarioData: Partial<Usuario>): Promise<Usuario> {
-  const response = await fetch(`http://localhost:3000/api/usuario/${usuarioId}`, {
+  const response = await fetch(buildApiUrl(`/usuario/${usuarioId}`), {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,

@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:3000/api';
+import { apiClient, buildApiUrl } from './httpClient';
 
 export interface Company {
   id: number;
@@ -13,12 +11,12 @@ export interface CompanyListResponse {
   data: Company[];
 }
 
-const api = axios.create({ baseURL: API_BASE_URL });
+const api = apiClient;
 
 // Servicio para obtener todas las compañías (solo admin)
 export async function getAllCompaniesAdmin(token: string): Promise<Company[]> {
   try {
-    const response = await fetch('http://localhost:3000/api/compania', {
+  const response = await fetch(buildApiUrl('/compania'), {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -45,7 +43,7 @@ export async function getAllCompaniesAdmin(token: string): Promise<Company[]> {
 // Servicio para eliminar una compañía (solo admin)
 export async function deleteCompanyAsAdmin(token: string, companiaId: number) {
   try {
-    const response = await fetch(`http://localhost:3000/api/compania/${companiaId}`, {
+  const response = await fetch(buildApiUrl(`/compania/${companiaId}`), {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -71,7 +69,7 @@ export async function deleteCompanyAsAdmin(token: string, companiaId: number) {
 // Servicio para crear una nueva compañía (solo admin)
 export async function createCompany(token: string, companyData: { nombre: string; detalle: string }): Promise<Company> {
   try {
-    const response = await fetch('http://localhost:3000/api/compania', {
+  const response = await fetch(buildApiUrl('/compania'), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

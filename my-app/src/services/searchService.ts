@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:3000/api';
+import { apiClient } from './httpClient';
 
 export type SearchTipo = 'juego' | 'servicio' | 'complemento' | 'todos';
 
@@ -38,7 +36,7 @@ export type SearchResponse = {
 	data: SearchItem[];
 };
 
-const api = axios.create({ baseURL: API_BASE_URL });
+const api = apiClient;
 
 export const searchService = {
 	async search(params: SearchParams): Promise<SearchResponse> {

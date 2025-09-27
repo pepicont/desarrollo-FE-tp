@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:3000/api';
+import { apiClient, buildApiUrl } from './httpClient';
 
 export interface Category {
   id: number;
@@ -13,12 +11,12 @@ export interface CategoryListResponse {
   data: Category[];
 }
 
-const api = axios.create({ baseURL: API_BASE_URL });
+const api = apiClient;
 
 // Servicio para obtener todas las categorías (solo admin)
 export async function getAllCategoriesAdmin(token: string): Promise<Category[]> {
   try {
-    const response = await fetch('http://localhost:3000/api/categoria', {
+  const response = await fetch(buildApiUrl('/categoria'), {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -45,7 +43,7 @@ export async function getAllCategoriesAdmin(token: string): Promise<Category[]> 
 // Servicio para eliminar una categoría (solo admin)
 export async function deleteCategoryAsAdmin(token: string, categoriaId: number) {
   try {
-    const response = await fetch(`http://localhost:3000/api/categoria/${categoriaId}`, {
+  const response = await fetch(buildApiUrl(`/categoria/${categoriaId}`), {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -71,7 +69,7 @@ export async function deleteCategoryAsAdmin(token: string, categoriaId: number) 
 // Servicio para crear una nueva categoría (solo admin)
 export async function createCategory(token: string, categoryData: { nombre: string; detalle: string }): Promise<Category> {
   try {
-    const response = await fetch('http://localhost:3000/api/categoria', {
+  const response = await fetch(buildApiUrl('/categoria'), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

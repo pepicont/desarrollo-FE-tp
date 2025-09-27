@@ -1,5 +1,7 @@
+import { buildApiUrl } from './httpClient';
+
 export async function getUserPurchases(token: string) {
-  const response = await fetch('http://localhost:3000/api/venta/my-ventas', {
+  const response = await fetch(buildApiUrl('/venta/my-ventas'), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,

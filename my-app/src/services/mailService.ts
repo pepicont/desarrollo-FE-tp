@@ -1,29 +1,27 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+import { apiClient } from './httpClient';
 
 export const mailService = {
   async sendMail({ mail, asunto, detalle }: { mail: string; asunto: string; detalle: string }) {
-    return axios.post(`${API_BASE_URL}/mail`, { mail, asunto, detalle });
+    return apiClient.post('/mail', { mail, asunto, detalle });
   },
 
   async forgotPassword(email: string) {
-    return axios.post(`${API_BASE_URL}/mail/forgot-password`, { email });
+    return apiClient.post('/mail/forgot-password', { email });
   },
 
   async welcome(email: string, nombre: string) {
-    return axios.post(`${API_BASE_URL}/mail/welcome`, { email, nombre });
+    return apiClient.post('/mail/welcome', { email, nombre });
   },
 
   async notifyCredentialsChange(oldEmail: string, oldUsername: string) {
-    return axios.post(`${API_BASE_URL}/mail/notify-credentials-change`, {
+    return apiClient.post('/mail/notify-credentials-change', {
       email: oldEmail,
       oldUsername
     });
   },
 
   async paymentConfirmation(email: string, nombre: string, producto: string, codigo: string) {
-    return axios.post(`${API_BASE_URL}/mail/payment-confirmation`, {
+    return apiClient.post('/mail/payment-confirmation', {
       email,
       nombre,
       producto,
@@ -32,6 +30,6 @@ export const mailService = {
   },
 
   async sendDeletedUserMail(mail: string, nombreUsuario: string, motivo: string) {
-    return axios.post(`${API_BASE_URL}/mail/deleted-user`, { mail, nombreUsuario, motivo });
+    return apiClient.post('/mail/deleted-user', { mail, nombreUsuario, motivo });
   },
 };

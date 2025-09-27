@@ -1,3 +1,5 @@
+import { buildApiUrl } from './httpClient';
+
 export type TopSeller = {
   id: number;
   tipo: 'juego' | 'servicio' | 'complemento';
@@ -14,7 +16,7 @@ export async function getTopSellers(params?: { tipo?: 'juego'|'servicio'|'comple
   const q = new URLSearchParams()
   if (params?.tipo) q.set('tipo', params.tipo)
   if (params?.limit) q.set('limit', String(params.limit))
-  const url = `http://localhost:3000/api/search/top-sellers${q.toString() ? `?${q.toString()}` : ''}`
+  const url = buildApiUrl(`/search/top-sellers${q.toString() ? `?${q.toString()}` : ''}`)
   const res = await fetch(url)
   if (!res.ok) throw await res.json()
   const json = await res.json()

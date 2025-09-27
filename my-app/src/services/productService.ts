@@ -1,6 +1,4 @@
-import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:3000/api'
+import { apiClient } from './httpClient'
 
 export type CompaniaRef = { id: number; nombre: string }
 export type CategoriaRef = { id: number; nombre: string }
@@ -77,7 +75,7 @@ export type CreateComplementoData = {
   juego: number
 }
 
-const api = axios.create({ baseURL: API_BASE_URL })
+const api = apiClient
 
 export const productService = {
   async getJuego(id: number): Promise<JuegoDetail> {

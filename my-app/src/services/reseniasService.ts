@@ -1,5 +1,7 @@
+import { buildApiUrl } from './httpClient';
+
 export async function getUserResenias(token: string) {
-  const response = await fetch('http://localhost:3000/api/resenia/my-resenias', {
+  const response = await fetch(buildApiUrl('/resenia/my-resenias'), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -11,7 +13,7 @@ export async function getUserResenias(token: string) {
 }
 
 export async function updateResenia(token: string, reseniaId: number, updateData: unknown) {
-  const response = await fetch(`http://localhost:3000/api/resenia/${reseniaId}`, {
+  const response = await fetch(buildApiUrl(`/resenia/${reseniaId}`), {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -37,7 +39,7 @@ export async function getReviewsByProduct(
   page: number = 1,
   limit: number = 10
 ): Promise<{ data: ProductReview[]; page: number; totalPages: number; total: number }> {
-  const response = await fetch(`http://localhost:3000/api/resenia/by-product/${tipo}/${id}?page=${page}&limit=${limit}`);
+  const response = await fetch(buildApiUrl(`/resenia/by-product/${tipo}/${id}?page=${page}&limit=${limit}`));
   if (!response.ok) throw await response.json();
   const json = await response.json();
   return {
@@ -49,7 +51,7 @@ export async function getReviewsByProduct(
 }
 
 export async function checkUserReviewForPurchase(token: string, ventaId: number) {
-  const response = await fetch(`http://localhost:3000/api/resenia/check-purchase/${ventaId}`, {
+  const response = await fetch(buildApiUrl(`/resenia/check-purchase/${ventaId}`), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -66,7 +68,7 @@ export async function createResenia(token: string, reseniaData: {
   puntaje: number,
   fecha: string
 }) {
-  const response = await fetch('http://localhost:3000/api/resenia', {
+  const response = await fetch(buildApiUrl('/resenia'), {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -79,7 +81,7 @@ export async function createResenia(token: string, reseniaData: {
 }
 
 export async function deleteResenia(token: string, reseniaId: number) {
-  const response = await fetch(`http://localhost:3000/api/resenia/${reseniaId}`, {
+  const response = await fetch(buildApiUrl(`/resenia/${reseniaId}`), {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -91,7 +93,7 @@ export async function deleteResenia(token: string, reseniaId: number) {
 }
 
 export async function deleteReseniaAsAdmin(token: string, reseniaId: number) {
-  const response = await fetch(`http://localhost:3000/api/resenia/admin/${reseniaId}`, {
+  const response = await fetch(buildApiUrl(`/resenia/admin/${reseniaId}`), {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -134,7 +136,7 @@ export type AdminResenia = {
 }
 
 export async function getAllResenasAdmin(token: string): Promise<AdminResenia[]> {
-  const response = await fetch('http://localhost:3000/api/resenia/admin/all', {
+  const response = await fetch(buildApiUrl('/resenia/admin/all'), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
