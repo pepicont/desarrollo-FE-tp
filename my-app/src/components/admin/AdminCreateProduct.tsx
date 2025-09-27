@@ -36,6 +36,7 @@ import NavBar from "../navBar/navBar"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
 import { productService, type CreateServicioData, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
+import type { Foto } from "../../services/productService"
 import { getAllCategoriesAdmin, type Category } from "../../services/categoryService"
 import { getAllCompaniesAdmin, type Company } from "../../services/companyService"
 
@@ -165,9 +166,19 @@ export default function AdminCreateProductPage() {
     fechaLanzamiento: "",
     edadPermitida: "",
   })
-  // Fotos y principal
-  const [fotos, setFotos] = useState<File[]>([]);
+  // Fotos actuales y nuevas para edición
+  const [fotosActuales, setFotosActuales] = useState<Foto[]>([]);
+  const [fotosNuevas, setFotosNuevas] = useState<File[]>([]);
   const [fotoPrincipalIdx, setFotoPrincipalIdx] = useState<number | null>(null);
+  const [fotoError, setFotoError] = useState<string>("");
+
+  // Oculta la alerta de fotoError después de 3 segundos
+  useEffect(() => {
+    if (fotoError) {
+      const timer = setTimeout(() => setFotoError("") , 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fotoError]);
   
   const [servicioForm, setServicioForm] = useState<ServicioFormData>({
     nombre: "",
@@ -229,9 +240,7 @@ export default function AdminCreateProductPage() {
 
         if (editTipo === 'juego') {
           const productData = await productService.getJuego(editId)
-          // Mapear la edad de la BD a la clasificación más cercana
           const mappedAge = mapAgeToRating(productData.edadPermitida)
-          
           setJuegoForm({
             nombre: productData.nombre || "",
             detalle: productData.detalle || "",
@@ -241,6 +250,8 @@ export default function AdminCreateProductPage() {
             fechaLanzamiento: productData.fechaLanzamiento || "",
             edadPermitida: mappedAge.toString(),
           })
+          setFotosActuales(productData.fotos || [])
+          setFotoPrincipalIdx(productData.fotos?.findIndex(f => f.esPrincipal) ?? null)
         } else if (editTipo === 'servicio') {
           const productData = await productService.getServicio(editId)
           setServicioForm({
@@ -260,14 +271,12 @@ export default function AdminCreateProductPage() {
             juego: productData.juego?.id?.toString() || "",
           })
         }
-
         setLoading(false)
       } catch (err: unknown) {
         setError("Error al cargar datos del producto: " + (err instanceof Error ? err.message : "Error desconocido"))
         setLoading(false)
       }
     }
-
     loadProductData()
   }, [isEditMode, editId, editTipo])
 
@@ -280,6 +289,7 @@ export default function AdminCreateProductPage() {
       const token = authService.getToken()
       if (!token) throw new Error("Token no encontrado")
 
+
       const formData = new FormData();
       formData.append("nombre", juegoForm.nombre);
       formData.append("detalle", juegoForm.detalle);
@@ -288,12 +298,21 @@ export default function AdminCreateProductPage() {
       formData.append("fechaLanzamiento", juegoForm.fechaLanzamiento);
       formData.append("edadPermitida", juegoForm.edadPermitida);
       juegoForm.categorias.forEach((catId) => formData.append("categorias", catId.toString()));
-      fotos.forEach((foto, idx) => {
+
+      // Enviar fotos nuevas
+      fotosNuevas.forEach((foto) => {
         formData.append("fotos", foto);
-        if (fotoPrincipalIdx === idx) {
-          formData.append("fotoPrincipal", foto.name);
-        }
       });
+
+      // Determinar la foto principal (id si es existente, nombre si es nueva)
+      let fotoPrincipalValue = null;
+      if (fotoPrincipalIdx !== null && fotoPrincipalIdx < fotosActuales.length) {
+        // Solo permitir seleccionar como principal una foto existente
+        fotoPrincipalValue = fotosActuales[fotoPrincipalIdx]?.id?.toString();
+      }
+      if (fotoPrincipalValue) {
+        formData.append("fotoPrincipal", fotoPrincipalValue);
+      }
 
       if (isEditMode && editId) {
         await productService.updateJuegoConFotos(editId, formData, token);
@@ -411,7 +430,6 @@ export default function AdminCreateProductPage() {
     })
     setError("")
     setSuccess("")
-    setFotos([])
     setFotoPrincipalIdx(null)
     setTimeout(() => {
       if (callback) callback()
@@ -760,38 +778,72 @@ export default function AdminCreateProductPage() {
             </Box>
           </Box>
 
-          {/* Fotos del Juego */}
+          {/* Fotos del Juego - edición y nuevas */}
           <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Fotos del juego</FormLabel>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Fotos actuales</FormLabel>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center', mb: 2 }}>
+              {fotosActuales.map((foto, idx) => (
+                <Box key={foto.id} sx={{ position: "relative" }}>
+                  <img
+                    src={foto.url}
+                    alt={`foto-actual-${idx}`}
+                    style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: fotoPrincipalIdx === idx ? "3px solid #4a90e2" : "2px solid #2a3441", cursor: "pointer" }}
+                    onClick={() => setFotoPrincipalIdx(idx)}
+                  />
+                  {fotoPrincipalIdx === idx && (
+                    <Chip label="Principal" color="primary" size="small" sx={{ position: "absolute", top: 4, left: 4 }} />
+                  )}
+                </Box>
+              ))}
+            </Box>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Agregar nuevas fotos</FormLabel>
             <input
               type="file"
               name="fotos"
               accept="image/*"
               multiple
+              disabled={fotosActuales.length + fotosNuevas.length >= 3}
               onChange={e => {
+                setFotoError("");
                 if (e.target.files) {
-                  setFotos(Array.from(e.target.files));
-                  setFotoPrincipalIdx(0);
+                  const files = Array.from(e.target.files);
+                  const totalFotos = fotosActuales.length + files.length;
+                  if (totalFotos > 3) {
+                    setFotoError("Solo puedes cargar hasta 3 fotos en total.");
+                    // Solo permitir hasta el máximo permitido
+                    const allowed = 3 - fotosActuales.length;
+                    setFotosNuevas(files.slice(0, allowed));
+                  } else {
+                    setFotosNuevas(files);
+                  }
+                  setFotoPrincipalIdx(fotosActuales.length > 0 ? fotoPrincipalIdx : 0);
                 }
               }}
               style={{ marginBottom: 8, display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
             />
+            {fotoError && (
+              <Alert severity="error" sx={{ mb: 2, textAlign: 'center' }}>{fotoError}</Alert>
+            )}
             <Typography sx={{ color: '#b0b0b0', mb: 2, textAlign: 'center' }}>
-              {fotos.length > 0 ? `${fotos.length} archivo${fotos.length > 1 ? 's' : ''} seleccionados.` : 'Ningún archivo seleccionado.'}
+              {fotosActuales.length + fotosNuevas.length >= 3
+                ? "Ya tienes 3 fotos. No puedes agregar más."
+                : fotosNuevas.length > 0
+                  ? `${fotosNuevas.length} archivo${fotosNuevas.length > 1 ? 's' : ''} seleccionados.`
+                  : 'Ningún archivo nuevo seleccionado.'}
             </Typography>
-            {fotos.length > 0 && (
+            {fotosNuevas.length > 0 && (
               <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center' }}>
-                {fotos.map((foto, idx) => (
+                {fotosNuevas.map((foto, idx) => (
                   <Box key={idx} sx={{ position: "relative" }}>
                     <img
                       src={URL.createObjectURL(foto)}
-                      alt={`foto-${idx}`}
-                      style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: fotoPrincipalIdx === idx ? "3px solid #4a90e2" : "2px solid #2a3441", cursor: "pointer" }}
-                      onClick={() => setFotoPrincipalIdx(idx)}
+                      alt={`foto-nueva-${idx}`}
+                      style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "2px solid #2a3441", cursor: "not-allowed", opacity: 0.6 }}
                     />
-                    {fotoPrincipalIdx === idx && (
-                      <Chip label="Principal" color="primary" size="small" sx={{ position: "absolute", top: 4, left: 4 }} />
-                    )}
+                    {/* Overlay para indicar que no se puede seleccionar como principal */}
+                    <Box sx={{ position: "absolute", top: 0, left: 0, width: 80, height: 80, bgcolor: "rgba(0,0,0,0.2)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Typography variant="caption" sx={{ color: "#b0b0b0", fontWeight: "bold" }}>Solo principal en fotos cargadas</Typography>
+                    </Box>
                   </Box>
                 ))}
               </Box>
