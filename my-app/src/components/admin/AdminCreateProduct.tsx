@@ -35,7 +35,7 @@ import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
-import { productService, type CreateJuegoData, type CreateServicioData, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
+import { productService, type CreateServicioData, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
 import { getAllCategoriesAdmin, type Category } from "../../services/categoryService"
 import { getAllCompaniesAdmin, type Company } from "../../services/companyService"
 
@@ -165,6 +165,9 @@ export default function AdminCreateProductPage() {
     fechaLanzamiento: "",
     edadPermitida: "",
   })
+  // Fotos y principal
+  const [fotos, setFotos] = useState<File[]>([]);
+  const [fotoPrincipalIdx, setFotoPrincipalIdx] = useState<number | null>(null);
   
   const [servicioForm, setServicioForm] = useState<ServicioFormData>({
     nombre: "",
@@ -277,24 +280,28 @@ export default function AdminCreateProductPage() {
       const token = authService.getToken()
       if (!token) throw new Error("Token no encontrado")
 
-      const data: CreateJuegoData = {
-        nombre: juegoForm.nombre,
-        detalle: juegoForm.detalle,
-        monto: parseFloat(juegoForm.monto),
-        categorias: juegoForm.categorias,
-        compania: parseInt(juegoForm.compania),
-        fechaLanzamiento: juegoForm.fechaLanzamiento,
-        edadPermitida: parseInt(juegoForm.edadPermitida),
-      }
+      const formData = new FormData();
+      formData.append("nombre", juegoForm.nombre);
+      formData.append("detalle", juegoForm.detalle);
+      formData.append("monto", juegoForm.monto);
+      formData.append("compania", juegoForm.compania);
+      formData.append("fechaLanzamiento", juegoForm.fechaLanzamiento);
+      formData.append("edadPermitida", juegoForm.edadPermitida);
+      juegoForm.categorias.forEach((catId) => formData.append("categorias", catId.toString()));
+      fotos.forEach((foto, idx) => {
+        formData.append("fotos", foto);
+        if (fotoPrincipalIdx === idx) {
+          formData.append("fotoPrincipal", foto.name);
+        }
+      });
 
       if (isEditMode && editId) {
-        await productService.updateJuego(editId, data, token);
-        // Si venimos de una ruta previa (p. ej. el producto abierto en modal), volver atrás para cerrar el modal
+        await productService.updateJuegoConFotos(editId, formData, token);
         if (window.history && window.history.length > 1) {
           navigate(-1)
-        } 
+        }
       } else {
-        await productService.createJuego(data, token);
+        await productService.createJuegoConFotos(formData, token);
         resetForm(() => setSuccess("Juego creado exitosamente"));
       }
     } catch (err: unknown) {
@@ -404,6 +411,8 @@ export default function AdminCreateProductPage() {
     })
     setError("")
     setSuccess("")
+    setFotos([])
+    setFotoPrincipalIdx(null)
     setTimeout(() => {
       if (callback) callback()
     }, 0)
@@ -751,6 +760,43 @@ export default function AdminCreateProductPage() {
             </Box>
           </Box>
 
+          {/* Fotos del Juego */}
+          <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Fotos del juego</FormLabel>
+            <input
+              type="file"
+              name="fotos"
+              accept="image/*"
+              multiple
+              onChange={e => {
+                if (e.target.files) {
+                  setFotos(Array.from(e.target.files));
+                  setFotoPrincipalIdx(0);
+                }
+              }}
+              style={{ marginBottom: 8, display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+            />
+            <Typography sx={{ color: '#b0b0b0', mb: 2, textAlign: 'center' }}>
+              {fotos.length > 0 ? `${fotos.length} archivo${fotos.length > 1 ? 's' : ''} seleccionados.` : 'Ningún archivo seleccionado.'}
+            </Typography>
+            {fotos.length > 0 && (
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center' }}>
+                {fotos.map((foto, idx) => (
+                  <Box key={idx} sx={{ position: "relative" }}>
+                    <img
+                      src={URL.createObjectURL(foto)}
+                      alt={`foto-${idx}`}
+                      style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: fotoPrincipalIdx === idx ? "3px solid #4a90e2" : "2px solid #2a3441", cursor: "pointer" }}
+                      onClick={() => setFotoPrincipalIdx(idx)}
+                    />
+                    {fotoPrincipalIdx === idx && (
+                      <Chip label="Principal" color="primary" size="small" sx={{ position: "absolute", top: 4, left: 4 }} />
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
           {/* Detalles del Juego */}
           <Box
             sx={{

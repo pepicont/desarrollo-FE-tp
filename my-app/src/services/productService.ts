@@ -78,6 +78,26 @@ export type CreateComplementoData = {
 const api = apiClient
 
 export const productService = {
+  async createJuegoConFotos(formData: FormData, token: string): Promise<JuegoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+        // No poner Content-Type, axios lo setea automáticamente para FormData
+      }
+    }
+    const res = await api.post<ApiResponse<JuegoDetail>>('/juego', formData, config)
+    return res.data.data
+  },
+
+  async updateJuegoConFotos(id: number, formData: FormData, token: string): Promise<JuegoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+    const res = await api.put<ApiResponse<JuegoDetail>>(`/juego/${id}`, formData, config)
+    return res.data.data
+  },
   async getJuego(id: number): Promise<JuegoDetail> {
     const res = await api.get<ApiResponse<JuegoDetail>>(`/juego/${id}`)
     return res.data.data
