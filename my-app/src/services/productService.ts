@@ -78,6 +78,26 @@ export type CreateComplementoData = {
 const api = apiClient
 
 export const productService = {
+  async createJuegoConFotos(formData: FormData, token: string): Promise<JuegoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+        // No poner Content-Type, axios lo setea automáticamente para FormData
+      }
+    }
+    const res = await api.post<ApiResponse<JuegoDetail>>('/juego', formData, config)
+    return res.data.data
+  },
+
+  async updateJuegoConFotos(id: number, formData: FormData, token: string): Promise<JuegoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+    const res = await api.put<ApiResponse<JuegoDetail>>(`/juego/${id}`, formData, config)
+    return res.data.data
+  },
   async getJuego(id: number): Promise<JuegoDetail> {
     const res = await api.get<ApiResponse<JuegoDetail>>(`/juego/${id}`)
     return res.data.data
@@ -93,16 +113,6 @@ export const productService = {
   async getFotos(tipo: 'juego'|'complemento'|'servicio', id: number): Promise<Foto[]> {
     const res = await api.get<ApiResponse<Foto[]>>(`/foto-producto/${tipo}/${id}`)
     return res.data.data
-  },
-  async addFoto(tipo: 'juego'|'complemento'|'servicio', id: number, body: { url: string; esPrincipal?: boolean }): Promise<Foto> {
-    const res = await api.post<ApiResponse<Foto>>(`/foto-producto/${tipo}/${id}`, body)
-    return res.data.data
-  },
-  async setFotoPrincipal(tipo: 'juego'|'complemento'|'servicio', id: number, fotoId: number): Promise<void> {
-    await api.put(`/foto-producto/${tipo}/${id}/${fotoId}/principal`)
-  },
-  async removeFoto(tipo: 'juego'|'complemento'|'servicio', id: number, fotoId: number): Promise<void> {
-    await api.delete(`/foto-producto/${tipo}/${id}/${fotoId}`)
   },
 
   // Create methods
