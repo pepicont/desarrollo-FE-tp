@@ -123,17 +123,7 @@ export const productService = {
     return res.data.data
   },
 
-  // Create methods
-  async createJuego(data: CreateJuegoData, token: string): Promise<JuegoDetail> {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await api.post<ApiResponse<JuegoDetail>>('/juego', data, config)
-    return res.data.data
-  },
+  
 
   async createServicio(data: CreateServicioData, token: string): Promise<ServicioDetail> {
     const config = {
@@ -160,18 +150,6 @@ export const productService = {
   // Helper method to get all juegos for complemento selection
   async getAllJuegos(): Promise<JuegoDetail[]> {
     const res = await api.get<ApiResponse<JuegoDetail[]>>('/juego')
-    return res.data.data
-  },
-
-  // Update methods
-  async updateJuego(id: number, data: CreateJuegoData, token: string): Promise<JuegoDetail> {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await api.put<ApiResponse<JuegoDetail>>(`/juego/${id}`, data, config)
     return res.data.data
   },
 
