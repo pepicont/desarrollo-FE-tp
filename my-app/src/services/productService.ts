@@ -78,6 +78,14 @@ export type CreateComplementoData = {
 const api = apiClient
 
 export const productService = {
+  async deleteJuego(id: number, token: string): Promise<void> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+    await api.delete(`/juego/${id}`, config);
+  },
   async createJuegoConFotos(formData: FormData, token: string): Promise<JuegoDetail> {
     const config = {
       headers: {

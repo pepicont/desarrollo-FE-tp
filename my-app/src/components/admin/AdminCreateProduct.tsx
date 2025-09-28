@@ -104,6 +104,24 @@ const mapAgeToRating = (age: number): number => {
 }
 
 export default function AdminCreateProductPage() {
+  // Eliminar juego
+  const handleDeleteJuego = async () => {
+    if (!editId) return;
+    setLoading(true);
+    setError("");
+    try {
+      const token = authService.getToken();
+      if (!token) throw new Error("Token no encontrado");
+      await productService.deleteJuego(editId, token);
+      resetForm(() => setSuccess("Juego eliminado correctamente"));
+      // Navegar y mostrar alerta como en creación
+      navigate("/admin/create-product", { state: { success: "Juego eliminado correctamente" } });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al eliminar el juego");
+    } finally {
+      setLoading(false);
+    }
+  };
     // IDs de fotos actuales eliminadas
   const [fotosAEliminar, setFotosAEliminar] = useState<number[]>([]);
   const navigate = useNavigate();
@@ -303,7 +321,6 @@ export default function AdminCreateProductPage() {
 
   const handleSubmitJuego = async (e: React.FormEvent) => {
   const fotosAEliminarActual = [...fotosAEliminar];
-  console.log('fotosAEliminar (submit):', fotosAEliminarActual);
     e.preventDefault()
     setLoading(true)
     setError("")
@@ -456,9 +473,12 @@ export default function AdminCreateProductPage() {
       categorias: [],
       juego: "",
     })
+    setFotosActuales([]);
+    setFotosNuevas([]);
+    setFotoPrincipalIdx(null);
+    setFotosAEliminar([]);
     setError("")
     setSuccess("")
-    setFotoPrincipalIdx(null)
     setTimeout(() => {
       if (callback) callback()
     }, 0)
@@ -961,6 +981,17 @@ export default function AdminCreateProductPage() {
           </Box>
 
           <Box sx={{ display: "flex", gap: 3, justifyContent: "center", pt: 2 }}>
+            {isEditMode && (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDeleteJuego}
+                disabled={loading}
+                sx={{ minWidth: "120px", py: 1.5, fontWeight: "bold", textTransform: "none" }}
+              >
+                Eliminar Juego
+              </Button>
+            )}
             <Button
               type="button"
               variant="outlined"

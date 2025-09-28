@@ -180,7 +180,7 @@ export default function Producto() {
               En este momento este producto no está disponible.
             </Alert>
             <Button variant="contained" color="primary" size="large" onClick={() => navigate('/productos')}>
-              Reintentar
+              Volver al catálogo
             </Button>
           </Container>
         ) : (
