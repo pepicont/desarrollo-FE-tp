@@ -930,8 +930,9 @@ export default function AdminCreateProductPage() {
               variant="outlined"
               size="large"
               onClick={() => {
-                resetForm()
-                if (isEditMode) navigate('/admin/create-product')
+                if (window.history && window.history.length > 1) {
+                  navigate(-1)
+                }
               }}
               disabled={loading}
               sx={{
@@ -1224,8 +1225,9 @@ export default function AdminCreateProductPage() {
               variant="outlined"
               size="large"
               onClick={() => {
-                resetForm()
-                if (isEditMode) navigate('/admin/create-product')
+                if (window.history && window.history.length > 1) {
+                  navigate(-1)
+                }
               }}
               disabled={loading}
               sx={{
@@ -1520,8 +1522,9 @@ export default function AdminCreateProductPage() {
               variant="outlined"
               size="large"
               onClick={() => {
-                resetForm()
-                if (isEditMode) navigate('/admin/create-product')
+              if (window.history && window.history.length > 1) {
+                  navigate(-1)
+                }
               }}
               disabled={loading}
               sx={{
