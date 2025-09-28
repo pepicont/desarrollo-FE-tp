@@ -104,6 +104,8 @@ const mapAgeToRating = (age: number): number => {
 }
 
 export default function AdminCreateProductPage() {
+    // IDs de fotos actuales eliminadas
+  const [fotosAEliminar, setFotosAEliminar] = useState<number[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   // Error and success states - usando el mismo patrón que otros componentes admin
@@ -171,6 +173,25 @@ export default function AdminCreateProductPage() {
   const [fotosNuevas, setFotosNuevas] = useState<File[]>([]);
   const [fotoPrincipalIdx, setFotoPrincipalIdx] = useState<number | null>(null);
   const [fotoError, setFotoError] = useState<string>("");
+
+    // Eliminar foto actual
+  const handleRemoveFotoActual = (idx: number) => {
+    const fotoEliminada = fotosActuales[idx];
+    setFotosAEliminar(prev => [...prev, fotoEliminada.id]);
+    const nuevasFotos = fotosActuales.filter((_, i) => i !== idx);
+    setFotosActuales(nuevasFotos);
+    // Si la principal se elimina, seleccionar otra
+    if (fotoPrincipalIdx === idx) {
+      setFotoPrincipalIdx(nuevasFotos.length > 0 ? 0 : null);
+    } else if (fotoPrincipalIdx !== null && fotoPrincipalIdx > idx) {
+      setFotoPrincipalIdx(fotoPrincipalIdx - 1);
+    }
+  };
+
+  // Eliminar foto nueva
+  const handleRemoveFotoNueva = (idx: number) => {
+    setFotosNuevas(fotosNuevas.filter((_, i) => i !== idx));
+  };
 
   // Oculta la alerta de fotoError después de 3 segundos
   useEffect(() => {
@@ -281,6 +302,8 @@ export default function AdminCreateProductPage() {
   }, [isEditMode, editId, editTipo])
 
   const handleSubmitJuego = async (e: React.FormEvent) => {
+  const fotosAEliminarActual = [...fotosAEliminar];
+  console.log('fotosAEliminar (submit):', fotosAEliminarActual);
     e.preventDefault()
     setLoading(true)
     setError("")
@@ -302,6 +325,11 @@ export default function AdminCreateProductPage() {
       // Enviar fotos nuevas
       fotosNuevas.forEach((foto) => {
         formData.append("fotos", foto);
+      });
+
+      // Enviar IDs de fotos a eliminar
+      fotosAEliminarActual.forEach(id => {
+        formData.append("fotosAEliminar", id.toString());
       });
 
       // Determinar la foto principal (id si es existente, nombre si es nueva)
@@ -790,6 +818,10 @@ export default function AdminCreateProductPage() {
                     style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: fotoPrincipalIdx === idx ? "3px solid #4a90e2" : "2px solid #2a3441", cursor: "pointer" }}
                     onClick={() => setFotoPrincipalIdx(idx)}
                   />
+                  {/* Botón eliminar */}
+                  <Box sx={{ position: "absolute", top: 2, right: 2, zIndex: 2 }}>
+                    <Button size="small" onClick={() => handleRemoveFotoActual(idx)} sx={{ minWidth: 0, p: 0, bgcolor: "rgba(0,0,0,0.5)", color: "white", borderRadius: "50%", width: 24, height: 24, fontWeight: "bold" }}>×</Button>
+                  </Box>
                   {fotoPrincipalIdx === idx && (
                     <Chip label="Principal" color="primary" size="small" sx={{ position: "absolute", top: 4, left: 4 }} />
                   )}
@@ -840,6 +872,10 @@ export default function AdminCreateProductPage() {
                       alt={`foto-nueva-${idx}`}
                       style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "2px solid #2a3441", cursor: "not-allowed", opacity: 0.6 }}
                     />
+                    {/* Botón eliminar */}
+                    <Box sx={{ position: "absolute", top: 2, right: 2, zIndex: 2 }}>
+                      <Button size="small" onClick={() => handleRemoveFotoNueva(idx)} sx={{ minWidth: 0, p: 0, bgcolor: "rgba(0,0,0,0.5)", color: "white", borderRadius: "50%", width: 24, height: 24, fontWeight: "bold" }}>×</Button>
+                    </Box>
                     {/* Overlay para indicar que no se puede seleccionar como principal */}
                     <Box sx={{ position: "absolute", top: 0, left: 0, width: 80, height: 80, bgcolor: "rgba(0,0,0,0.2)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <Typography variant="caption" sx={{ color: "#b0b0b0", fontWeight: "bold" }}>Solo principal en fotos cargadas</Typography>
