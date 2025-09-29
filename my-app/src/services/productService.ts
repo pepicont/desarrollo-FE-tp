@@ -86,6 +86,15 @@ export const productService = {
     }
     await api.delete(`/juego/${id}`, config);
   },
+
+    async deleteServicio(id: number, token: string): Promise<void> {
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+      await api.delete(`/servicio/${id}`, config);
+    },
   async createJuegoConFotos(formData: FormData, token: string): Promise<JuegoDetail> {
     const config = {
       headers: {
@@ -106,6 +115,27 @@ export const productService = {
     const res = await api.put<ApiResponse<JuegoDetail>>(`/juego/${id}`, formData, config)
     return res.data.data
   },
+
+    async createServicioConFotos(formData: FormData, token: string): Promise<ServicioDetail> {
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // No poner Content-Type, axios lo setea automáticamente para FormData
+        }
+      }
+      const res = await api.post<ApiResponse<ServicioDetail>>('/servicio', formData, config)
+      return res.data.data
+    },
+
+    async updateServicioConFotos(id: number, formData: FormData, token: string): Promise<ServicioDetail> {
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+      const res = await api.put<ApiResponse<ServicioDetail>>(`/servicio/${id}`, formData, config)
+      return res.data.data
+    },
   async getJuego(id: number): Promise<JuegoDetail> {
     const res = await api.get<ApiResponse<JuegoDetail>>(`/juego/${id}`)
     return res.data.data
@@ -123,19 +153,6 @@ export const productService = {
     return res.data.data
   },
 
-  
-
-  async createServicio(data: CreateServicioData, token: string): Promise<ServicioDetail> {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await api.post<ApiResponse<ServicioDetail>>('/servicio', data, config)
-    return res.data.data
-  },
-
   async createComplemento(data: CreateComplementoData, token: string): Promise<ComplementoDetail> {
     const config = {
       headers: {
@@ -150,17 +167,6 @@ export const productService = {
   // Helper method to get all juegos for complemento selection
   async getAllJuegos(): Promise<JuegoDetail[]> {
     const res = await api.get<ApiResponse<JuegoDetail[]>>('/juego')
-    return res.data.data
-  },
-
-  async updateServicio(id: number, data: CreateServicioData, token: string): Promise<ServicioDetail> {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await api.put<ApiResponse<ServicioDetail>>(`/servicio/${id}`, data, config)
     return res.data.data
   },
 

@@ -35,7 +35,7 @@ import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
-import { productService, type CreateServicioData, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
+import { productService, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
 import type { Foto } from "../../services/productService"
 import { getAllCategoriesAdmin, type Category } from "../../services/categoryService"
 import { getAllCompaniesAdmin, type Company } from "../../services/companyService"
@@ -104,6 +104,23 @@ const mapAgeToRating = (age: number): number => {
 }
 
 export default function AdminCreateProductPage() {
+  // Eliminar servicio
+  const handleDeleteServicio = async () => {
+    if (!editId) return;
+    setLoading(true);
+    setError("");
+    try {
+      const token = authService.getToken();
+      if (!token) throw new Error("Token no encontrado");
+      await productService.deleteServicio(editId, token);
+      resetForm(() => setSuccess("Servicio eliminado correctamente"));
+      navigate("/admin/create-product", { state: { success: "Servicio eliminado correctamente" } });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al eliminar el servicio");
+    } finally {
+      setLoading(false);
+    }
+  };
   // Eliminar juego
   const handleDeleteJuego = async () => {
     if (!editId) return;
@@ -186,13 +203,13 @@ export default function AdminCreateProductPage() {
     fechaLanzamiento: "",
     edadPermitida: "",
   })
-  // Fotos actuales y nuevas para edición
+  // Fotos Juego actuales y nuevas para edición
   const [fotosActuales, setFotosActuales] = useState<Foto[]>([]);
   const [fotosNuevas, setFotosNuevas] = useState<File[]>([]);
   const [fotoPrincipalIdx, setFotoPrincipalIdx] = useState<number | null>(null);
   const [fotoError, setFotoError] = useState<string>("");
 
-    // Eliminar foto actual
+    // Eliminar Juego foto actual
   const handleRemoveFotoActual = (idx: number) => {
     const fotoEliminada = fotosActuales[idx];
     setFotosAEliminar(prev => [...prev, fotoEliminada.id]);
@@ -206,12 +223,12 @@ export default function AdminCreateProductPage() {
     }
   };
 
-  // Eliminar foto nueva
+  // Eliminar Juego foto nueva
   const handleRemoveFotoNueva = (idx: number) => {
     setFotosNuevas(fotosNuevas.filter((_, i) => i !== idx));
   };
 
-  // Oculta la alerta de fotoError después de 3 segundos
+  // Oculta la alerta de fotoError Juego después de 3 segundos
   useEffect(() => {
     if (fotoError) {
       const timer = setTimeout(() => setFotoError("") , 3000);
@@ -226,7 +243,37 @@ export default function AdminCreateProductPage() {
     categorias: [],
     compania: "",
   })
+  // Fotos para Servicio
+  const [fotosActualesServicio, setFotosActualesServicio] = useState<Foto[]>([]);
+  const [fotosNuevasServicio, setFotosNuevasServicio] = useState<File[]>([]);
+  const [fotoPrincipalIdxServicio, setFotoPrincipalIdxServicio] = useState<number | null>(null);
+  const [fotoErrorServicio, setFotoErrorServicio] = useState<string>("");
+  const [fotosAEliminarServicio, setFotosAEliminarServicio] = useState<number[]>([]);
   
+    // Eliminar foto actual Servicio
+  const handleRemoveFotoActualServicio = (idx: number) => {
+    const fotoEliminada = fotosActualesServicio[idx];
+    setFotosAEliminarServicio(prev => [...prev, fotoEliminada.id]);
+    const nuevasFotos = fotosActualesServicio.filter((_, i) => i !== idx);
+    setFotosActualesServicio(nuevasFotos);
+    if (fotoPrincipalIdxServicio === idx) {
+      setFotoPrincipalIdxServicio(nuevasFotos.length > 0 ? 0 : null);
+    } else if (fotoPrincipalIdxServicio !== null && fotoPrincipalIdxServicio > idx) {
+      setFotoPrincipalIdxServicio(fotoPrincipalIdxServicio - 1);
+    }
+  };
+
+  // Eliminar foto nueva Servicio
+  const handleRemoveFotoNuevaServicio = (idx: number) => {
+    setFotosNuevasServicio(fotosNuevasServicio.filter((_, i) => i !== idx));
+  };
+
+  useEffect(() => {
+    if (fotoErrorServicio) {
+      const timer = setTimeout(() => setFotoErrorServicio("") , 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fotoErrorServicio]);
   const [complementoForm, setComplementoForm] = useState<ComplementoFormData>({
     nombre: "",
     detalle: "",
@@ -300,6 +347,8 @@ export default function AdminCreateProductPage() {
             categorias: productData.categorias?.map((c: CategoriaRef) => c.id) || [],
             compania: productData.compania?.id?.toString() || "",
           })
+          setFotosActualesServicio(productData.fotos || []);
+          setFotoPrincipalIdxServicio(productData.fotos?.findIndex(f => f.esPrincipal) ?? null);
         } else if (editTipo === 'complemento') {
           const productData = await productService.getComplemento(editId)
           setComplementoForm({
@@ -385,21 +434,39 @@ export default function AdminCreateProductPage() {
       const token = authService.getToken()
       if (!token) throw new Error("Token no encontrado")
 
-      const data: CreateServicioData = {
-        nombre: servicioForm.nombre,
-        detalle: servicioForm.detalle,
-        monto: parseFloat(servicioForm.monto),
-        categorias: servicioForm.categorias,
-        compania: parseInt(servicioForm.compania),
+      const formData = new FormData();
+      formData.append("nombre", servicioForm.nombre);
+      formData.append("detalle", servicioForm.detalle);
+      formData.append("monto", servicioForm.monto);
+      formData.append("compania", servicioForm.compania);
+      servicioForm.categorias.forEach((catId) => formData.append("categorias", catId.toString()));
+
+      // Enviar fotos nuevas
+      fotosNuevasServicio.forEach((foto) => {
+        formData.append("fotos", foto);
+      });
+
+      // Enviar IDs de fotos a eliminar
+      fotosAEliminarServicio.forEach(id => {
+        formData.append("fotosAEliminar", id.toString());
+      });
+
+      // Determinar la foto principal (id si es existente, nombre si es nueva)
+      let fotoPrincipalValue = null;
+      if (fotoPrincipalIdxServicio !== null && fotoPrincipalIdxServicio < fotosActualesServicio.length) {
+        fotoPrincipalValue = fotosActualesServicio[fotoPrincipalIdxServicio]?.id?.toString();
+      }
+      if (fotoPrincipalValue) {
+        formData.append("fotoPrincipal", fotoPrincipalValue);
       }
 
       if (isEditMode && editId) {
-        await productService.updateServicio(editId, data, token);
+        await productService.updateServicioConFotos(editId, formData, token);
         if (window.history && window.history.length > 1) {
           navigate(-1)
         }
       } else {
-        await productService.createServicio(data, token);
+        await productService.createServicioConFotos(formData, token);
         resetForm(() => setSuccess("Servicio creado exitosamente"));
       }
     } catch (err: unknown) {
@@ -750,7 +817,7 @@ export default function AdminCreateProductPage() {
               transition: "all 0.3s ease",
               "&:hover": {
                 borderColor: "#4a90e2",
-                boxShadow: "0 4px 12px rgba(74, 144, 226, 0.1)",
+                boxShadow: "0 4px 12px rgba(168, 85, 247, 0.1)",
               },
             }}
           >
@@ -1060,45 +1127,43 @@ export default function AdminCreateProductPage() {
   const renderServicioForm = () => (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper sx={{ p: 4, borderRadius: 3, bgcolor: "background.paper" }}>
-        <Box sx={{ 
-          background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
-          color: "white",
-          p: 3,
-          mb: 4,
-          borderRadius: 3,
-          position: "relative",
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-          },
-        }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-            <Box sx={{ 
-              p: 2, 
-              bgcolor: "rgba(255,255,255,0.1)", 
-              borderRadius: 2,
-              border: "2px solid rgba(255,255,255,0.2)",
-            }}>
-              <SettingsIcon sx={{ fontSize: 32 }} />
-            </Box>
-            <Box>
-              <Typography variant="h4" component="h2" sx={{ fontWeight: "bold", mb: 0.5 }}>
-                {isEditMode ? "Editar Servicio" : "Crear Nuevo Servicio"}
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                {isEditMode ? "Modifica los datos del servicio" : "Agrega servicios de gaming o suscripciones"}
-              </Typography>
+        <Box component="form" onSubmit={handleSubmitServicio}>
+          <Box sx={{ 
+            background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
+            color: "white",
+            p: 3,
+            mb: 4,
+            borderRadius: 3,
+            position: "relative",
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "1px",
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+            },
+          }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+              <Box sx={{ 
+                p: 2, 
+                bgcolor: "rgba(255,255,255,0.1)", 
+                borderRadius: 2,
+                border: "2px solid rgba(255,255,255,0.2)",
+              }}>
+                <SettingsIcon sx={{ fontSize: 32 }} />
+              </Box>
+              <Box>
+                <Typography variant="h4" component="h2" sx={{ fontWeight: "bold", mb: 0.5 }}>
+                  {isEditMode ? "Editar Servicio" : "Crear Nuevo Servicio"}
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                  {isEditMode ? "Modifica los datos del servicio" : "Agrega servicios de gaming o suscripciones"}
+                </Typography>
+              </Box>
             </Box>
           </Box>
-        </Box>
-
-        <Box component="form" onSubmit={handleSubmitServicio}>
-          {/* Información Básica */}
           <Box
             sx={{
               mb: 4,
@@ -1120,7 +1185,7 @@ export default function AdminCreateProductPage() {
               <TextField
                 label="Nombre del Servicio"
                 value={servicioForm.nombre}
-                onChange={(e) => setServicioForm({ ...servicioForm, nombre: e.target.value })}
+                onChange={e => setServicioForm({ ...servicioForm, nombre: e.target.value })}
                 required
                 sx={{ 
                   flex: "1 1 300px", 
@@ -1140,7 +1205,7 @@ export default function AdminCreateProductPage() {
                 label="Precio (US$)"
                 type="number"
                 value={servicioForm.monto}
-                onChange={(e) => setServicioForm({ ...servicioForm, monto: e.target.value })}
+                onChange={e => setServicioForm({ ...servicioForm, monto: e.target.value })}
                 required
                 sx={{ 
                   flex: "1 1 200px", 
@@ -1198,8 +1263,7 @@ export default function AdminCreateProductPage() {
               }}
             />
           </Box>
-
-          {/* Clasificación y Categorización */}
+          {/* Compañía y Categorías */}
           <Box
             sx={{
               mb: 4,
@@ -1209,28 +1273,28 @@ export default function AdminCreateProductPage() {
               border: "1px solid #2a3441",
               transition: "all 0.3s ease",
               "&:hover": {
-                borderColor: "#a855f7",
-                boxShadow: "0 4px 12px rgba(168, 85, 247, 0.1)",
+                borderColor: "#4a90e2",
+                boxShadow: "0 4px 12px rgba(74, 144, 226, 0.1)",
               },
             }}
           >
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
-              Clasificación
+              Compañía y Categorización
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Compañía</InputLabel>
                 <Select
-                  value={servicioForm.compania}
+                  value={juegoForm.compania}
                   label="Compañía"
-                  onChange={(e) => setServicioForm({ ...servicioForm, compania: e.target.value })}
+                  onChange={(e) => setJuegoForm({ ...juegoForm, compania: e.target.value })}
                   sx={{
                     bgcolor: "#141926",
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "#2a3441", borderWidth: "2px" },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#a855f7" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#4a90e2" },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": { 
-                      borderColor: "#a855f7",
-                      boxShadow: "0 0 0 3px rgba(168, 85, 247, 0.1)",
+                      borderColor: "#4a90e2",
+                      boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
                     },
                   }}
                 >
@@ -1246,16 +1310,16 @@ export default function AdminCreateProductPage() {
                 <InputLabel sx={{ color: "#b0b0b0" }}>Categorías</InputLabel>
                 <Select
                   multiple
-                  value={servicioForm.categorias}
+                  value={juegoForm.categorias}
                   label="Categorías"
-                  onChange={(e) => setServicioForm({ ...servicioForm, categorias: e.target.value as number[] })}
+                  onChange={(e) => setJuegoForm({ ...juegoForm, categorias: e.target.value as number[] })}
                   sx={{
                     bgcolor: "#141926",
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "#2a3441", borderWidth: "2px" },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#a855f7" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#4a90e2" },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": { 
-                      borderColor: "#a855f7",
-                      boxShadow: "0 0 0 3px rgba(168, 85, 247, 0.1)",
+                      borderColor: "#4a90e2",
+                      boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
                     },
                   }}
                   renderValue={(selected) => (
@@ -1267,7 +1331,7 @@ export default function AdminCreateProductPage() {
                           label={category?.nombre} 
                           size="small"
                           sx={{ 
-                            bgcolor: "#a855f7", 
+                            bgcolor: "#4a90e2", 
                             color: "white",
                             fontWeight: "bold"
                           }}
@@ -1286,7 +1350,98 @@ export default function AdminCreateProductPage() {
             </Box>
           </Box>
 
+          {/* Fotos del Servicio - edición y nuevas */}
+          <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Fotos actuales</FormLabel>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center', mb: 2 }}>
+              {fotosActualesServicio.map((foto, idx) => (
+                <Box key={foto.id} sx={{ position: "relative" }}>
+                  <img
+                    src={foto.url}
+                    alt={`foto-actual-servicio-${idx}`}
+                    style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: fotoPrincipalIdxServicio === idx ? "3px solid #a855f7" : "2px solid #2a3441", cursor: "pointer" }}
+                    onClick={() => setFotoPrincipalIdxServicio(idx)}
+                  />
+                  {/* Botón eliminar */}
+                  <Box sx={{ position: "absolute", top: 2, right: 2, zIndex: 2 }}>
+                    <Button size="small" onClick={() => handleRemoveFotoActualServicio(idx)} sx={{ minWidth: 0, p: 0, bgcolor: "rgba(0,0,0,0.5)", color: "white", borderRadius: "50%", width: 24, height: 24, fontWeight: "bold" }}>×</Button>
+                  </Box>
+                  {fotoPrincipalIdxServicio === idx && (
+                    <Chip label="Principal" color="secondary" size="small" sx={{ position: "absolute", top: 4, left: 4 }} />
+                  )}
+                </Box>
+              ))}
+            </Box>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Agregar nuevas fotos</FormLabel>
+            <input
+              type="file"
+              name="fotos"
+              accept="image/*"
+              multiple
+              disabled={fotosActualesServicio.length + fotosNuevasServicio.length >= 3}
+              onChange={e => {
+                setFotoErrorServicio("");
+                if (e.target.files) {
+                  const files = Array.from(e.target.files);
+                  const totalFotos = fotosActualesServicio.length + files.length;
+                  if (totalFotos > 3) {
+                    setFotoErrorServicio("Solo puedes cargar hasta 3 fotos en total.");
+                    const allowed = 3 - fotosActualesServicio.length;
+                    setFotosNuevasServicio(files.slice(0, allowed));
+                  } else {
+                    setFotosNuevasServicio(files);
+                  }
+                  setFotoPrincipalIdxServicio(fotosActualesServicio.length > 0 ? fotoPrincipalIdxServicio : 0);
+                }
+              }}
+              style={{ marginBottom: 8, display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+            />
+            {fotoErrorServicio && (
+              <Alert severity="error" sx={{ mb: 2, textAlign: 'center' }}>{fotoErrorServicio}</Alert>
+            )}
+            <Typography sx={{ color: '#b0b0b0', mb: 2, textAlign: 'center' }}>
+              {fotosActualesServicio.length + fotosNuevasServicio.length >= 3
+                ? "Ya tienes 3 fotos. No puedes agregar más."
+                : fotosNuevasServicio.length > 0
+                  ? `${fotosNuevasServicio.length} archivo${fotosNuevasServicio.length > 1 ? 's' : ''} seleccionados.`
+                  : 'Ningún archivo nuevo seleccionado.'}
+            </Typography>
+            {fotosNuevasServicio.length > 0 && (
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center' }}>
+                {fotosNuevasServicio.map((foto, idx) => (
+                  <Box key={idx} sx={{ position: "relative" }}>
+                    <img
+                      src={URL.createObjectURL(foto)}
+                      alt={`foto-nueva-servicio-${idx}`}
+                      style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "2px solid #2a3441", cursor: "not-allowed", opacity: 0.6 }}
+                    />
+                    {/* Botón eliminar */}
+                    <Box sx={{ position: "absolute", top: 2, right: 2, zIndex: 2 }}>
+                      <Button size="small" onClick={() => handleRemoveFotoNuevaServicio(idx)} sx={{ minWidth: 0, p: 0, bgcolor: "rgba(0,0,0,0.5)", color: "white", borderRadius: "50%", width: 24, height: 24, fontWeight: "bold" }}>×</Button>
+                    </Box>
+                    {/* Overlay para indicar que no se puede seleccionar como principal */}
+                    <Box sx={{ position: "absolute", top: 0, left: 0, width: 80, height: 80, bgcolor: "rgba(0,0,0,0.2)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Typography variant="caption" sx={{ color: "#b0b0b0", fontWeight: "bold" }}>Solo principal en fotos cargadas</Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+          {/* ...resto del formulario Servicio... */}
+
           <Box sx={{ display: "flex", gap: 3, justifyContent: "center", pt: 2 }}>
+              {isEditMode && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleDeleteServicio}
+                  disabled={loading}
+                  sx={{ minWidth: "120px", py: 1.5, fontWeight: "bold", textTransform: "none" }}
+                >
+                  Eliminar Servicio
+                </Button>
+              )}
             <Button
               type="button"
               variant="outlined"
