@@ -540,10 +540,18 @@ export default function AdminCreateProductPage() {
       categorias: [],
       juego: "",
     })
+    // Reset fotos de Juego
     setFotosActuales([]);
     setFotosNuevas([]);
     setFotoPrincipalIdx(null);
     setFotosAEliminar([]);
+    setFotoError("");
+    // Reset fotos de Servicio
+    setFotosActualesServicio([]);
+    setFotosNuevasServicio([]);
+    setFotoPrincipalIdxServicio(null);
+    setFotosAEliminarServicio([]);
+    setFotoErrorServicio("");
     setError("")
     setSuccess("")
     setTimeout(() => {
@@ -1273,7 +1281,7 @@ export default function AdminCreateProductPage() {
               border: "1px solid #2a3441",
               transition: "all 0.3s ease",
               "&:hover": {
-                borderColor: "#4a90e2",
+                borderColor: "#a855f7",
                 boxShadow: "0 4px 12px rgba(74, 144, 226, 0.1)",
               },
             }}
@@ -1285,15 +1293,15 @@ export default function AdminCreateProductPage() {
               <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Compañía</InputLabel>
                 <Select
-                  value={juegoForm.compania}
+                  value={servicioForm.compania}
                   label="Compañía"
-                  onChange={(e) => setJuegoForm({ ...juegoForm, compania: e.target.value })}
+                  onChange={(e) => setServicioForm({ ...servicioForm, compania: e.target.value })}
                   sx={{
                     bgcolor: "#141926",
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "#2a3441", borderWidth: "2px" },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#4a90e2" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#a855f7" },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": { 
-                      borderColor: "#4a90e2",
+                      borderColor: "#a855f7",
                       boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
                     },
                   }}
@@ -1310,15 +1318,15 @@ export default function AdminCreateProductPage() {
                 <InputLabel sx={{ color: "#b0b0b0" }}>Categorías</InputLabel>
                 <Select
                   multiple
-                  value={juegoForm.categorias}
+                  value={servicioForm.categorias}
                   label="Categorías"
-                  onChange={(e) => setJuegoForm({ ...juegoForm, categorias: e.target.value as number[] })}
+                  onChange={(e) => setServicioForm({ ...servicioForm, categorias: e.target.value as number[] })}
                   sx={{
                     bgcolor: "#141926",
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "#2a3441", borderWidth: "2px" },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#4a90e2" },
+                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#a855f7" },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": { 
-                      borderColor: "#4a90e2",
+                      borderColor: "#a855f7",
                       boxShadow: "0 0 0 3px rgba(74, 144, 226, 0.1)",
                     },
                   }}
@@ -1331,7 +1339,7 @@ export default function AdminCreateProductPage() {
                           label={category?.nombre} 
                           size="small"
                           sx={{ 
-                            bgcolor: "#4a90e2", 
+                            bgcolor: "#a855f7", 
                             color: "white",
                             fontWeight: "bold"
                           }}
