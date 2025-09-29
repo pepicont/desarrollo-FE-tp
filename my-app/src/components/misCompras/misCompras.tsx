@@ -457,7 +457,14 @@ export default function MisComprasPage() {
         <NavBar />
 
         {/* Contenido principal */}
-        <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: { xs: 3, md: 4 },
+            mt: { xs: 10, md: 8 },
+            px: { xs: 2.5, sm: 3, md: 4 },
+          }}
+        >
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -505,8 +512,17 @@ export default function MisComprasPage() {
           </Box>
 
           {/* Header con título y filtros */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-            <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", md: "center" },
+              flexDirection: { xs: "column", md: "row" },
+              gap: { xs: 2, md: 0 },
+              mb: 3,
+            }}
+          >
+            <Box sx={{ width: "100%" }}>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
                 Mis compras
               </Typography>
@@ -515,7 +531,16 @@ export default function MisComprasPage() {
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: { xs: 1.5, sm: 2 },
+                alignItems: "center",
+                flexWrap: "wrap",
+                justifyContent: { xs: "flex-start", md: "flex-end" },
+                width: "100%",
+              }}
+            >
               {/* Selector de items per page */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
@@ -605,25 +630,33 @@ export default function MisComprasPage() {
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
               {paginatedVentas.map((venta) => (
                 <Card
                   key={venta.id}
                   sx={{
                     bgcolor: "#1e2532",
                     borderRadius: 2,
-                    p: 2,
+                    p: { xs: 2, md: 2.5 },
                   }}
                 >
                   <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        gap: { xs: 2, md: 2.5 },
+                      }}
+                    >
                       <Box
                         sx={{
-                          width: 96,
-                          height: 96,
+                          width: { xs: "100%", sm: 112, md: 120 },
+                          height: { xs: 180, sm: 112, md: 120 },
                           borderRadius: 2,
                           overflow: "hidden",
                           flexShrink: 0,
+                          alignSelf: { xs: "stretch", sm: "center" },
                         }}
                       >
                         <img
@@ -637,7 +670,7 @@ export default function MisComprasPage() {
                           onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }}
                         />
                       </Box>
-                      <Box sx={{ flexGrow: 1 }}>
+                      <Box sx={{ flexGrow: 1, width: "100%" }}>
                         <Typography
                           variant="h6"
                           sx={{
@@ -665,7 +698,17 @@ export default function MisComprasPage() {
                           ${(getProductPrice(venta) ?? 0).toFixed(2)}
                         </Typography>
                       </Box>
-                      <Box sx={{ textAlign: "right" }}>
+                      <Box
+                        sx={{
+                          textAlign: { xs: "left", sm: "right" },
+                          width: { xs: "100%", sm: "auto" },
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: { xs: "flex-start", sm: "flex-end" },
+                          gap: 0.75,
+                          mt: { xs: 1.5, sm: 0 },
+                        }}
+                      >
                         <Chip
                           label={getProductCategory(venta)}
                           size="small"
@@ -693,14 +736,15 @@ export default function MisComprasPage() {
                               color: 'white',
                               fontSize: '0.75rem',
                               textTransform: 'none',
-                              mt: 1,
+                              mt: 0.5,
+                              alignSelf: { xs: "stretch", sm: "flex-end" },
                             }}
                             onClick={() => handleReviewAction(venta)}
                           >
                             {reviewsStatus[venta.id].hasReview ? 'Editar reseña' : 'Agregar reseña'}
                           </Button>
                         ) : (
-                          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'center' }, width: { xs: '100%', sm: 'auto' } }}>
                             <CircularProgress size={16} sx={{ color: '#3a7bd5' }} />
                           </Box>
                         )}

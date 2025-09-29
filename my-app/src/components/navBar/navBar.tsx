@@ -18,6 +18,8 @@ import {
   InputAdornment,
   Typography,
   Modal,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material"
 import {
   Menu as MenuIcon,
@@ -95,14 +97,18 @@ const adminMenuItems = [
 export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
+  const [searchModalOpen, setSearchModalOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
   const searchRef = useRef<HTMLInputElement | null>(null)
+  const searchButtonRef = useRef<HTMLButtonElement | null>(null)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   // Cerrar search al hacer click fuera
   useEffect(() => {
     if (!searchOpen) return;
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        closeSearch();
+        closeSearchInline();
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -194,7 +200,39 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
   })
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen)
-  const handleSearchToggle = () => setSearchOpen(!searchOpen)
+  const openSearchModal = () => {
+    setSearchModalOpen(true)
+    requestAnimationFrame(() => {
+      searchRef.current?.focus()
+    })
+  }
+  const closeSearchModal = () => {
+    setSearchModalOpen(false)
+    setSearchQuery("")
+    setTimeout(() => {
+      searchButtonRef.current?.focus()
+    }, 0)
+  }
+  const closeSearchInline = () => {
+    setSearchOpen(false)
+    setSearchQuery("")
+  }
+  const handleSearchToggle = () => {
+    if (isMobile) {
+      if (searchModalOpen) {
+        closeSearchModal()
+      } else {
+        openSearchModal()
+      }
+      return
+    }
+    setSearchOpen((prev) => {
+      if (prev) {
+        setSearchQuery("")
+      }
+      return !prev
+    })
+  }
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => setProfileMenuAnchor(event.currentTarget)
   const handleProfileMenuClose = () => setProfileMenuAnchor(null)
   const handleLogout = () => {
@@ -207,10 +245,6 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     
   }
 
-  const closeSearch = () => {
-    setSearchOpen(false)
-    setSearchQuery("")
-  }
 
   const onSubmitSearch = () => {
     const q = searchQuery.trim()
@@ -218,7 +252,11 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
     // Navegar a la página de productos con el parámetro de búsqueda
     const url = `/productos?q=${encodeURIComponent(q)}`
     window.location.href = url
-    closeSearch()
+    if (isMobile) {
+      closeSearchModal()
+    } else {
+      closeSearchInline()
+    }
   }
 
   const handleMenuClick = (text: string, href?: string, isLogout?: boolean) => {
@@ -315,11 +353,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
               <MenuIcon />
             </IconButton>
-            {!searchOpen ? (
-              <IconButton color="inherit" aria-label="search" onClick={handleSearchToggle}>
-                <SearchIcon />
-              </IconButton>
-            ) : (
+            {!isMobile && searchOpen ? (
               <TextField
                 placeholder="Buscar videojuegos, DLC, membresías..."
                 variant="outlined"
@@ -328,7 +362,7 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Escape") closeSearch()
+                  if (e.key === "Escape") closeSearchInline()
                   if (e.key === "Enter") onSubmitSearch()
                 }}
                 sx={{ width: { xs: "60vw", sm: "45vw", md: 440 } }}
@@ -341,25 +375,39 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton aria-label="Cerrar búsqueda" onClick={closeSearch} edge="end" size="small">
+                      <IconButton aria-label="Cerrar búsqueda" onClick={closeSearchInline} edge="end" size="small">
                         <CloseIcon />
                       </IconButton>
                     </InputAdornment>
                   ),
                 }}
               />
+            ) : (
+              <IconButton
+                color="inherit"
+                aria-label="search"
+                onClick={handleSearchToggle}
+                ref={searchButtonRef}
+              >
+                <SearchIcon />
+              </IconButton>
             )}
           </Box>
 
           {/* Center: logo stays centered regardless */}
           <Box sx={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <IconButton onClick={() => (window.location.href = "/")} sx={{ p: 0 }} aria-label="Ir al inicio">
-              <img src={imgLogo} alt="Gaming Portal Logo" style={{ height: 56, objectFit: "contain" }} />
+              <Box
+                component="img"
+                src={imgLogo}
+                alt="Gaming Portal Logo"
+                sx={{ height: { xs: 40, sm: 56 }, objectFit: "contain" }}
+              />
             </IconButton>
           </Box>
 
           {/* Right: cart (optional) + profile */}
-          {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+          {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexShrink: 0 }}>
             {/* {onCartClick && (
               <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
                 <Badge badgeContent={cartCount} color="error">
@@ -378,16 +426,91 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
 
           {/* Acá debería ir un botón de iniciar sesión si no está logueado */}
           {!isLoggedIn && (
-            <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-
-              <Button color ="inherit" variant="contained"size="large"sx={{ textTransform: "none", borderColor: "#ffffffff", color: "#ffffffff", "&:hover": { backgroundColor: "#003e7cff" } }}
-               onClick={() => (window.location.href = "/login")}>
+            <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexShrink: 0 }}>
+              <Button
+                color="inherit"
+                variant="contained"
+                size={isMobile ? "small" : "large"}
+                sx={{
+                  textTransform: "none",
+                  borderColor: "#ffffffff",
+                  color: "#ffffffff",
+                  px: { xs: 1.5, sm: 3 },
+                  py: { xs: 0.5, sm: 1.25 },
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  lineHeight: 1.2,
+                  borderRadius: 2,
+                  minWidth: { xs: "auto", sm: 120 },
+                  "&:hover": { backgroundColor: "#003e7cff" },
+                }}
+                onClick={() => (window.location.href = "/login")}
+              >
                 Iniciar Sesión
               </Button>
             </Box>
           )}
         </Toolbar>
       </StyledAppBar>
+      <Modal
+        open={isMobile && searchModalOpen}
+        onClose={() => closeSearchModal()}
+        aria-labelledby="mobile-search-modal-title"
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            minHeight: "100%",
+            px: 2,
+            pt: { xs: 12, sm: 14 },
+            pb: 4,
+          }}
+        >
+          <Box sx={{ width: "100%", maxWidth: 520 }}>
+            <Box
+              sx={{
+                bgcolor: "#1e2532",
+                width: "100%",
+                p: 3,
+                borderRadius: 2,
+                boxShadow: 24,
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                position: "relative",
+              }}
+            >
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <IconButton aria-label="Cerrar búsqueda" onClick={closeSearchModal} size="small" sx={{ color: "#ffffff" }}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <TextField
+              placeholder="Buscar videojuegos, DLC, membresías..."
+              variant="outlined"
+              autoFocus
+              size="small"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") closeSearchModal()
+                if (e.key === "Enter") onSubmitSearch()
+              }}
+              fullWidth
+              inputRef={searchRef}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
         <Box sx={{ width: 280, pt: 2, backgroundColor: "#1E2A3A", height: "100%" }}>
           <Box sx={{ p: 2, borderBottom: "1px solid #2A3441" }}>
