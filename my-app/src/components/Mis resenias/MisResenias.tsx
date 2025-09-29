@@ -427,7 +427,14 @@ export default function MisResenasPage() {
         <CssBaseline />
         <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
           <NavBar />
-          <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              py: { xs: 3, md: 4 },
+              mt: { xs: 10, md: 8 },
+              px: { xs: 2.5, sm: 3, md: 4 },
+            }}
+          >
             <Alert
               severity="error"
               sx={{ width: "100%" }}
@@ -505,7 +512,14 @@ export default function MisResenasPage() {
         {/* NavBar compartida */}
         <NavBar />
         {/* Contenido principal */}
-        <Container maxWidth="md" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
+        <Container
+          maxWidth="md"
+          sx={{
+            py: { xs: 3, md: 4 },
+            mt: { xs: 10, md: 8 },
+            px: { xs: 2.5, sm: 3, md: 4 },
+          }}
+        >
           {/* Alertas de éxito y eliminación */}
           {successAlert && (
             <Alert severity="success" sx={{ mb: 2, fontWeight: 'bold' }}>Reseña modificada con éxito</Alert>
@@ -548,23 +562,46 @@ export default function MisResenasPage() {
             />
           </Box>
 
-          {/* Título con filtro centrado y botón Nueva reseña */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", flexGrow: 1 }}>
+          {/* Título, filtros y acción */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "flex-start", md: "center" },
+              gap: { xs: 2, md: 3 },
+              mb: { xs: 2, md: 1 },
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{
+                color: "white",
+                fontWeight: "bold",
+                flexGrow: { md: 1 },
+                width: { xs: "100%", md: "auto" },
+              }}
+            >
               Mis reseñas
             </Typography>
-            
-            {/* Filtro centrado */}
-            <Box sx={{ mx: 4 }}>
-              <FormControl size="small">
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "stretch", sm: "center" },
+                gap: { xs: 1.5, sm: 2 },
+                width: { xs: "100%", md: "auto" },
+              }}
+            >
+              <FormControl size="small" sx={{ width: { xs: "100%", sm: 180 } }}>
                 <Select
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                   displayEmpty
                   variant="outlined"
                   sx={{
-                    minWidth: 120,
-                    height: 32,
+                    minWidth: { xs: "100%", sm: 160 },
+                    height: { xs: 40, sm: 36 },
                     backgroundColor: '#2a3441',
                     borderRadius: 3,
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -572,9 +609,9 @@ export default function MisResenasPage() {
                     },
                     '& .MuiSelect-select': {
                       color: '#9ca3af',
-                      fontSize: '0.8rem',
+                      fontSize: { xs: '0.9rem', sm: '0.8rem' },
                       fontWeight: 500,
-                      padding: '6px 12px',
+                      padding: { xs: '10px 14px', sm: '6px 12px' },
                       display: 'flex',
                       alignItems: 'center',
                     },
@@ -622,30 +659,31 @@ export default function MisResenasPage() {
                   <MenuItem value="anteriores">📅 Anteriores</MenuItem>
                 </Select>
               </FormControl>
-            </Box>
-            
-            <Button
-              variant="contained"
-              onClick={() => navigate("/mis-compras")}
-              sx={{
-                background: "#3a7bd5",
-                color: "white",
-                fontWeight: "bold",
-                px: 3,
-                py: 1.5,
-                borderRadius: 2,
-                textTransform: "none",
-                boxShadow: "none",
-                "&:hover": {
-                  background: "#2c5aa0",
+
+              <Button
+                variant="contained"
+                onClick={() => navigate("/mis-compras")}
+                sx={{
+                  background: "#3a7bd5",
+                  color: "white",
+                  fontWeight: "bold",
+                  px: { xs: 2, sm: 3 },
+                  py: { xs: 1.25, sm: 1.5 },
+                  borderRadius: 2,
+                  textTransform: "none",
                   boxShadow: "none",
-                  transform: "none",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Nueva reseña
-            </Button>
+                  width: { xs: "100%", sm: "auto" },
+                  "&:hover": {
+                    background: "#2c5aa0",
+                    boxShadow: "none",
+                    transform: "none",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Nueva reseña
+              </Button>
+            </Box>
           </Box>
 
           {/* Contador y selector de items por página */}
@@ -657,12 +695,22 @@ export default function MisResenasPage() {
             flexDirection: { xs: "column", sm: "row" },
             gap: { xs: 2, sm: 0 },
           }}>
-            <Typography variant="body2" sx={{ color: "#6b7280" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "#6b7280", textAlign: { xs: "center", sm: "left" } }}
+            >
               Mostrando {filteredResenias.length} de {resenias.length} reseñas
             </Typography>
             
             {/* Selector de items per page */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                justifyContent: { xs: "center", sm: "flex-start" },
+              }}
+            >
               <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
                 Mostrar:
               </Typography>
@@ -728,7 +776,13 @@ export default function MisResenasPage() {
 
           {/* Lista de reseñas */}
           {filteredResenias.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 4 }}>
+            <Box
+              sx={{
+                textAlign: "center",
+                py: { xs: 3, md: 4 },
+                px: { xs: 2, sm: 0 },
+              }}
+            >
               <Typography variant="h6" sx={{ color: "text.secondary", mb: 2 }}>
                 {resenias.length === 0 ? "No tienes reseñas aún" : "No hay reseñas para el filtro seleccionado"}
               </Typography>
@@ -749,19 +803,38 @@ export default function MisResenasPage() {
                     boxSizing: "border-box",
                   }}
                 >
-                  <CardContent sx={{ p: 3, width: "100%", boxSizing: "border-box" }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2, md: 3 }, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+                  <CardContent
+                    sx={{
+                      p: { xs: 2.5, md: 3 },
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        gap: { xs: 2, sm: 2.5, md: 3 },
+                        width: "100%",
+                      }}
+                    >
                       {/* Imagen del producto */}
                       <Avatar
                         src={getProductImage(resenia.venta)}
                         alt={getProductName(resenia.venta)}
-                        sx={{ width: 96, height: 96, borderRadius: 1, bgcolor: '#0f1625' }}
+                        sx={{
+                          width: { xs: 80, sm: 96 },
+                          height: { xs: 80, sm: 96 },
+                          borderRadius: 1,
+                          bgcolor: '#0f1625',
+                        }}
                         variant="rounded"
                         imgProps={{ onError: (e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' } }}
                       />
 
                       {/* Información de la reseña */}
-                      <Box sx={{ flex: 1 }}>
+                      <Box sx={{ flex: 1, width: "100%" }}>
                         <Typography
                           variant="h6"
                           sx={{
@@ -778,7 +851,15 @@ export default function MisResenasPage() {
                         </Typography>
 
                         {/* Vista normal de la reseña */}
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: { xs: 1, sm: 2 },
+                            flexWrap: "wrap",
+                            mb: 1,
+                          }}
+                        >
                           <Rating
                             value={resenia.puntaje}
                             readOnly
@@ -793,7 +874,15 @@ export default function MisResenasPage() {
                             {resenia.puntaje} estrellas
                           </Typography>
                         </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: { xs: 0.75, sm: 1 },
+                            flexWrap: "wrap",
+                            mb: 2,
+                          }}
+                        >
                           <Typography variant="body2" sx={{ color: "text.secondary" }}>
                             Fecha de reseña: {formatDate(resenia.fecha)}
                           </Typography>
@@ -802,19 +891,35 @@ export default function MisResenasPage() {
                           "{resenia.detalle}"
                         </Typography>
                       </Box>
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: { xs: "row", sm: "column" },
+                          alignItems: "center",
+                          justifyContent: { xs: "flex-end", sm: "center" },
+                          gap: { xs: 1, sm: 0.5 },
+                          width: { xs: "100%", sm: "auto" },
+                          mt: { xs: 1, sm: 0 },
+                        }}
+                      >
                         <IconButton
                           onClick={() => handleEditClick(resenia.id)}
                           sx={{
                             bgcolor: "primary.main",
                             color: "white",
                             "&:hover": { bgcolor: "#3a7bc8" },
-                            mb: 1,
+                            mb: { xs: 0, sm: 1 },
                           }}
                         >
                           <EditIcon />
                         </IconButton>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            display: "block",
+                          }}
+                        >
                           Editar
                         </Typography>
                       </Box>
