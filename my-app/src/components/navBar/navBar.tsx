@@ -397,12 +397,17 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
           {/* Center: logo stays centered regardless */}
           <Box sx={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <IconButton onClick={() => (window.location.href = "/")} sx={{ p: 0 }} aria-label="Ir al inicio">
-              <img src={imgLogo} alt="Gaming Portal Logo" style={{ height: 56, objectFit: "contain" }} />
+              <Box
+                component="img"
+                src={imgLogo}
+                alt="Gaming Portal Logo"
+                sx={{ height: { xs: 40, sm: 56 }, objectFit: "contain" }}
+              />
             </IconButton>
           </Box>
 
           {/* Right: cart (optional) + profile */}
-          {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+          {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexShrink: 0 }}>
             {/* {onCartClick && (
               <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
                 <Badge badgeContent={cartCount} color="error">
@@ -421,10 +426,25 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
 
           {/* Acá debería ir un botón de iniciar sesión si no está logueado */}
           {!isLoggedIn && (
-            <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-
-              <Button color ="inherit" variant="contained"size="large"sx={{ textTransform: "none", borderColor: "#ffffffff", color: "#ffffffff", "&:hover": { backgroundColor: "#003e7cff" } }}
-               onClick={() => (window.location.href = "/login")}>
+            <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexShrink: 0 }}>
+              <Button
+                color="inherit"
+                variant="contained"
+                size={isMobile ? "small" : "large"}
+                sx={{
+                  textTransform: "none",
+                  borderColor: "#ffffffff",
+                  color: "#ffffffff",
+                  px: { xs: 1.5, sm: 3 },
+                  py: { xs: 0.5, sm: 1.25 },
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  lineHeight: 1.2,
+                  borderRadius: 2,
+                  minWidth: { xs: "auto", sm: 120 },
+                  "&:hover": { backgroundColor: "#003e7cff" },
+                }}
+                onClick={() => (window.location.href = "/login")}
+              >
                 Iniciar Sesión
               </Button>
             </Box>
