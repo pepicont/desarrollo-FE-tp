@@ -128,8 +128,11 @@ export default function ReviewModal({
           borderRadius: 3,
           boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
           overflow: "hidden",
-          width: { xs: '95vw', sm: '90vw', md: '600px' },
-          maxWidth: { xs: '95vw', sm: '90vw', md: '600px' },
+          width: { xs: '94vw', sm: '85vw', md: '600px' },
+          maxWidth: { xs: '94vw', sm: '85vw', md: '600px' },
+          maxHeight: { xs: '90vh', md: '92vh' },
+          display: 'flex',
+          flexDirection: 'column',
         },
       }}
       BackdropProps={{
@@ -143,7 +146,7 @@ export default function ReviewModal({
         sx={{
           background: "linear-gradient(135deg, #4a90e2 0%, #357abd 100%)",
           color: "white",
-          p: 3,
+          p: { xs: 2.5, sm: 3 },
           position: "relative",
           "&::after": {
             content: '""',
@@ -156,14 +159,21 @@ export default function ReviewModal({
           },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "flex-start", sm: "center" },
+            gap: { xs: 2, sm: 3 },
+          }}
+        >
           <Box sx={{ position: "relative" }}>
             <Avatar
               src={productImage}
               alt="Producto"
               sx={{
-                width: 60,
-                height: 60,
+                width: { xs: 52, sm: 60 },
+                height: { xs: 52, sm: 60 },
                 borderRadius: 2,
                 border: "3px solid rgba(255,255,255,0.2)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
@@ -171,24 +181,41 @@ export default function ReviewModal({
               variant="rounded"
             />
           </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
+          <Box sx={{ flex: 1, width: "100%" }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: "bold",
+                mb: 0.5,
+                fontSize: { xs: "1.25rem", sm: "1.5rem" },
+              }}
+            >
               {mode === 'create' ? 'Agregar Reseña' : 'Editar Reseña'}
             </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
+            <Typography
+              variant="body1"
+              sx={{ opacity: 0.9, fontWeight: 500, fontSize: { xs: "0.95rem", sm: "1rem" } }}
+            >
               {productName}
             </Typography>
           </Box>
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 4, bgcolor: "#141926" }}>
+      <DialogContent
+        sx={{
+          p: { xs: 2.5, sm: 3.5, md: 4 },
+          bgcolor: "#141926",
+          flex: 1,
+          overflowY: "auto",
+        }}
+      >
         {/* Rating Section */}
         <Box
           sx={{
-            mt: 3,
-            mb: 4,
-            p: 3,
+            mt: { xs: 1.5, sm: 3 },
+            mb: { xs: 3, sm: 4 },
+            p: { xs: 2.5, sm: 3 },
             bgcolor: "#1e2532",
             borderRadius: 2,
             border: "1px solid #2a3441",
@@ -199,10 +226,26 @@ export default function ReviewModal({
             },
           }}
         >
-          <Typography variant="h6" sx={{ color: "white", mb: 2, fontWeight: "bold" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: "white",
+              mb: { xs: 1.5, sm: 2 },
+              fontWeight: "bold",
+              fontSize: { xs: "1.05rem", sm: "1.15rem" },
+            }}
+          >
             Calificación
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "flex-start", sm: "center" },
+              gap: { xs: 2, sm: 3 },
+              width: "100%",
+            }}
+          >
             <Rating
               value={puntaje}
               onChange={(_, value) => setPuntaje(value || 0)}
@@ -222,16 +265,23 @@ export default function ReviewModal({
             />
             <Box
               sx={{
-                px: 2,
-                py: 1,
+                px: { xs: 2, sm: 2.5 },
+                py: { xs: 0.75, sm: 1 },
                 bgcolor: "#1e2532", // Fondo igual al modal
                 borderRadius: 1,
-                minWidth: "100px",
+                minWidth: { xs: "100%", sm: "120px" },
                 textAlign: "center",
                 border: "1px solid #f59e0b", // Borde dorado igual a las estrellas
               }}
             >
-              <Typography variant="body1" sx={{ color: "#f59e0b", fontWeight: "bold" }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#f59e0b",
+                  fontWeight: "bold",
+                  fontSize: { xs: "0.95rem", sm: "1rem" },
+                }}
+              >
                 {puntaje} estrella{puntaje !== 1 ? "s" : ""}
               </Typography>
             </Box>
@@ -242,14 +292,22 @@ export default function ReviewModal({
         {mode === 'edit' && (
           <Box
             sx={{
-              mb: 4,
-              p: 3,
+              mb: { xs: 3, sm: 4 },
+              p: { xs: 2.5, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 2,
               border: "1px solid #2a3441",
             }}
           >
-            <Typography variant="h6" sx={{ color: "white", mb: 1, fontWeight: "bold" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: "white",
+                mb: 1,
+                fontWeight: "bold",
+                fontSize: { xs: "1.05rem", sm: "1.15rem" },
+              }}
+            >
               Fecha de reseña
             </Typography>
             <Typography variant="body1" sx={{ color: "#b0b0b0" }}>
@@ -261,7 +319,7 @@ export default function ReviewModal({
         {/* Comment Section */}
         <Box
           sx={{
-            p: 3,
+            p: { xs: 2.5, sm: 3 },
             bgcolor: "#1e2532",
             borderRadius: 2,
             border: "1px solid #2a3441",
@@ -272,14 +330,22 @@ export default function ReviewModal({
             },
           }}
         >
-          <Typography variant="h6" sx={{ color: "white", mb: 2, fontWeight: "bold" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: "white",
+              mb: { xs: 1.5, sm: 2 },
+              fontWeight: "bold",
+              fontSize: { xs: "1.05rem", sm: "1.15rem" },
+            }}
+          >
             Tu opinión
           </Typography>
           <TextField
             value={detalle}
             onChange={(e) => setDetalle(e.target.value)}
             multiline
-            rows={5}
+            rows={4}
             fullWidth
             variant="outlined"
             placeholder="Comparte tu experiencia con este producto..."
@@ -287,7 +353,7 @@ export default function ReviewModal({
               "& .MuiOutlinedInput-root": {
                 color: "white",
                 bgcolor: "#141926",
-                fontSize: "1rem",
+                fontSize: { xs: "0.95rem", sm: "1rem" },
                 "& fieldset": {
                   borderColor: "#2a3441",
                   borderWidth: "2px",
