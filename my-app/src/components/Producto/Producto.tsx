@@ -55,6 +55,10 @@ export default function Producto() {
     (tipo === 'complemento' && data && 'fotos' in (data as ComplementoDetail) ? (data as ComplementoDetail).fotos : undefined) ||
     []
   ) as Foto[]
+  // Ordenar: principal primero, luego las demás
+  const fotosOrdenadas = fotos.length > 0
+    ? [...fotos].sort((a, b) => (b.esPrincipal ? 1 : 0) - (a.esPrincipal ? 1 : 0))
+    : [];
 
   
   useEffect(() => {
@@ -217,7 +221,7 @@ export default function Producto() {
                   )}
                 </Box> 
                 {/* Mini galería de thumbnails */}
-                {fotos && fotos.length > 0 && (
+                {fotosOrdenadas.length > 0 && (
                   <Box
                     sx={{
                       display: 'flex',
@@ -230,7 +234,7 @@ export default function Producto() {
                       '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 3 },
                     }}
                   >
-                    {fotos.map((f) => {
+                    {fotosOrdenadas.map((f) => {
                       const isSelected = !!heroImage && f.url === heroImage
                       return (
                         <Box
