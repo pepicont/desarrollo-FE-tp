@@ -29,16 +29,11 @@ export default function Footer() {
         bgcolor: '#000',
         color: '#fff',
         py: 4,
-        px: 2,
-        width: '100vw',
-        position: 'relative',
-        left: '50%',
-        right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        maxWidth: '100vw',
+        px: { xs: 2, md: 4 },
+        width: '100%',
         mt: 'auto',
         boxShadow: '0 -2px 8px rgba(0,0,0,0.2)',
+        overflowX: 'hidden',
       }}
     >
       <Box
