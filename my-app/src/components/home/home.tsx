@@ -81,6 +81,16 @@ const CarouselContainer = styled(Box)`
   overflow: hidden;
   border-radius: 16px;
   margin-bottom: 32px;
+
+  @media (max-width: 900px) {
+    height: 360px;
+  }
+
+  @media (max-width: 600px) {
+    height: 360px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+  }
 `
 
 const CarouselSlide = styled(Box)`
@@ -116,6 +126,14 @@ const CarouselArrow = styled(IconButton)`
   }
   & .MuiSvgIcon-root {
     font-size: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    width: 38px;
+    height: 38px;
+    & .MuiSvgIcon-root {
+      font-size: 1.2rem;
+    }
   }
 `
 
@@ -360,17 +378,39 @@ export default function Home() {
                       sx={{
                         background: "linear-gradient(180deg, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.7) 100%)",
                         width: "100%",
-                        p: 4,
+                        p: { xs: 2.5, sm: 3, md: 4 },
                         color: "white",
                         borderBottomLeftRadius: 16,
                         borderBottomRightRadius: 16,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: { xs: 1.25, sm: 1.75, md: 2 },
                       }}
                     >
                       {/*<Chip label={item.badge} color="primary" sx={{ mb: 2 }} />*/}
-                      <Typography variant="h3" component="h3" gutterBottom>
+                      <Typography
+                        variant="h3"
+                        component="h3"
+                        gutterBottom
+                        sx={{
+                          m: 0,
+                          fontSize: { xs: "1.75rem", sm: "2.1rem", md: "2.5rem" },
+                          lineHeight: { xs: 1.15, md: 1.2 },
+                          wordBreak: "break-word",
+                          hyphens: "auto",
+                        }}
+                      >
                         {item.title}
                       </Typography>
-                      <Typography variant="h6">{item.description}</Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.15rem" },
+                          lineHeight: { xs: 1.4, md: 1.5 },
+                        }}
+                      >
+                        {item.description}
+                      </Typography>
                       {tipoFiltro && (
                         <Box sx={{ mt: 2 }}>
                           <Button
@@ -380,6 +420,9 @@ export default function Home() {
                               textTransform: 'none',
                               borderRadius: 2,
                               backgroundColor: '#2c5aa0',
+                              px: { xs: 2.5, sm: 3 },
+                              py: { xs: 0.75, sm: 0.9 },
+                              fontSize: { xs: '0.9rem', sm: '0.95rem' },
                               '&:hover': { backgroundColor: '#1e3d6f' },
                               boxShadow: 'none',
                             }}
