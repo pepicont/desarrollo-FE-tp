@@ -35,7 +35,7 @@ import CssBaseline from "@mui/material/CssBaseline"
 import NavBar from "../navBar/navBar"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { authService } from "../../services/authService"
-import { productService, type CreateComplementoData, type CategoriaRef } from "../../services/productService"
+import { productService, type CategoriaRef } from "../../services/productService"
 import type { Foto } from "../../services/productService"
 import { getAllCategoriesAdmin, type Category } from "../../services/categoryService"
 import { getAllCompaniesAdmin, type Company } from "../../services/companyService"
@@ -249,6 +249,37 @@ export default function AdminCreateProductPage() {
   const [fotoPrincipalIdxServicio, setFotoPrincipalIdxServicio] = useState<number | null>(null);
   const [fotoErrorServicio, setFotoErrorServicio] = useState<string>("");
   const [fotosAEliminarServicio, setFotosAEliminarServicio] = useState<number[]>([]);
+  // Fotos para Complemento
+  const [fotosActualesComplemento, setFotosActualesComplemento] = useState<Foto[]>([]);
+  const [fotosNuevasComplemento, setFotosNuevasComplemento] = useState<File[]>([]);
+  const [fotoPrincipalIdxComplemento, setFotoPrincipalIdxComplemento] = useState<number | null>(null);
+  const [fotoErrorComplemento, setFotoErrorComplemento] = useState<string>("");
+  const [fotosAEliminarComplemento, setFotosAEliminarComplemento] = useState<number[]>([]);
+
+  // Eliminar foto actual Complemento
+  const handleRemoveFotoActualComplemento = (idx: number) => {
+    const fotoEliminada = fotosActualesComplemento[idx];
+    setFotosAEliminarComplemento(prev => [...prev, fotoEliminada.id]);
+    const nuevasFotos = fotosActualesComplemento.filter((_, i) => i !== idx);
+    setFotosActualesComplemento(nuevasFotos);
+    if (fotoPrincipalIdxComplemento === idx) {
+      setFotoPrincipalIdxComplemento(nuevasFotos.length > 0 ? 0 : null);
+    } else if (fotoPrincipalIdxComplemento !== null && fotoPrincipalIdxComplemento > idx) {
+      setFotoPrincipalIdxComplemento(fotoPrincipalIdxComplemento - 1);
+    }
+  };
+
+  // Eliminar foto nueva Complemento
+  const handleRemoveFotoNuevaComplemento = (idx: number) => {
+    setFotosNuevasComplemento(fotosNuevasComplemento.filter((_, i) => i !== idx));
+  };
+
+  useEffect(() => {
+    if (fotoErrorComplemento) {
+      const timer = setTimeout(() => setFotoErrorComplemento("") , 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fotoErrorComplemento]);
   
     // Eliminar foto actual Servicio
   const handleRemoveFotoActualServicio = (idx: number) => {
@@ -358,6 +389,8 @@ export default function AdminCreateProductPage() {
             categorias: productData.categorias?.map((c: CategoriaRef) => c.id) || [],
             juego: productData.juego?.id?.toString() || "",
           })
+          setFotosActualesComplemento(productData.fotos || []);
+          setFotoPrincipalIdxComplemento(productData.fotos?.findIndex(f => f.esPrincipal) ?? null);
         }
         setLoading(false)
       } catch (err: unknown) {
@@ -478,40 +511,59 @@ export default function AdminCreateProductPage() {
   }
 
   const handleSubmitComplemento = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const token = authService.getToken()
-      if (!token) throw new Error("Token no encontrado")
+      const token = authService.getToken();
+      if (!token) throw new Error("Token no encontrado");
 
-      const data: CreateComplementoData = {
-        nombre: complementoForm.nombre,
-        detalle: complementoForm.detalle,
-        monto: parseFloat(complementoForm.monto),
-        categorias: complementoForm.categorias,
-        compania: (() => {
-          const selectedJuego = juegos.find(j => j.id === parseInt(complementoForm.juego));
-          return selectedJuego ? selectedJuego.compania.id : 0;
-        })(),
-        juego: parseInt(complementoForm.juego),
+      const formData = new FormData();
+      formData.append("nombre", complementoForm.nombre);
+      formData.append("detalle", complementoForm.detalle);
+      formData.append("monto", complementoForm.monto);
+      formData.append("juego", complementoForm.juego);
+      // Obtener la compañía del juego seleccionado
+      const selectedJuego = juegos.find(j => j.id === parseInt(complementoForm.juego));
+      if (selectedJuego) {
+        formData.append("compania", selectedJuego.compania.id.toString());
+      }
+      complementoForm.categorias.forEach((catId) => formData.append("categorias", catId.toString()));
+
+      // Enviar fotos nuevas
+      fotosNuevasComplemento.forEach((foto) => {
+        formData.append("fotos", foto);
+      });
+
+      // Enviar IDs de fotos a eliminar
+      fotosAEliminarComplemento.forEach(id => {
+        formData.append("fotosAEliminar", id.toString());
+      });
+
+      // Determinar la foto principal (id si es existente)
+      let fotoPrincipalValue = null;
+      if (fotoPrincipalIdxComplemento !== null && fotoPrincipalIdxComplemento < fotosActualesComplemento.length) {
+        fotoPrincipalValue = fotosActualesComplemento[fotoPrincipalIdxComplemento]?.id?.toString();
+      }
+      if (fotoPrincipalValue) {
+        formData.append("fotoPrincipal", fotoPrincipalValue);
       }
 
       if (isEditMode && editId) {
-        await productService.updateComplemento(editId, data, token);
+        await productService.updateComplementoConFotos(editId, formData, token);
         if (window.history && window.history.length > 1) {
-          navigate(-1)
-        } 
+          navigate(-1);
+        }
       } else {
-        await productService.createComplemento(data, token);
+        await productService.createComplementoConFotos(formData, token);
         resetForm(() => setSuccess("Complemento creado exitosamente"));
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el complemento`
-      resetForm(() => setError(errorMessage))
+      const errorMessage = err instanceof Error ? err.message : `Error al ${isEditMode ? 'actualizar' : 'crear'} el complemento`;
+      resetForm(() => setError(errorMessage));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -540,18 +592,24 @@ export default function AdminCreateProductPage() {
       categorias: [],
       juego: "",
     })
-    // Reset fotos de Juego
-    setFotosActuales([]);
-    setFotosNuevas([]);
-    setFotoPrincipalIdx(null);
-    setFotosAEliminar([]);
-    setFotoError("");
-    // Reset fotos de Servicio
-    setFotosActualesServicio([]);
-    setFotosNuevasServicio([]);
-    setFotoPrincipalIdxServicio(null);
-    setFotosAEliminarServicio([]);
-    setFotoErrorServicio("");
+  // Reset fotos de Juego
+  setFotosActuales([]);
+  setFotosNuevas([]);
+  setFotoPrincipalIdx(null);
+  setFotosAEliminar([]);
+  setFotoError("");
+  // Reset fotos de Servicio
+  setFotosActualesServicio([]);
+  setFotosNuevasServicio([]);
+  setFotoPrincipalIdxServicio(null);
+  setFotosAEliminarServicio([]);
+  setFotoErrorServicio("");
+  // Reset fotos de Complemento
+  setFotosActualesComplemento([]);
+  setFotosNuevasComplemento([]);
+  setFotoPrincipalIdxComplemento(null);
+  setFotosAEliminarComplemento([]);
+  setFotoErrorComplemento("");
     setError("")
     setSuccess("")
     setTimeout(() => {
@@ -1518,6 +1576,7 @@ export default function AdminCreateProductPage() {
   const renderComplementoForm = () => (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper sx={{ p: 4, borderRadius: 3, bgcolor: "background.paper" }}>
+        <Box component="form" onSubmit={handleSubmitComplemento}>
         <Box sx={{ 
           background: "linear-gradient(135deg, #34d399 0%, #059669 100%)",
           color: "white",
@@ -1554,8 +1613,6 @@ export default function AdminCreateProductPage() {
             </Box>
           </Box>
         </Box>
-
-        <Box component="form" onSubmit={handleSubmitComplemento}>
           {/* Información Básica */}
           <Box
             sx={{
@@ -1745,14 +1802,150 @@ export default function AdminCreateProductPage() {
               </Select>
             </FormControl>
           </Box>
+          {/* Fotos de Complemento */}
+          <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Fotos actuales</FormLabel>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center', mb: 2 }}>
+              {fotosActualesComplemento.map((foto, idx) => (
+                <Box key={foto.id} sx={{ position: "relative" }}>
+                  <img
+                    src={foto.url}
+                    alt={`foto-actual-complemento-${idx}`}
+                    style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: fotoPrincipalIdxComplemento === idx ? "3px solid #34d399" : "2px solid #2a3441", cursor: "pointer" }}
+                    onClick={() => setFotoPrincipalIdxComplemento(idx)}
+                  />
+                  <span
+                    onClick={() => handleRemoveFotoActualComplemento(idx)}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      background: "rgba(0,0,0,0.5)",
+                      color: "#fff",
+                      borderRadius: "50%",
+                      width: 24,
+                      height: 24,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      fontWeight: "bold",
+                      fontSize: 16,
+                      zIndex: 2
+                    }}
+                  >×</span>
+                  {fotoPrincipalIdxComplemento === idx && (
+                    <Chip label="Principal" color="success" size="small" sx={{ position: "absolute", top: 4, left: 4 }} />
+                  )}
+                </Box>
+              ))}
+            </Box>
+            <FormLabel sx={{ color: "#b0b0b0", mb: 2, textAlign: 'center', width: '100%' }}>Agregar nuevas fotos</FormLabel>
+            <input
+              type="file"
+              name="fotos"
+              accept="image/*"
+              multiple
+              disabled={fotosActualesComplemento.length + fotosNuevasComplemento.length >= 3}
+              onChange={e => {
+                setFotoErrorComplemento("");
+                if (e.target.files) {
+                  const files = Array.from(e.target.files);
+                  const totalFotos = fotosActualesComplemento.length + files.length;
+                  if (totalFotos > 3) {
+                    setFotoErrorComplemento("Solo puedes cargar hasta 3 fotos en total.");
+                    const allowed = 3 - fotosActualesComplemento.length;
+                    setFotosNuevasComplemento(files.slice(0, allowed));
+                  } else {
+                    setFotosNuevasComplemento(files);
+                  }
+                  setFotoPrincipalIdxComplemento(fotosActualesComplemento.length > 0 ? fotoPrincipalIdxComplemento : 0);
+                }
+              }}
+              style={{ marginBottom: 8, display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+            />
+            {fotoErrorComplemento && (
+              <Alert severity="error" sx={{ mb: 2, textAlign: 'center' }}>{fotoErrorComplemento}</Alert>
+            )}
+            <Typography sx={{ color: '#b0b0b0', mb: 2, textAlign: 'center' }}>
+              {fotosActualesComplemento.length + fotosNuevasComplemento.length >= 3
+                ? "Ya tienes 3 fotos. No puedes agregar más."
+                : fotosNuevasComplemento.length > 0
+                  ? `${fotosNuevasComplemento.length} archivo${fotosNuevasComplemento.length > 1 ? 's' : ''} seleccionados.`
+                  : 'Ningún archivo nuevo seleccionado.'}
+            </Typography>
+            {fotosNuevasComplemento.length > 0 && (
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: 'center' }}>
+                {fotosNuevasComplemento.map((foto, idx) => (
+                  <Box key={idx} sx={{ position: "relative" }}>
+                    <img
+                      src={URL.createObjectURL(foto)}
+                      alt={`foto-nueva-complemento-${idx}`}
+                      style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "2px solid #2a3441", cursor: "not-allowed", opacity: 0.6 }}
+                    />
+                    {/* Overlay para indicar que no se puede seleccionar como principal */}
+                    <Box sx={{ position: "absolute", top: 0, left: 0, width: 80, height: 80, bgcolor: "rgba(0,0,0,0.2)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Typography variant="caption" sx={{ color: "#b0b0b0", fontWeight: "bold" }}>Solo principal en fotos cargadas</Typography>
+                    </Box>
+                    <span
+                      onClick={() => handleRemoveFotoNuevaComplemento(idx)}
+                      style={{
+                        position: "absolute",
+                        top: 4,
+                        right: 4,
+                        background: "rgba(0,0,0,0.5)",
+                        color: "#fff",
+                        borderRadius: "50%",
+                        width: 24,
+                        height: 24,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        fontSize: 16,
+                        zIndex: 2
+                      }}
+                    >×</span>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
 
           <Box sx={{ display: "flex", gap: 3, justifyContent: "center", pt: 2 }}>
+            {isEditMode && (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={async () => {
+                  if (!editId) return;
+                  setLoading(true);
+                  setError("");
+                  try {
+                    const token = authService.getToken();
+                    if (!token) throw new Error("Token no encontrado");
+                    await productService.deleteComplemento(editId, token);
+                    resetForm(() => setSuccess("Complemento eliminado correctamente"));
+                    navigate("/admin/create-product", { state: { success: "Complemento eliminado correctamente" } });
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : "Error al eliminar el complemento");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                sx={{ minWidth: "120px", py: 1.5, fontWeight: "bold", textTransform: "none" }}
+              >
+                Eliminar Complemento
+              </Button>
+            )}
             <Button
               type="button"
               variant="outlined"
               size="large"
               onClick={() => {
-              if (window.history && window.history.length > 1) {
+                if (window.history && window.history.length > 1) {
                   navigate(-1)
                 }
               }}

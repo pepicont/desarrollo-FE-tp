@@ -78,6 +78,15 @@ export type CreateComplementoData = {
 const api = apiClient
 
 export const productService = {
+  async deleteComplemento(id: number, token: string): Promise<void> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+    await api.delete(`/complemento/${id}`, config);
+  },
+
   async deleteJuego(id: number, token: string): Promise<void> {
     const config = {
       headers: {
@@ -136,6 +145,26 @@ export const productService = {
       const res = await api.put<ApiResponse<ServicioDetail>>(`/servicio/${id}`, formData, config)
       return res.data.data
     },
+    async createComplementoConFotos(formData: FormData, token: string): Promise<ComplementoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+        // No poner Content-Type, axios lo setea automáticamente para FormData
+      }
+    }
+    const res = await api.post<ApiResponse<ComplementoDetail>>('/complemento', formData, config)
+    return res.data.data
+  },
+
+  async updateComplementoConFotos(id: number, formData: FormData, token: string): Promise<ComplementoDetail> {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+    const res = await api.put<ApiResponse<ComplementoDetail>>(`/complemento/${id}`, formData, config)
+    return res.data.data
+  },
   async getJuego(id: number): Promise<JuegoDetail> {
     const res = await api.get<ApiResponse<JuegoDetail>>(`/juego/${id}`)
     return res.data.data
@@ -153,31 +182,9 @@ export const productService = {
     return res.data.data
   },
 
-  async createComplemento(data: CreateComplementoData, token: string): Promise<ComplementoDetail> {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await api.post<ApiResponse<ComplementoDetail>>('/complemento', data, config)
-    return res.data.data
-  },
-
   // Helper method to get all juegos for complemento selection
   async getAllJuegos(): Promise<JuegoDetail[]> {
     const res = await api.get<ApiResponse<JuegoDetail[]>>('/juego')
     return res.data.data
-  },
-
-  async updateComplemento(id: number, data: CreateComplementoData, token: string): Promise<ComplementoDetail> {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await api.put<ApiResponse<ComplementoDetail>>(`/complemento/${id}`, data, config)
-    return res.data.data
-  },
+  }
 }
