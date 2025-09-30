@@ -311,7 +311,7 @@ export default function AdminCompaniasPage() {
                     Compañías
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#6b7280" }}>
-                    Mostrando {filteredCompanias.length} de {companias.length} compañías
+                    Mostrando {paginatedCompanias.length} de {filteredCompanias.length} compañías
                   </Typography>
                 </Box>
 

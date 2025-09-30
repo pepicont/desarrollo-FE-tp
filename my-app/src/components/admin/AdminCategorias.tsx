@@ -311,7 +311,7 @@ export default function AdminCategoriasPage() {
                     Categorías
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#6b7280" }}>
-                    Mostrando {filteredCategorias.length} de {categorias.length} categorías
+                    Mostrando {paginatedCategorias.length} de {filteredCategorias.length} categorías
                   </Typography>
                 </Box>
 

@@ -505,7 +505,7 @@ export default function AdminResenasPage() {
             }}
           >
             <Typography variant="body2" sx={{ color: "#6b7280" }}>
-              Mostrando {filteredResenias.length} de {resenias.length} reseñas
+              Mostrando {paginatedResenias.length} de {filteredResenias.length} reseñas
             </Typography>
 
             {/* Selector de items per page y orden */}

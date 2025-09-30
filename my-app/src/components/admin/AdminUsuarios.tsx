@@ -295,7 +295,7 @@ export default function UsuariosPage() {
                     Usuarios
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#6b7280" }}>
-                    Mostrando {filteredUsuarios.length} de {usuarios.length} usuarios
+                    Mostrando {paginatedUsuarios.length} de {filteredUsuarios.length} usuarios
                   </Typography>
                 </Box>
 
