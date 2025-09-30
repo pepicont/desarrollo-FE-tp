@@ -32,7 +32,7 @@ import { companyService, type Company } from "../../services/companyService"
 import ModernPagination from "../shared-components/ModernPagination"
 import { useNavigate } from "react-router-dom"
 import ReviewModal from "../shared-components/ReviewModal"
-//import Footer from "../footer/footer"
+import Footer from "../footer/footer"
 
 const darkTheme = createTheme({
   palette: {
@@ -886,7 +886,7 @@ export default function MisComprasPage() {
           </Box>
         </Drawer>
         {/* Footer */}
-        {/* <Footer /> */}
+        { <Footer /> }
       </Box>
     </ThemeProvider>
   )

@@ -29,7 +29,7 @@ import { authService } from "../../services/authService"
 import { updateResenia, deleteResenia } from "../../services/reseniasService"
 import { getUserResenias } from "../../services/reseniasService"
 import ReviewModal from "../shared-components/ReviewModal"
-//import Footer from "../footer/footer"
+import Footer from "../footer/footer"
 import ModernPagination from "../shared-components/ModernPagination"
 
 const darkTheme = createTheme({
@@ -964,7 +964,7 @@ export default function MisResenasPage() {
         />
       )}
       {/* Footer compartido */}
-      {/* <Footer /> */}
+      <Footer /> 
       </Box>
     </ThemeProvider>
   )

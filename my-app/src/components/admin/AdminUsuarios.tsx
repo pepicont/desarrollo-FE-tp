@@ -36,6 +36,7 @@ import ModernPagination from "../shared-components/ModernPagination"
 import { authService } from "../../services/authService"
 import { getAllUsuarios, deleteUsuario, type Usuario as UsuarioAPI } from "../../services/usuarioService"
 import { mailService } from "../../services/mailService"
+import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -493,6 +494,7 @@ export default function UsuariosPage() {
             </>
           )}
         </Container>
+        <Footer />
       </Box>
 
       {/* Modal de confirmación para eliminar usuario */}

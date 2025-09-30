@@ -2,18 +2,20 @@ import { Box, Typography, Stack } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { authService } from '../../services/authService';
 import './footer.css';
 
-const navLinks = [
-  { to: '/productos', label: 'Productos' },
-  { to: '/mis-compras', label: 'Mis Compras' },
-  { to: '/mis-resenas', label: 'Mis Reseñas' },
-  { to: '/perfil', label: 'Perfil' },
-  { to: '/about-us', label: 'Sobre Nosotros' },
-];
 
 export default function Footer() {
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const checkAdmin = async () => {
+      setIsAdmin(await authService.isAdmin());
+    };
+    checkAdmin();
+  }, []);
 
   // Función para marcar Productos como activo también en /producto y /producto/:id
   const isProductosActive = () => {
@@ -70,15 +72,22 @@ export default function Footer() {
             >
               Productos
             </NavLink>
-            {navLinks.slice(1).map(link => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            {!isAdmin ? (
+              <>
+                <NavLink to="/mis-compras" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Mis Compras</NavLink>
+                <NavLink to="/mis-resenas" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Mis Reseñas</NavLink>
+                <NavLink to="/perfil" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Perfil</NavLink>
+                <NavLink to="/about-us" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Sobre Nosotros</NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink to="/admin/usuarios" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Usuarios</NavLink>
+                <NavLink to="/admin/resenias" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Reseñas</NavLink>
+                <NavLink to="/admin/companias" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Compañías</NavLink>
+                <NavLink to="/admin/categorias" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Categorías</NavLink>
+                <NavLink to="/perfil" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Perfil</NavLink>
+              </>
+            )}
           </Box>
         </Box>
         {/* Derecha: Marca y copyright */}

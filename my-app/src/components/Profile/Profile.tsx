@@ -655,7 +655,7 @@ export default function Profile() {
             </Box>
           </Box>
         </Container>
-        {/* <Footer /> */}
+        { <Footer /> }
       </Box>
 
       {/* Modal de confirmación para cambio de email */}

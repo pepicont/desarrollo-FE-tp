@@ -35,6 +35,7 @@ import ModernPagination from "../shared-components/ModernPagination"
 import CompanyModal from "./CompanyModal"
 import { authService } from "../../services/authService"
 import { getAllCompaniesAdmin, deleteCompanyAsAdmin, createCompany, type Company } from "../../services/companyService"
+import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -505,6 +506,7 @@ export default function AdminCompaniasPage() {
             </>
           )}
         </Container>
+        <Footer />
       </Box>
 
       {/* Modal para agregar compañía */}

@@ -35,6 +35,7 @@ import NavBar from "../navBar/navBar"
 import { authService } from "../../services/authService"
 import { deleteReseniaAsAdmin, getAllResenasAdmin, type AdminResenia } from "../../services/reseniasService"
 import ModernPagination from "../shared-components/ModernPagination"
+import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -303,6 +304,7 @@ export default function AdminResenasPage() {
           >
             <CircularProgress size={60} />
           </Container>
+          <Footer />
         </Box>
       </ThemeProvider>
     )
@@ -351,6 +353,7 @@ export default function AdminResenasPage() {
               {error}
             </Alert>
           </Container>
+          <Footer />
         </Box>
       </ThemeProvider>
     )
@@ -840,6 +843,7 @@ export default function AdminResenasPage() {
             </Button>
           </DialogActions>
         </Dialog>
+        <Footer />
       </Box>
     </ThemeProvider>
   )

@@ -35,6 +35,7 @@ import ModernPagination from "../shared-components/ModernPagination"
 import CategoryModal from "./CategoryModal"
 import { authService } from "../../services/authService"
 import { getAllCategoriesAdmin, deleteCategoryAsAdmin, createCategory, type Category } from "../../services/categoryService"
+import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
   palette: {
@@ -471,6 +472,7 @@ export default function AdminCategoriasPage() {
             </>
           )}
         </Container>
+        <Footer />
       </Box>
 
       {/* Modal para agregar categoría */}
