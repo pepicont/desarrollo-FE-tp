@@ -238,7 +238,7 @@ export default function UsuariosPage() {
         <NavBar />
         
         {/* Contenido principal */}
-  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
+  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 0.5, sm: 2, md: 4 } }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -253,13 +253,13 @@ export default function UsuariosPage() {
             <>
               {/* Alerta de éxito */}
               {success && (
-                <Alert severity="success" sx={{ mb: 2, maxWidth: 600, mx: "auto" }} ref={successAlertRef} tabIndex={-1}>
+                <Alert severity="success" sx={{ mb: 2, maxWidth: 600 }} ref={successAlertRef} tabIndex={-1}>
                   {success}
                 </Alert>
               )}
               {/* Barra de búsqueda */}
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ maxWidth: 600, mx: "auto" }}>
+                <Box sx={{ maxWidth: 600 }}>
                   <TextField
                     fullWidth
                     placeholder="Buscar usuarios..."
@@ -438,7 +438,7 @@ export default function UsuariosPage() {
                   </Typography>
                 </Box>
               ) : (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
                   {paginatedUsuarios.map((usuario) => (
                     <Card
                       key={usuario.id}
@@ -446,8 +446,9 @@ export default function UsuariosPage() {
                         bgcolor: "#1e2532",
                         borderRadius: 2,
                         border: "1px solid #2a3441",
-                        p: { xs: 2, sm: 3 },
+                        p: { xs: 1.5, sm: 3 },
                         width: "100%",
+                        maxWidth: "100%",
                         boxSizing: "border-box",
                         "&:hover": {
                           borderColor: "#374151",
@@ -531,8 +532,11 @@ export default function UsuariosPage() {
                           <Box
                             sx={{
                               display: "flex",
-                              justifyContent: { xs: "flex-end", md: "flex-start" },
-                              width: { xs: "100%", md: "auto" }
+                              justifyContent: { xs: "center", md: "flex-end" },
+                              alignItems: "center",
+                              width: { xs: "100%", md: "auto" },
+                              flexShrink: 0,
+                              ml: { md: "auto" }
                             }}
                           >
                             {usuario.tipoUsuario !== 'admin' ? (
@@ -549,7 +553,8 @@ export default function UsuariosPage() {
                                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                                   px: { xs: 2, sm: 2.5 },
                                   py: { xs: 1, sm: 0.75 },
-                                  width: { xs: "100%", sm: "auto" }
+                                  width: { xs: "100%", sm: "auto" },
+                                  minWidth: { md: 120 }
                                 }}
                               >
                                 Eliminar

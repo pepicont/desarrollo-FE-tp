@@ -725,9 +725,16 @@ export default function AdminCreateProductPage() {
     </Container>
   )
 
-  const renderJuegoForm = () => (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper sx={{ p: 4, borderRadius: 3, bgcolor: "background.paper" }}>
+   const renderJuegoForm = () => (
+    <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 3 }, width: "100%", maxWidth: "100%" }}>
+      <Paper sx={{ 
+        p: { xs: 2, sm: 3, md: 4 }, 
+        borderRadius: 3, 
+        bgcolor: "background.paper",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box"
+      }}>
         <Box sx={{ 
           background: "linear-gradient(135deg, #4a90e2 0%, #357abd 100%)",
           color: "white",
