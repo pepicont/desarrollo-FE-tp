@@ -82,6 +82,7 @@ const adminMenuItems = [
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
   { text: "Usuarios", icon: <PersonIcon />, href: "/admin/usuarios" },
   { text: "Reseñas", icon: <ReviewIcon />, href: "/admin/resenias" },
+  { text: "Compras", icon: <ShoppingBagIcon />, href: "/admin/compras" },
   { text: "Compañías", icon: <BusinessIcon />, href: "/admin/companias" },
   { text: "Categorías", icon: <CategoryIcon />, href: "/admin/categorias" },
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
