@@ -11,6 +11,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Business as BusinessIcon } from "@mui/icons-material";
+import type { Company } from "../../services/companyService";
 
 interface CompanyModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface CompanyModalProps {
     detalle: string;
   }) => Promise<void>;
   loading?: boolean;
+  editingCompany?: Company | null;
 }
 
 export default function CompanyModal({
@@ -27,17 +29,28 @@ export default function CompanyModal({
   onClose,
   onSave,
   loading = false,
+  editingCompany = null,
 }: CompanyModalProps) {
   const [nombre, setNombre] = useState("");
   const [detalle, setDetalle] = useState("");
 
-  // Limpiar formulario cuando se abre el modal
+  // Actualizar formulario cuando se abre el modal o cambia la compañía a editar
   useEffect(() => {
     if (open) {
-      setNombre("");
-      setDetalle("");
+      if (editingCompany) {
+        setNombre(editingCompany.nombre);
+        setDetalle(editingCompany.detalle);
+      } else {
+        setNombre("");
+        setDetalle("");
+      }
     }
-  }, [open]);
+  }, [open, editingCompany]);
+
+  // Verificar si hay cambios en modo edición
+  const hasChanges = editingCompany
+    ? nombre.trim() !== editingCompany.nombre || detalle.trim() !== editingCompany.detalle
+    : true;
 
   const handleSave = async () => {
     try {
@@ -117,10 +130,10 @@ export default function CompanyModal({
           </Box>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
-              Agregar Compañía
+              {editingCompany ? "Editar Compañía" : "Agregar Compañía"}
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
-              Crear nueva compañía en el sistema
+              {editingCompany ? "Modificar información de la compañía" : "Crear nueva compañía en el sistema"}
             </Typography>
           </Box>
         </Box>
@@ -260,7 +273,7 @@ export default function CompanyModal({
         <Button
           onClick={handleSave}
           variant="contained"
-          disabled={loading || !nombre.trim() || !detalle.trim()}
+          disabled={loading || !nombre.trim() || !detalle.trim() || !hasChanges}
           sx={{
             width: { xs: '100%', sm: 'auto' },
             fontWeight: "bold",
@@ -277,10 +290,10 @@ export default function CompanyModal({
           {loading ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <CircularProgress size={20} color="inherit" />
-              <span>Creando...</span>
+              <span>{editingCompany ? 'Actualizando...' : 'Creando...'}</span>
             </Box>
           ) : (
-            'Crear Compañía'
+            editingCompany ? 'Editar Compañía' : 'Crear Compañía'
           )}
         </Button>
       </DialogActions>

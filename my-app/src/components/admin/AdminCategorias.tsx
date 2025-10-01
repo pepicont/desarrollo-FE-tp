@@ -27,6 +27,7 @@ import {
   Category as CategoryIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
+  Edit as EditIcon,
 } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -34,7 +35,7 @@ import NavBar from "../navBar/navBar"
 import ModernPagination from "../shared-components/ModernPagination"
 import CategoryModal from "./CategoryModal"
 import { authService } from "../../services/authService"
-import { getAllCategoriesAdmin, deleteCategoryAsAdmin, createCategory, type Category } from "../../services/categoryService"
+import { getAllCategoriesAdmin, deleteCategoryAsAdmin, createCategory, updateCategory, type Category } from "../../services/categoryService"
 import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
@@ -75,6 +76,7 @@ export default function AdminCategoriasPage() {
   // Estados para el modal de agregar categoría
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   
   // Estados para búsqueda y filtros
   const [searchQuery, setSearchQuery] = useState("")
@@ -217,8 +219,9 @@ export default function AdminCategoriasPage() {
 
   // Alerta de éxito de creación
   const [createSuccess, setCreateSuccess] = useState("");
-  // Función para agregar categoría
-  const handleAddCategory = async (categoryData: { nombre: string; detalle: string }) => {
+  
+  // Función para agregar o editar categoría
+  const handleSaveCategory = async (categoryData: { nombre: string; detalle: string }) => {
     setAddLoading(true);
     try {
       const token = authService.getToken();
@@ -226,16 +229,40 @@ export default function AdminCategoriasPage() {
         setError("No estás autenticado");
         return;
       }
-      const newCategory = await createCategory(token, categoryData);
-      setCategorias(prev => [...prev, newCategory]);
-      setCreateSuccess("Categoría creada correctamente");
-      setTimeout(() => setCreateSuccess("") , 3000);
+      
+      if (editingCategory) {
+        // Modo edición
+        const updatedCategory = await updateCategory(token, editingCategory.id, categoryData);
+        setCategorias(prev => prev.map(c => c.id === editingCategory.id ? updatedCategory : c));
+        setCreateSuccess("Categoría actualizada correctamente");
+      } else {
+        // Modo creación
+        const newCategory = await createCategory(token, categoryData);
+        setCategorias(prev => [...prev, newCategory]);
+        setCreateSuccess("Categoría creada correctamente");
+      }
+      
+      setTimeout(() => setCreateSuccess(""), 3000);
+      setAddModalOpen(false);
+      setEditingCategory(null);
     } catch (error: unknown) {
-      console.error('Error al crear categoría:', error);
-      setError("Error al crear la categoría");
+      console.error('Error al guardar categoría:', error);
+      setError(editingCategory ? "Error al actualizar la categoría" : "Error al crear la categoría");
     } finally {
       setAddLoading(false);
     }
+  }
+
+  // Función para abrir el modal en modo edición
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setAddModalOpen(true);
+  }
+
+  // Función para cerrar el modal y resetear el estado de edición
+  const handleCloseModal = () => {
+    setAddModalOpen(false);
+    setEditingCategory(null);
   }
 
   return (
@@ -560,6 +587,7 @@ export default function AdminCategoriasPage() {
                           <Box
                             sx={{
                               display: "flex",
+                              gap: 1.5,
                               justifyContent: { xs: "center", md: "flex-end" },
                               alignItems: "center",
                               width: { xs: "100%", md: "auto" },
@@ -567,6 +595,25 @@ export default function AdminCategoriasPage() {
                               ml: { md: "auto" }
                             }}
                           >
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              startIcon={<EditIcon />}
+                              onClick={() => handleEditCategory(categoria)}
+                              sx={{
+                                borderColor: "#4a90e2",
+                                color: "#4a90e2",
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1.5, sm: 2 },
+                                "&:hover": {
+                                  backgroundColor: "rgba(74, 144, 226, 0.1)",
+                                  borderColor: "#357abd",
+                                },
+                              }}
+                            >
+                              Editar
+                            </Button>
                             <Button
                               variant="contained"
                               color="error"
@@ -610,12 +657,13 @@ export default function AdminCategoriasPage() {
         <Footer />
       </Box>
 
-      {/* Modal para agregar categoría */}
+      {/* Modal para agregar/editar categoría */}
       <CategoryModal
         open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleAddCategory}
+        onClose={handleCloseModal}
+        onSave={handleSaveCategory}
         loading={addLoading}
+        editingCategory={editingCategory}
       />
 
       {/* Modal de confirmación para eliminar categoría */}

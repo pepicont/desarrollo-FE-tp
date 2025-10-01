@@ -27,6 +27,7 @@ import {
   Business as BusinessIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
+  Edit as EditIcon,
 } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -34,7 +35,7 @@ import NavBar from "../navBar/navBar"
 import ModernPagination from "../shared-components/ModernPagination"
 import CompanyModal from "./CompanyModal"
 import { authService } from "../../services/authService"
-import { getAllCompaniesAdmin, deleteCompanyAsAdmin, createCompany, type Company } from "../../services/companyService"
+import { getAllCompaniesAdmin, deleteCompanyAsAdmin, createCompany, updateCompany, type Company } from "../../services/companyService"
 import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
@@ -75,6 +76,7 @@ export default function AdminCompaniasPage() {
   // Estados para el modal de agregar compañía
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null)
   
   // Estados para búsqueda y filtros
   const [searchQuery, setSearchQuery] = useState("")
@@ -217,8 +219,9 @@ export default function AdminCompaniasPage() {
 
   // Alerta de éxito de creación
   const [createSuccess, setCreateSuccess] = useState("");
-  // Función para agregar compañía
-  const handleAddCompany = async (companyData: { nombre: string; detalle: string }) => {
+  
+  // Función para agregar o editar compañía
+  const handleSaveCompany = async (companyData: { nombre: string; detalle: string }) => {
     setAddLoading(true);
     try {
       const token = authService.getToken();
@@ -226,16 +229,40 @@ export default function AdminCompaniasPage() {
         setError("No estás autenticado");
         return;
       }
-      const newCompany = await createCompany(token, companyData);
-      setCompanias(prev => [...prev, newCompany]);
-      setCreateSuccess("Compañía creada correctamente");
-      setTimeout(() => setCreateSuccess("") , 3000);
+      
+      if (editingCompany) {
+        // Modo edición
+        const updatedCompany = await updateCompany(token, editingCompany.id, companyData);
+        setCompanias(prev => prev.map(c => c.id === editingCompany.id ? updatedCompany : c));
+        setCreateSuccess("Compañía actualizada correctamente");
+      } else {
+        // Modo creación
+        const newCompany = await createCompany(token, companyData);
+        setCompanias(prev => [...prev, newCompany]);
+        setCreateSuccess("Compañía creada correctamente");
+      }
+      
+      setTimeout(() => setCreateSuccess(""), 3000);
+      setAddModalOpen(false);
+      setEditingCompany(null);
     } catch (error: unknown) {
-      console.error('Error al crear compañía:', error);
-      setError("Error al crear la compañía");
+      console.error('Error al guardar compañía:', error);
+      setError(editingCompany ? "Error al actualizar la compañía" : "Error al crear la compañía");
     } finally {
       setAddLoading(false);
     }
+  }
+
+  // Función para abrir el modal en modo edición
+  const handleEditCompany = (company: Company) => {
+    setEditingCompany(company);
+    setAddModalOpen(true);
+  }
+
+  // Función para cerrar el modal y resetear el estado de edición
+  const handleCloseModal = () => {
+    setAddModalOpen(false);
+    setEditingCompany(null);
   }
 
   return (
@@ -558,6 +585,7 @@ export default function AdminCompaniasPage() {
                           <Box
                             sx={{
                               display: "flex",
+                              gap: 1.5,
                               justifyContent: { xs: "center", md: "flex-end" },
                               alignItems: "center",
                               width: { xs: "100%", md: "auto" },
@@ -565,6 +593,25 @@ export default function AdminCompaniasPage() {
                               ml: { md: "auto" }
                             }}
                           >
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              startIcon={<EditIcon />}
+                              onClick={() => handleEditCompany(compania)}
+                              sx={{
+                                borderColor: "#4a90e2",
+                                color: "#4a90e2",
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1.5, sm: 2 },
+                                "&:hover": {
+                                  backgroundColor: "rgba(74, 144, 226, 0.1)",
+                                  borderColor: "#357abd",
+                                },
+                              }}
+                            >
+                              Editar
+                            </Button>
                             <Button
                               variant="contained"
                               color="error"
@@ -608,12 +655,13 @@ export default function AdminCompaniasPage() {
         <Footer />
       </Box>
 
-      {/* Modal para agregar compañía */}
+      {/* Modal para agregar/editar compañía */}
       <CompanyModal
         open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleAddCompany}
+        onClose={handleCloseModal}
+        onSave={handleSaveCompany}
         loading={addLoading}
+        editingCompany={editingCompany}
       />
 
       {/* Modal de confirmación para eliminar compañía */}
