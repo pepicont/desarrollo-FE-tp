@@ -422,15 +422,28 @@ export default function AdminCategoriasPage() {
                   <Button
                     variant="outlined"
                     onClick={toggleSortOrder}
-                    startIcon={sortOrder === 'asc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                    startIcon={
+                      sortOrder === 'asc'
+                        ? <ArrowDownIcon sx={{ fontSize: 18 }} />
+                        : <ArrowUpIcon sx={{ fontSize: 18 }} />
+                    }
                     size="small"
                     sx={{
-                      textTransform: "none",
+                      display: 'flex',
+                      alignItems: 'center',
                       borderColor: "#4b5563",
                       color: "white",
-                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                      px: { xs: 1.5, sm: 2 },
-                      "&:hover": {
+                      minWidth: 80,
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: { xs: "0.95rem", sm: "1rem" },
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                      textTransform: 'none',
+                      '& .MuiButton-startIcon': {
+                        marginRight: 0.7,
+                      },
+                      '&:hover': {
                         backgroundColor: "#374151",
                         borderColor: "#6b7280",
                       },

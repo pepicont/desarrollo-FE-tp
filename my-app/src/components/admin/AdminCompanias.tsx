@@ -422,15 +422,29 @@ export default function AdminCompaniasPage() {
 
                   <Button
                     variant="outlined"
-                    startIcon={sortOrder === 'asc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
                     onClick={toggleSortOrder}
+                    startIcon={
+                      sortOrder === 'asc'
+                        ? <ArrowDownIcon sx={{ fontSize: 18 }} />
+                        : <ArrowUpIcon sx={{ fontSize: 18 }} />
+                    }
                     size="small"
                     sx={{
+                      display: 'flex',
+                      alignItems: 'center',
                       borderColor: "#4b5563",
                       color: "white",
-                      "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
-                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                      px: { xs: 1.5, sm: 2 },
+                      minWidth: 80,
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: { xs: "0.95rem", sm: "1rem" },
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                      textTransform: 'none',
+                      '& .MuiButton-startIcon': {
+                        marginRight: 0.7,
+                      },
+                      '&:hover': { backgroundColor: "#374151", borderColor: "#6b7280" },
                     }}
                   >
                     {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
