@@ -238,7 +238,7 @@ export default function UsuariosPage() {
         <NavBar />
         
         {/* Contenido principal */}
-        <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 1, sm: 2, md: 4 } }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -289,20 +289,61 @@ export default function UsuariosPage() {
               </Box>
 
               {/* Header con título y controles */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: { xs: "flex-start", md: "center" },
+                  flexDirection: { xs: "column", md: "row" },
+                  gap: { xs: 2, md: 0 },
+                  mb: 3,
+                  textAlign: { xs: "center", md: "left" }
+                }}
+              >
+                <Box sx={{ width: "100%" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      color: "white",
+                      fontSize: { xs: "1.5rem", md: "2rem" }
+                    }}
+                  >
                     Usuarios
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#6b7280" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#6b7280",
+                      fontSize: { xs: "0.85rem", md: "0.95rem" }
+                    }}
+                  >
                     Mostrando {paginatedUsuarios.length} de {filteredUsuarios.length} usuarios
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: { xs: 1, sm: 1.5, md: 2 },
+                    flexWrap: { xs: "wrap", md: "nowrap" },
+                    justifyContent: { xs: "center", md: "flex-end" },
+                    width: { xs: "100%", md: "auto" }
+                  }}
+                >
                   {/* Selector de items por página */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      color: "#6b7280",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" }
+                    }}
+                  >
+                    <Typography sx={{ display: { xs: "none", sm: "block" } }}>
                       Mostrar:
                     </Typography>
                     <FormControl size="small">
@@ -313,8 +354,8 @@ export default function UsuariosPage() {
                           setItemsPerPage(Number(e.target.value))
                         }}
                         sx={{
-                          minWidth: 70,
-                          height: 32,
+                          minWidth: { xs: 60, sm: 70 },
+                          height: { xs: 28, sm: 32 },
                           backgroundColor: '#2a3441',
                           borderRadius: 2,
                           '& .MuiOutlinedInput-notchedOutline': {
@@ -322,7 +363,7 @@ export default function UsuariosPage() {
                           },
                           '& .MuiSelect-select': {
                             color: '#9ca3af',
-                            fontSize: '0.875rem',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             fontWeight: 500,
                             padding: '6px 8px',
                           },
@@ -365,15 +406,23 @@ export default function UsuariosPage() {
 
                   <Button
                     variant="outlined"
-                    startIcon={sortOrder === 'desc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                    startIcon={sortOrder === 'desc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
                     onClick={toggleSortOrder}
+                    size="small"
                     sx={{
                       borderColor: "#4b5563",
                       color: "white",
                       "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      px: { xs: 1.5, sm: 2 },
                     }}
                   >
-                    {sortOrder === 'desc' ? 'Más antiguos' : 'Más recientes'}
+                    <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
+                      {sortOrder === 'desc' ? 'Recientes' : 'Antiguos'}
+                    </Box>
+                    <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                      {sortOrder === 'desc' ? 'Más recientes' : 'Más antiguos'}
+                    </Box>
                   </Button>
                 </Box>
               </Box>
@@ -397,19 +446,39 @@ export default function UsuariosPage() {
                         bgcolor: "#1e2532",
                         borderRadius: 2,
                         border: "1px solid #2a3441",
-                        p: 3,
+                        p: { xs: 2, sm: 3 },
+                        width: "100%",
+                        boxSizing: "border-box",
+                        "&:hover": {
+                          borderColor: "#374151",
+                        },
+                        transition: "border-color 0.2s",
                       }}
                     >
                       <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 3, flex: 1 }}>
-                            <Avatar 
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: { xs: "column", md: "row" },
+                            alignItems: { xs: "flex-start", md: "center" },
+                            gap: { xs: 2, sm: 3 },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                              width: { xs: "100%", md: "auto" },
+                            }}
+                          >
+                            <Avatar
                               src={usuario.urlFoto}
                               sx={{ 
-                                width: 48, 
-                                height: 48, 
+                                width: { xs: 56, sm: 48 }, 
+                                height: { xs: 56, sm: 48 }, 
                                 bgcolor: '#4a90e2',
-                                fontSize: '1.1rem',
+                                fontSize: { xs: '1.25rem', sm: '1.1rem' },
                                 fontWeight: 600 
                               }}
                               alt={usuario.nombre}
@@ -422,7 +491,8 @@ export default function UsuariosPage() {
                               display: { xs: 'flex', md: 'grid' }, 
                               flexDirection: { xs: 'column', md: 'unset' },
                               gridTemplateColumns: { md: '1fr 1fr 1fr' }, 
-                              gap: 3 
+                              gap: { xs: 1.5, sm: 3 },
+                              textAlign: { xs: 'center', md: 'left' }
                             }}>
                               <Box>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
@@ -446,7 +516,7 @@ export default function UsuariosPage() {
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
                                   Fecha de creación
                                 </Typography>
-                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: { xs: "center", md: "flex-start" }, justifyContent: "center" }}>
                                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: "center" }}>
                                     <CalendarIcon sx={{ fontSize: 16, color: "#6b7280" }} />
                                     <Typography variant="body1" sx={{ color: "white" }}>
@@ -458,24 +528,36 @@ export default function UsuariosPage() {
                             </Box>
                           </Box>
 
-                          {usuario.tipoUsuario !== 'admin' ? (
-                            <Button
-                              variant="contained"
-                              color="error"
-                              size="small"
-                              startIcon={<DeleteIcon />}
-                              onClick={() => handleDeleteUser(usuario.id)}
-                              sx={{
-                                bgcolor: '#dc2626',
-                                '&:hover': { bgcolor: '#b91c1c' },
-                                textTransform: 'none',
-                              }}
-                            >
-                              Eliminar
-                            </Button>
-                          ) : (
-                            <Box sx={{ width: 120, height: 40 }} />
-                          )}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: { xs: "flex-end", md: "flex-start" },
+                              width: { xs: "100%", md: "auto" }
+                            }}
+                          >
+                            {usuario.tipoUsuario !== 'admin' ? (
+                              <Button
+                                variant="contained"
+                                color="error"
+                                size="small"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleDeleteUser(usuario.id)}
+                                sx={{
+                                  bgcolor: '#dc2626',
+                                  '&:hover': { bgcolor: '#b91c1c' },
+                                  textTransform: 'none',
+                                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                  px: { xs: 2, sm: 2.5 },
+                                  py: { xs: 1, sm: 0.75 },
+                                  width: { xs: "100%", sm: "auto" }
+                                }}
+                              >
+                                Eliminar
+                              </Button>
+                            ) : (
+                              <Box sx={{ width: { xs: "100%", md: 120 }, height: 40 }} />
+                            )}
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>
@@ -483,11 +565,13 @@ export default function UsuariosPage() {
 
                   {/* Paginación moderna */}
                   {filteredUsuarios.length > 0 && (
-                    <ModernPagination
-                      currentPage={page}
-                      totalPages={totalPages}
-                      onPageChange={setPage}
-                    />
+                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+                      <ModernPagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                      />
+                    </Box>
                   )}
                 </Box>
               )}
@@ -501,19 +585,36 @@ export default function UsuariosPage() {
       <Dialog
         open={deleteModalOpen}
         onClose={cancelDeleteUser}
+        fullWidth
+        maxWidth="sm"
         PaperProps={{
           sx: {
             bgcolor: "#141926",
             border: "2px solid #ef4444",
             borderRadius: 3,
+            m: { xs: 2, sm: 4 },
+            width: { xs: "calc(100% - 32px)", sm: "auto" },
           },
         }}
       >
-        <DialogTitle sx={{ color: "#ef4444", fontWeight: "bold" }}>
+        <DialogTitle
+          sx={{
+            color: "#ef4444",
+            fontWeight: "bold",
+            fontSize: { xs: "1.1rem", sm: "1.25rem" },
+            pb: { xs: 1, sm: 2 }
+          }}
+        >
           ⚠️ Eliminar Usuario
         </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#b0b0b0" }}>
+        <DialogContent sx={{ pt: { xs: 1, sm: 2 } }}>
+          <DialogContentText
+            sx={{
+              color: "#b0b0b0",
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+              lineHeight: { xs: 1.4, sm: 1.5 }
+            }}
+          >
             ¿Estás seguro de que quieres eliminar a <strong style={{ color: "#ffffff" }}>{userToDelete?.nombreUsuario}</strong>?
             <br /><br />
             Esta acción no se puede deshacer y eliminará todos los datos asociados al usuario.

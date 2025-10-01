@@ -419,8 +419,23 @@ export default function AdminResenasPage() {
           </Box>
 
           {/* Título con filtro */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1, justifyContent: "space-between" }}>
-            <Typography variant="h5" sx={{ color: "white", fontWeight: "bold" }}>
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            mb: 3, 
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 1 }
+          }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                color: "white", 
+                fontWeight: "bold",
+                fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                textAlign: { xs: "center", sm: "left" }
+              }}
+            >
               Todas las Reseñas
             </Typography>
 
@@ -432,8 +447,8 @@ export default function AdminResenasPage() {
                 displayEmpty
                 variant="outlined"
                 sx={{
-                  minWidth: 120,
-                  height: 32,
+                  minWidth: { xs: 150, sm: 120 },
+                  height: 36,
                   backgroundColor: "#2a3441",
                   borderRadius: 3,
                   "& .MuiOutlinedInput-notchedOutline": {
@@ -441,9 +456,9 @@ export default function AdminResenasPage() {
                   },
                   "& .MuiSelect-select": {
                     color: "#9ca3af",
-                    fontSize: "0.8rem",
+                    fontSize: "0.875rem",
                     fontWeight: 500,
-                    padding: "6px 12px",
+                    padding: "8px 14px",
                     display: "flex",
                     alignItems: "center",
                   },
@@ -509,8 +524,18 @@ export default function AdminResenasPage() {
             </Typography>
 
             {/* Selector de items per page y orden */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>Mostrar:</Typography>
+            <Box sx={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: { xs: 0.5, sm: 1 },
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              justifyContent: { xs: "center", sm: "flex-start" }
+            }}>
+              <Typography sx={{ 
+                color: "#6b7280", 
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                display: { xs: "none", sm: "block" }
+              }}>Mostrar:</Typography>
               <FormControl size="small">
                 <Select
                   value={itemsPerPage}
@@ -520,8 +545,8 @@ export default function AdminResenasPage() {
                     setItemsPerPage(newValue)
                   }}
                   sx={{
-                    minWidth: 70,
-                    height: 32,
+                    minWidth: { xs: 60, sm: 70 },
+                    height: { xs: 28, sm: 32 },
                     backgroundColor: "#2a3441",
                     borderRadius: 2,
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -570,7 +595,7 @@ export default function AdminResenasPage() {
               </FormControl>
 
               {/* Nuevo: selector de criterio de orden */}
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: { xs: 100, sm: 120 } }}>
                 <Select
                   value={sortBy}
                   onChange={(e) => {
@@ -578,7 +603,7 @@ export default function AdminResenasPage() {
                     setPage(1)
                   }}
                   sx={{
-                    height: 32,
+                    height: { xs: 28, sm: 32 },
                     backgroundColor: "#2a3441",
                     borderRadius: 2,
                     color: "#9ca3af",
@@ -633,15 +658,26 @@ export default function AdminResenasPage() {
               variant="outlined"
               startIcon={sortOrder === 'desc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
               onClick={toggleSortOrder}
+              size="small"
               sx={{
                 borderColor: "#4b5563",
                 color: "white",
                 "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                minWidth: { xs: "auto", sm: "auto" },
+                px: { xs: 1, sm: 2 }
               }}
             >
-              {sortBy === 'fecha'
-                ? sortOrder === 'desc' ? 'Más recientes' : 'Más antiguos'
-                : sortOrder === 'desc' ? 'Mayor puntuación' : 'Menor puntuación'}
+              <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                {sortBy === 'fecha'
+                  ? sortOrder === 'desc' ? 'Más recientes' : 'Más antiguos'
+                  : sortOrder === 'desc' ? 'Mayor puntuación' : 'Menor puntuación'}
+              </Box>
+              <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
+                {sortBy === 'fecha'
+                  ? sortOrder === 'desc' ? 'Recientes' : 'Antiguos'
+                  : sortOrder === 'desc' ? 'Mayor' : 'Menor'}
+              </Box>
             </Button>
           </Box>
 
@@ -674,16 +710,33 @@ export default function AdminResenasPage() {
                     transition: "border-color 0.2s",
                   }}
                 >
-                  <CardContent sx={{ p: 3, width: "100%", boxSizing: "border-box" }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 3 }, width: "100%", boxSizing: "border-box" }}>
                     <Box
-                      sx={{ display: "flex", alignItems: "flex-start", gap: 3, flexWrap: { xs: "wrap", md: "nowrap" } }}
+                      sx={{ 
+                        display: "flex", 
+                        alignItems: "flex-start", 
+                        gap: { xs: 2, sm: 3 }, 
+                        flexDirection: { xs: "column", md: "row" }
+                      }}
                     >
                       {/* Información del usuario */}
-                      <Box sx={{ minWidth: 200 }}>
-                        <Typography variant="h6" sx={{ color: "primary.main", fontWeight: "bold", mb: 1 }}>
+                      <Box sx={{ 
+                        minWidth: { xs: "100%", md: 200 },
+                        order: { xs: 1, md: 1 }
+                      }}>
+                        <Typography variant="h6" sx={{ 
+                          color: "primary.main", 
+                          fontWeight: "bold", 
+                          mb: 1,
+                          fontSize: { xs: "1rem", sm: "1.25rem" }
+                        }}>
                           {resenia.usuario.nombre}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: "text.secondary", 
+                          mb: 1,
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" }
+                        }}>
                           @{resenia.usuario.nombreUsuario}
                         </Typography>
                         <Chip
@@ -692,18 +745,46 @@ export default function AdminResenasPage() {
                           sx={{
                             bgcolor: "#2a3441",
                             color: "#9ca3af",
-                            fontSize: "0.75rem",
+                            fontSize: { xs: "0.6rem", sm: "0.75rem" },
                           }}
                         />
                       </Box>
 
                       {/* Información de la reseña */}
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" sx={{ color: "white", fontWeight: "bold", mb: 1 }}>
+
+                      <Box sx={{ 
+                        flex: 1,
+                        order: { xs: 2, md: 2 },
+                        width: { xs: "100%", md: "auto" },
+                        textAlign: { xs: "center", sm: "left" }
+                      }}>
+                        <Typography variant="h6" sx={{ 
+                          color: "white", 
+                          fontWeight: "bold", 
+                          mb: 1,
+                          fontSize: { xs: "0.9rem", sm: "1.25rem" }
+                        }}>
                           {getProductName(resenia.venta)}
                         </Typography>
 
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, flexWrap: "wrap" }}>
+                        {/* Fecha arriba */}
+                        <Typography variant="body2" sx={{ 
+                          color: "text.secondary",
+                          fontSize: "0.85rem",
+                          mb: 0.5
+                        }}>
+                          {formatDate(resenia.fecha)}
+                        </Typography>
+
+                        {/* Estrellas y chip en una fila */}
+                        <Box sx={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: { xs: "center", sm: "flex-start" },
+                          gap: 1.5, 
+                          mb: 2,
+                          width: "100%"
+                        }}>
                           <Rating
                             value={resenia.puntaje}
                             readOnly
@@ -712,6 +793,9 @@ export default function AdminResenasPage() {
                               "& .MuiRating-iconFilled": {
                                 color: "#ffd700",
                               },
+                              "& .MuiRating-icon": {
+                                fontSize: "1.1rem"
+                              }
                             }}
                           />
                           <Chip
@@ -721,11 +805,9 @@ export default function AdminResenasPage() {
                               bgcolor: getRatingColor(resenia.puntaje),
                               color: "white",
                               fontWeight: "bold",
+                              fontSize: "0.75rem"
                             }}
                           />
-                          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                            {formatDate(resenia.fecha)}
-                          </Typography>
                         </Box>
 
                         <Typography
@@ -734,9 +816,11 @@ export default function AdminResenasPage() {
                             color: "text.secondary",
                             fontStyle: "italic",
                             bgcolor: "#141926",
-                            p: 2,
+                            p: { xs: 1.5, sm: 2 },
                             borderRadius: 1,
                             border: "1px solid #2a3441",
+                            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                            lineHeight: { xs: 1.4, sm: 1.5 }
                           }}
                         >
                           "{resenia.detalle}"
@@ -744,22 +828,31 @@ export default function AdminResenasPage() {
                       </Box>
 
                       {/* Botón de eliminar */}
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        startIcon={deleteLoading === resenia.id ? <CircularProgress size={16} color="inherit" /> : <DeleteIcon />}
-                        onClick={() => handleDeleteClick(resenia.id)}
-                        disabled={deleteLoading === resenia.id}
-                        sx={{
-                          bgcolor: '#dc2626',
-                          '&:hover': { bgcolor: '#b91c1c' },
-                          textTransform: 'none',
-                          minWidth: 'auto',
-                        }}
-                      >
-                        {deleteLoading === resenia.id ? 'Eliminando...' : 'Eliminar'}
-                      </Button>
+                      <Box sx={{ 
+                        order: { xs: 3, md: 3 },
+                        alignSelf: { xs: "flex-end", md: "flex-start" },
+                        width: { xs: "100%", md: "auto" }
+                      }}>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          startIcon={deleteLoading === resenia.id ? <CircularProgress size={16} color="inherit" /> : <DeleteIcon />}
+                          onClick={() => handleDeleteClick(resenia.id)}
+                          disabled={deleteLoading === resenia.id}
+                          sx={{
+                            bgcolor: '#dc2626',
+                            '&:hover': { bgcolor: '#b91c1c' },
+                            textTransform: 'none',
+                            minWidth: 'auto',
+                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            py: { xs: 1, sm: 0.5 },
+                            width: { xs: "100%", md: "auto" }
+                          }}
+                        >
+                          {deleteLoading === resenia.id ? 'Eliminando...' : 'Eliminar'}
+                        </Button>
+                      </Box>
                     </Box>
                   </CardContent>
                 </Card>
@@ -777,27 +870,41 @@ export default function AdminResenasPage() {
         <Dialog
           open={deleteDialogOpen}
           onClose={handleDeleteCancel}
+          fullWidth
+          maxWidth="sm"
           PaperProps={{
             sx: {
               bgcolor: "#141926",
               border: "2px solid #ef4444",
               borderRadius: 3,
+              m: { xs: 2, sm: 4 },
+              width: { xs: "calc(100% - 32px)", sm: "auto" },
+              maxHeight: { xs: "calc(100vh - 64px)", sm: "auto" }
             },
           }}
         >
-          <DialogTitle sx={{ color: "#ef4444", fontWeight: "bold" }}>
+          <DialogTitle sx={{ 
+            color: "#ef4444", 
+            fontWeight: "bold",
+            fontSize: { xs: "1.1rem", sm: "1.25rem" },
+            pb: { xs: 1, sm: 2 }
+          }}>
             ⚠️ Eliminar Reseña
           </DialogTitle>
-          <DialogContent>
-            <DialogContentText sx={{ color: "#b0b0b0" }}>
+          <DialogContent sx={{ pb: { xs: 2, sm: 3 } }}>
+            <DialogContentText sx={{ 
+              color: "#b0b0b0",
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+              lineHeight: { xs: 1.4, sm: 1.5 }
+            }}>
               ¿Estás seguro de que quieres eliminar esta reseña?
               <br /><br />
               Esta acción no se puede deshacer y eliminará todos los datos asociados a la reseña.
             </DialogContentText>
           </DialogContent>
           <DialogActions sx={{
-            p: 3,
-            gap: 2,
+            p: { xs: 2, sm: 3 },
+            gap: { xs: 1, sm: 2 },
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'stretch', sm: 'center' },
@@ -810,7 +917,9 @@ export default function AdminResenasPage() {
                 color: "#b0b0b0",
                 borderColor: "#2a3441",
                 width: { xs: '100%', sm: 'auto' },
-                mb: { xs: 1, sm: 0 },
+                order: { xs: 2, sm: 1 },
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                py: { xs: 1.5, sm: 1 },
                 "&:hover": {
                   borderColor: "#4a90e2",
                   color: "#4a90e2",
@@ -826,7 +935,9 @@ export default function AdminResenasPage() {
               sx={{
                 backgroundColor: "#ef4444",
                 width: { xs: '100%', sm: 'auto' },
-                mb: { xs: 1, sm: 0 },
+                order: { xs: 1, sm: 2 },
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                py: { xs: 1.5, sm: 1 },
                 "&:hover": {
                   backgroundColor: "#dc2626",
                 },
