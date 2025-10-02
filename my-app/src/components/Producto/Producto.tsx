@@ -377,14 +377,14 @@ export default function Producto() {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Category fontSize="small" color="disabled" />
-                        <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : '(categorias)'}</Typography>
+                        <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : 'Sin categorías actualmente'}</Typography>
                       </Box>
                     </Box>
                   )}
                   {(tipo === 'servicio' || tipo === 'complemento') && data && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Category fontSize="small" color="disabled" />
-                      <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : '(categorias)'}</Typography>
+                      <Typography>{data && Array.isArray(data.categorias) && data.categorias.length > 0 ? data.categorias.map(c => c.nombre).join(', ') : 'Sin categorías actualmente'}</Typography>
                     </Box>
                   )}
                 </Box>
