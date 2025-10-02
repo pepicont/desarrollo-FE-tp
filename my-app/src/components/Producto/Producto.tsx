@@ -9,6 +9,21 @@ import ModernPagination from '../shared-components/ModernPagination'
 import { authService } from '../../services/authService'
 import Footer from '../footer/footer'
 
+const ESRB_RATING_LABELS: Record<number, string> = {
+  0: 'E (Everyone)',
+  10: 'E10+ (Everyone 10+)',
+  13: 'T (Teen 13+)',
+  17: 'M (Mature 17+)',
+  18: 'AO (Adults Only 18+)',
+}
+
+const getAgeRatingLabel = (value: unknown): string => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return '(clasificación)'
+  }
+  return ESRB_RATING_LABELS[value] ?? `${value}+`
+}
+
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
@@ -354,7 +369,11 @@ export default function Producto() {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Person fontSize="small" color="disabled" />
-                        <Typography>Edad permitida: {data && 'edadPermitida' in data && typeof (data as JuegoDetail).edadPermitida === 'number' ? (data as JuegoDetail).edadPermitida + '+' : '(edad)+'}</Typography>
+                        <Typography>
+                          Edad permitida: {getAgeRatingLabel(
+                            data && 'edadPermitida' in data ? (data as JuegoDetail).edadPermitida : undefined
+                          )}
+                        </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Category fontSize="small" color="disabled" />

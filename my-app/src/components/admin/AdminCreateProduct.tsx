@@ -89,7 +89,7 @@ interface ComplementoFormData {
 const ageRatings = [
   { value: 0, label: "E (Everyone)" },
   { value: 10, label: "E10+ (Everyone 10+)" },
-  { value: 13, label: "T (Teen)" },
+  { value: 13, label: "T (Teen 13+)" },
   { value: 17, label: "M (Mature 17+)" },
   { value: 18, label: "AO (Adults Only 18+)" }
 ]
@@ -101,6 +101,14 @@ const mapAgeToRating = (age: number): number => {
   if (age <= 16) return 13;      // Teen
   if (age <= 17) return 17;      // Mature 17+
   return 18;                     // Adults Only 18+
+}
+
+const normalizeEdadPermitidaInput = (value: string): number => {
+  const numeric = Number(value)
+  if (Number.isNaN(numeric)) {
+    return 0
+  }
+  return mapAgeToRating(numeric)
 }
 
 export default function AdminCreateProductPage() {
@@ -418,7 +426,8 @@ export default function AdminCreateProductPage() {
       formData.append("monto", juegoForm.monto);
       formData.append("compania", juegoForm.compania);
       formData.append("fechaLanzamiento", juegoForm.fechaLanzamiento);
-      formData.append("edadPermitida", juegoForm.edadPermitida);
+  const edadPermitidaValue = normalizeEdadPermitidaInput(juegoForm.edadPermitida)
+  formData.append("edadPermitida", edadPermitidaValue.toString());
       juegoForm.categorias.forEach((catId) => formData.append("categorias", catId.toString()));
 
       // Enviar fotos nuevas
