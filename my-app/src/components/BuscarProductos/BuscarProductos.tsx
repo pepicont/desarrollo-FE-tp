@@ -114,15 +114,25 @@ export default function BuscarProductos() {
         else if (priceFilter === '50-100') { params.priceMin = 50; params.priceMax = 100 }
         else if (priceFilter === 'over-100') { params.priceMin = 100 }
 
-        const edad = ageFilter ? Number(ageFilter) : undefined
-        if (!Number.isNaN(edad!) && edad !== undefined) params.edadMax = edad
+        const edadExacta = ageFilter !== '' ? Number(ageFilter) : undefined
+        const edadFilterActivo = edadExacta !== undefined && !Number.isNaN(edadExacta)
 
-  params.page = page
-  params.limit = itemsPerPage
+        if (edadFilterActivo) {
+          params.edadMax = edadExacta
+          params.page = 1
+          params.limit = 100
+        } else {
+          params.page = page
+          params.limit = itemsPerPage
+        }
 
-    const res = await searchService.search(params)
-    setItems(res.data)
-    setTotalCount(res.count)
+        const res = await searchService.search(params)
+        const data = edadFilterActivo
+          ? res.data.filter(item => item.tipo !== 'juego' || item.edadPermitida === edadExacta)
+          : res.data
+
+        setItems(data)
+        setTotalCount(edadFilterActivo ? data.length : res.count)
       } catch (e: unknown) {
         console.error('Error buscando productos', e)
         setError('No se pudieron cargar los productos')
@@ -469,9 +479,12 @@ export default function BuscarProductos() {
                   label="Edad"
                   sx={{ color: "white" }}
                 >
-                  <MenuItem value="8">Niño</MenuItem>
-                  <MenuItem value="13">Adolescente (+13)</MenuItem>
-                  <MenuItem value="18">Adulto (+18)</MenuItem>
+                  <MenuItem value="">Todas</MenuItem>
+                  <MenuItem value="0">E (Everyone)</MenuItem>
+                  <MenuItem value="10">E10+ (Everyone 10+)</MenuItem>
+                  <MenuItem value="13">T (Teen 13+)</MenuItem>
+                  <MenuItem value="17">M (Mature 17+)</MenuItem>
+                  <MenuItem value="18">AO (Adults Only 18+)</MenuItem>
                 </Select>
               </FormControl>
             </Box>
