@@ -94,6 +94,34 @@ export async function createCategory(token: string, categoryData: { nombre: stri
   }
 }
 
+// Servicio para actualizar una categoría existente (solo admin)
+export async function updateCategory(token: string, categoriaId: number, categoryData: { nombre: string; detalle: string }): Promise<Category> {
+  try {
+    const response = await fetch(buildApiUrl(`/categoria/${categoriaId}`), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(categoryData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error response: ${response.status} - ${errorText}`);
+      const error: Error & { status?: number } = new Error(`HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    const json = await response.json();
+    return json.data as Category;
+  } catch (error) {
+    console.error('Error en updateCategory:', error);
+    throw error;
+  }
+}
+
 export const categoryService = {
   async getAll(): Promise<Category[]> {
     const res = await api.get<CategoryListResponse>('/categoria');

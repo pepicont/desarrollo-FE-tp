@@ -80,6 +80,7 @@ const userMenuItems = [
 const adminMenuItems = [
   { text: "Home", icon: <HomeIcon />, href: "/" },
   { text: "Productos", icon: <SportsEsportsIcon />, href: "/productos" },
+  { text: "Compras", icon: <ShoppingBagIcon />, href: "/admin/compras" },
   { text: "Usuarios", icon: <PersonIcon />, href: "/admin/usuarios" },
   { text: "Reseñas", icon: <ReviewIcon />, href: "/admin/resenias" },
   { text: "Compañías", icon: <BusinessIcon />, href: "/admin/companias" },

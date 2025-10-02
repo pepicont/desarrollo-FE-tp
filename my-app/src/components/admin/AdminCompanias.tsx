@@ -27,6 +27,7 @@ import {
   Business as BusinessIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
+  Edit as EditIcon,
 } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -34,7 +35,7 @@ import NavBar from "../navBar/navBar"
 import ModernPagination from "../shared-components/ModernPagination"
 import CompanyModal from "./CompanyModal"
 import { authService } from "../../services/authService"
-import { getAllCompaniesAdmin, deleteCompanyAsAdmin, createCompany, type Company } from "../../services/companyService"
+import { getAllCompaniesAdmin, deleteCompanyAsAdmin, createCompany, updateCompany, type Company } from "../../services/companyService"
 import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
@@ -75,6 +76,7 @@ export default function AdminCompaniasPage() {
   // Estados para el modal de agregar compañía
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null)
   
   // Estados para búsqueda y filtros
   const [searchQuery, setSearchQuery] = useState("")
@@ -217,8 +219,9 @@ export default function AdminCompaniasPage() {
 
   // Alerta de éxito de creación
   const [createSuccess, setCreateSuccess] = useState("");
-  // Función para agregar compañía
-  const handleAddCompany = async (companyData: { nombre: string; detalle: string }) => {
+  
+  // Función para agregar o editar compañía
+  const handleSaveCompany = async (companyData: { nombre: string; detalle: string }) => {
     setAddLoading(true);
     try {
       const token = authService.getToken();
@@ -226,16 +229,40 @@ export default function AdminCompaniasPage() {
         setError("No estás autenticado");
         return;
       }
-      const newCompany = await createCompany(token, companyData);
-      setCompanias(prev => [...prev, newCompany]);
-      setCreateSuccess("Compañía creada correctamente");
-      setTimeout(() => setCreateSuccess("") , 3000);
+      
+      if (editingCompany) {
+        // Modo edición
+        const updatedCompany = await updateCompany(token, editingCompany.id, companyData);
+        setCompanias(prev => prev.map(c => c.id === editingCompany.id ? updatedCompany : c));
+        setCreateSuccess("Compañía actualizada correctamente");
+      } else {
+        // Modo creación
+        const newCompany = await createCompany(token, companyData);
+        setCompanias(prev => [...prev, newCompany]);
+        setCreateSuccess("Compañía creada correctamente");
+      }
+      
+      setTimeout(() => setCreateSuccess(""), 3000);
+      setAddModalOpen(false);
+      setEditingCompany(null);
     } catch (error: unknown) {
-      console.error('Error al crear compañía:', error);
-      setError("Error al crear la compañía");
+      console.error('Error al guardar compañía:', error);
+      setError(editingCompany ? "Error al actualizar la compañía" : "Error al crear la compañía");
     } finally {
       setAddLoading(false);
     }
+  }
+
+  // Función para abrir el modal en modo edición
+  const handleEditCompany = (company: Company) => {
+    setEditingCompany(company);
+    setAddModalOpen(true);
+  }
+
+  // Función para cerrar el modal y resetear el estado de edición
+  const handleCloseModal = () => {
+    setAddModalOpen(false);
+    setEditingCompany(null);
   }
 
   return (
@@ -305,20 +332,61 @@ export default function AdminCompaniasPage() {
               </Box>
 
               {/* Header con título y controles */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: { xs: "flex-start", md: "center" },
+                  flexDirection: { xs: "column", md: "row" },
+                  gap: { xs: 2, md: 0 },
+                  mb: 3,
+                  textAlign: { xs: "center", md: "left" }
+                }}
+              >
+                <Box sx={{ width: "100%" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      color: "white",
+                      fontSize: { xs: "1.5rem", md: "2rem" }
+                    }}
+                  >
                     Compañías
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#6b7280" }}>
-                    Mostrando {filteredCompanias.length} de {companias.length} compañías
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#6b7280",
+                      fontSize: { xs: "0.85rem", md: "0.95rem" }
+                    }}
+                  >
+                    Mostrando {paginatedCompanias.length} de {filteredCompanias.length} compañías
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: { xs: 1, sm: 1.5, md: 2 },
+                    flexWrap: { xs: "wrap", md: "nowrap" },
+                    justifyContent: { xs: "center", md: "flex-end" },
+                    width: { xs: "100%", md: "auto" }
+                  }}
+                >
                   {/* Selector de items por página */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      color: "#6b7280",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" }
+                    }}
+                  >
+                    <Typography sx={{ display: { xs: "none", sm: "block" } }}>
                       Mostrar:
                     </Typography>
                     <FormControl size="small">
@@ -329,8 +397,8 @@ export default function AdminCompaniasPage() {
                           setItemsPerPage(Number(e.target.value))
                         }}
                         sx={{
-                          minWidth: 70,
-                          height: 32,
+                          minWidth: { xs: 60, sm: 70 },
+                          height: { xs: 28, sm: 32 },
                           backgroundColor: '#2a3441',
                           borderRadius: 2,
                           '& .MuiOutlinedInput-notchedOutline': {
@@ -381,12 +449,29 @@ export default function AdminCompaniasPage() {
 
                   <Button
                     variant="outlined"
-                    startIcon={sortOrder === 'asc' ? <ArrowDownIcon /> : <ArrowUpIcon />}
                     onClick={toggleSortOrder}
+                    startIcon={
+                      sortOrder === 'asc'
+                        ? <ArrowDownIcon sx={{ fontSize: 18 }} />
+                        : <ArrowUpIcon sx={{ fontSize: 18 }} />
+                    }
+                    size="small"
                     sx={{
+                      display: 'flex',
+                      alignItems: 'center',
                       borderColor: "#4b5563",
                       color: "white",
-                      "&:hover": { backgroundColor: "#374151", borderColor: "#6b7280" },
+                      minWidth: 80,
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: { xs: "0.95rem", sm: "1rem" },
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                      textTransform: 'none',
+                      '& .MuiButton-startIcon': {
+                        marginRight: 0.7,
+                      },
+                      '&:hover': { backgroundColor: "#374151", borderColor: "#6b7280" },
                     }}
                   >
                     {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
@@ -396,17 +481,18 @@ export default function AdminCompaniasPage() {
                   <Button
                     variant="contained"
                     onClick={() => setAddModalOpen(true)}
-                    startIcon={<BusinessIcon />}
                     sx={{
                       background: "#3a7bd5",
                       color: "white",
                       fontWeight: "bold",
-                      px: 3,
-                      py: 1.5,
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 1, sm: 1.5 },
                       borderRadius: 2,
                       textTransform: "none",
                       boxShadow: "none",
                       transition: "all 0.3s ease",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      width: { xs: "100%", sm: "auto" },
                       "&:hover": {
                         background: "#2c5aa0",
                         boxShadow: "none",
@@ -430,7 +516,7 @@ export default function AdminCompaniasPage() {
                   </Typography>
                 </Box>
               ) : (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", mx: "auto" }}>
                   {paginatedCompanias.map((compania) => (
                     <Card
                       key={compania.id}
@@ -438,18 +524,40 @@ export default function AdminCompaniasPage() {
                         bgcolor: "#1e2532",
                         borderRadius: 2,
                         border: "1px solid #2a3441",
-                        p: 3,
+                        p: { xs: 2, sm: 3 },
+                        width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
+                        "&:hover": {
+                          borderColor: "#374151",
+                        },
+                        transition: "border-color 0.2s",
                       }}
                     >
                       <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 3, flex: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: { xs: "column", md: "row" },
+                            alignItems: { xs: "flex-start", md: "center" },
+                            gap: { xs: 2, sm: 3 },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                              width: { xs: "100%", md: "auto" },
+                            }}
+                          >
                             <Box sx={{ 
                               flex: 1, 
                               display: { xs: 'flex', md: 'grid' }, 
                               flexDirection: { xs: 'column', md: 'unset' },
                               gridTemplateColumns: { md: '200px 1fr' }, 
-                              gap: 3 
+                              gap: { xs: 1.5, sm: 3 },
+                              textAlign: { xs: 'center', md: 'left' }
                             }}>
                               <Box>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
@@ -474,20 +582,56 @@ export default function AdminCompaniasPage() {
                             </Box>
                           </Box>
 
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            startIcon={<DeleteIcon />}
-                            onClick={() => handleDeleteCompany(compania.id)}
+                          <Box
                             sx={{
-                              bgcolor: '#dc2626',
-                              '&:hover': { bgcolor: '#b91c1c' },
-                              textTransform: 'none',
+                              display: "flex",
+                              gap: 1.5,
+                              justifyContent: { xs: "center", md: "flex-end" },
+                              alignItems: "center",
+                              width: { xs: "100%", md: "auto" },
+                              flexShrink: 0,
+                              ml: { md: "auto" }
                             }}
                           >
-                            Eliminar
-                          </Button>
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              startIcon={<EditIcon />}
+                              onClick={() => handleEditCompany(compania)}
+                              sx={{
+                                borderColor: "#4a90e2",
+                                color: "#4a90e2",
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1.5, sm: 2 },
+                                "&:hover": {
+                                  backgroundColor: "rgba(74, 144, 226, 0.1)",
+                                  borderColor: "#357abd",
+                                },
+                              }}
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDeleteCompany(compania.id)}
+                              sx={{
+                                bgcolor: '#dc2626',
+                                '&:hover': { bgcolor: '#b91c1c' },
+                                textTransform: 'none',
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 2, sm: 2.5 },
+                                py: { xs: 1, sm: 0.75 },
+                                width: { xs: "100%", sm: "auto" },
+                                minWidth: { md: 120 }
+                              }}
+                            >
+                              Eliminar
+                            </Button>
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>
@@ -495,11 +639,13 @@ export default function AdminCompaniasPage() {
 
                   {/* Paginación moderna */}
                   {filteredCompanias.length > 0 && (
-                    <ModernPagination
-                      currentPage={page}
-                      totalPages={totalPages}
-                      onPageChange={setPage}
-                    />
+                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+                      <ModernPagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                      />
+                    </Box>
                   )}
                 </Box>
               )}
@@ -509,12 +655,13 @@ export default function AdminCompaniasPage() {
         <Footer />
       </Box>
 
-      {/* Modal para agregar compañía */}
+      {/* Modal para agregar/editar compañía */}
       <CompanyModal
         open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleAddCompany}
+        onClose={handleCloseModal}
+        onSave={handleSaveCompany}
         loading={addLoading}
+        editingCompany={editingCompany}
       />
 
       {/* Modal de confirmación para eliminar compañía */}

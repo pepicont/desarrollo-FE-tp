@@ -231,10 +231,10 @@ export default function BuscarProductos() {
                   borderRadius: 3,
                   textTransform: "none",
                   fontSize: "0.95rem",
-                  boxShadow: "0 4px 12px rgba(74, 144, 226, 0.3)",
+                  boxShadow: "none",
                   "&:hover": {
                     background: "linear-gradient(135deg, #357abd, #2c5aa0)",
-                    boxShadow: "0 6px 16px rgba(74, 144, 226, 0.4)",
+                    boxShadow: "none",
                     transform: "translateY(-2px)",
                   },
                   transition: "all 0.3s ease",

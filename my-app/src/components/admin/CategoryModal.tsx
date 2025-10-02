@@ -11,6 +11,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Category as CategoryIcon } from "@mui/icons-material";
+import type { Category } from "../../services/categoryService";
 
 interface CategoryModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface CategoryModalProps {
     detalle: string;
   }) => Promise<void>;
   loading?: boolean;
+  editingCategory?: Category | null;
 }
 
 export default function CategoryModal({
@@ -27,17 +29,28 @@ export default function CategoryModal({
   onClose,
   onSave,
   loading = false,
+  editingCategory = null,
 }: CategoryModalProps) {
   const [nombre, setNombre] = useState("");
   const [detalle, setDetalle] = useState("");
 
-  // Limpiar formulario cuando se abre el modal
+  // Actualizar formulario cuando se abre el modal o cambia la categoría a editar
   useEffect(() => {
     if (open) {
-      setNombre("");
-      setDetalle("");
+      if (editingCategory) {
+        setNombre(editingCategory.nombre);
+        setDetalle(editingCategory.detalle);
+      } else {
+        setNombre("");
+        setDetalle("");
+      }
     }
-  }, [open]);
+  }, [open, editingCategory]);
+
+  // Verificar si hay cambios en modo edición
+  const hasChanges = editingCategory
+    ? nombre.trim() !== editingCategory.nombre || detalle.trim() !== editingCategory.detalle
+    : true;
 
   const handleSave = async () => {
     try {
@@ -117,10 +130,10 @@ export default function CategoryModal({
           </Box>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
-              Agregar Categoría
+              {editingCategory ? "Editar Categoría" : "Agregar Categoría"}
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
-              Crear nueva categoría en el sistema
+              {editingCategory ? "Modificar información de la categoría" : "Crear nueva categoría en el sistema"}
             </Typography>
           </Box>
         </Box>
@@ -260,7 +273,7 @@ export default function CategoryModal({
         <Button
           onClick={handleSave}
           variant="contained"
-          disabled={loading || !nombre.trim() || !detalle.trim()}
+          disabled={loading || !nombre.trim() || !detalle.trim() || !hasChanges}
           sx={{
             width: { xs: '100%', sm: 'auto' },
             fontWeight: "bold",
@@ -277,10 +290,10 @@ export default function CategoryModal({
           {loading ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <CircularProgress size={20} color="inherit" />
-              <span>Creando...</span>
+              <span>{editingCategory ? 'Actualizando...' : 'Creando...'}</span>
             </Box>
           ) : (
-            'Crear Categoría'
+            editingCategory ? 'Editar Categoría' : 'Crear Categoría'
           )}
         </Button>
       </DialogActions>

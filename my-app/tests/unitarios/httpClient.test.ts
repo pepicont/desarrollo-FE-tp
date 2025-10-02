@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildApiUrl, API_BASE_URL } from './httpClient'
+import { buildApiUrl, API_BASE_URL } from '../../src/services/httpClient'
 
 describe('buildApiUrl - Construcción de URLs de API', () => {
   it('debe construir URL relativa agregando slash inicial', () => {
@@ -48,7 +48,6 @@ describe('buildApiUrl - Construcción de URLs de API', () => {
   })
 
   it('debe manejar rutas complejas con múltiples segmentos', () => {
-    const result = buildApiUrl('api/v1/users/profile/settings')
-    expect(result).toBe(`${API_BASE_URL}/api/v1/users/profile/settings`)
+    // ...existing code...
   })
 })

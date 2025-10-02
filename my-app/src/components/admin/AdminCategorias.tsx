@@ -27,6 +27,7 @@ import {
   Category as CategoryIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
+  Edit as EditIcon,
 } from "@mui/icons-material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -34,7 +35,7 @@ import NavBar from "../navBar/navBar"
 import ModernPagination from "../shared-components/ModernPagination"
 import CategoryModal from "./CategoryModal"
 import { authService } from "../../services/authService"
-import { getAllCategoriesAdmin, deleteCategoryAsAdmin, createCategory, type Category } from "../../services/categoryService"
+import { getAllCategoriesAdmin, deleteCategoryAsAdmin, createCategory, updateCategory, type Category } from "../../services/categoryService"
 import Footer from "../footer/footer.tsx"
 
 const darkTheme = createTheme({
@@ -75,6 +76,7 @@ export default function AdminCategoriasPage() {
   // Estados para el modal de agregar categoría
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   
   // Estados para búsqueda y filtros
   const [searchQuery, setSearchQuery] = useState("")
@@ -217,8 +219,9 @@ export default function AdminCategoriasPage() {
 
   // Alerta de éxito de creación
   const [createSuccess, setCreateSuccess] = useState("");
-  // Función para agregar categoría
-  const handleAddCategory = async (categoryData: { nombre: string; detalle: string }) => {
+  
+  // Función para agregar o editar categoría
+  const handleSaveCategory = async (categoryData: { nombre: string; detalle: string }) => {
     setAddLoading(true);
     try {
       const token = authService.getToken();
@@ -226,16 +229,40 @@ export default function AdminCategoriasPage() {
         setError("No estás autenticado");
         return;
       }
-      const newCategory = await createCategory(token, categoryData);
-      setCategorias(prev => [...prev, newCategory]);
-      setCreateSuccess("Categoría creada correctamente");
-      setTimeout(() => setCreateSuccess("") , 3000);
+      
+      if (editingCategory) {
+        // Modo edición
+        const updatedCategory = await updateCategory(token, editingCategory.id, categoryData);
+        setCategorias(prev => prev.map(c => c.id === editingCategory.id ? updatedCategory : c));
+        setCreateSuccess("Categoría actualizada correctamente");
+      } else {
+        // Modo creación
+        const newCategory = await createCategory(token, categoryData);
+        setCategorias(prev => [...prev, newCategory]);
+        setCreateSuccess("Categoría creada correctamente");
+      }
+      
+      setTimeout(() => setCreateSuccess(""), 3000);
+      setAddModalOpen(false);
+      setEditingCategory(null);
     } catch (error: unknown) {
-      console.error('Error al crear categoría:', error);
-      setError("Error al crear la categoría");
+      console.error('Error al guardar categoría:', error);
+      setError(editingCategory ? "Error al actualizar la categoría" : "Error al crear la categoría");
     } finally {
       setAddLoading(false);
     }
+  }
+
+  // Función para abrir el modal en modo edición
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setAddModalOpen(true);
+  }
+
+  // Función para cerrar el modal y resetear el estado de edición
+  const handleCloseModal = () => {
+    setAddModalOpen(false);
+    setEditingCategory(null);
   }
 
   return (
@@ -305,20 +332,61 @@ export default function AdminCategoriasPage() {
               </Box>
 
               {/* Header con título y controles */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: { xs: "flex-start", md: "center" },
+                  flexDirection: { xs: "column", md: "row" },
+                  gap: { xs: 2, md: 0 },
+                  mb: 3,
+                  textAlign: { xs: "center", md: "left" }
+                }}
+              >
+                <Box sx={{ width: "100%" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      color: "white",
+                      fontSize: { xs: "1.5rem", md: "2rem" }
+                    }}
+                  >
                     Categorías
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#6b7280" }}>
-                    Mostrando {filteredCategorias.length} de {categorias.length} categorías
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#6b7280",
+                      fontSize: { xs: "0.85rem", md: "0.95rem" }
+                    }}
+                  >
+                    Mostrando {paginatedCategorias.length} de {filteredCategorias.length} categorías
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: { xs: 1, sm: 1.5, md: 2 },
+                    flexWrap: { xs: "wrap", md: "nowrap" },
+                    justifyContent: { xs: "center", md: "flex-end" },
+                    width: { xs: "100%", md: "auto" }
+                  }}
+                >
                   {/* Selector de items por página */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      color: "#6b7280",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" }
+                    }}
+                  >
+                    <Typography sx={{ display: { xs: "none", sm: "block" } }}>
                       Mostrar:
                     </Typography>
                     <FormControl size="small">
@@ -326,9 +394,47 @@ export default function AdminCategoriasPage() {
                         value={itemsPerPage}
                         onChange={(e) => setItemsPerPage(Number(e.target.value))}
                         sx={{
-                          bgcolor: "background.paper",
-                          minWidth: 80,
-                          "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                          minWidth: { xs: 60, sm: 80 },
+                          height: { xs: 28, sm: 32 },
+                          backgroundColor: '#2a3441',
+                          borderRadius: 2,
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            border: 'none',
+                          },
+                          '& .MuiSelect-select': {
+                            color: '#9ca3af',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            fontWeight: 500,
+                            padding: '6px 8px',
+                          },
+                          '& .MuiSvgIcon-root': {
+                            color: '#6b7280',
+                          },
+                          '&:hover': {
+                            backgroundColor: '#374151',
+                          },
+                        }}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              backgroundColor: '#1e2532',
+                              border: '1px solid #374151',
+                              borderRadius: 2,
+                              '& .MuiMenuItem-root': {
+                                color: 'white',
+                                fontSize: '0.875rem',
+                                '&:hover': {
+                                  backgroundColor: '#374151',
+                                },
+                                '&.Mui-selected': {
+                                  backgroundColor: '#3a7bd5',
+                                  '&:hover': {
+                                    backgroundColor: '#2c5aa0',
+                                  },
+                                },
+                              },
+                            },
+                          },
                         }}
                       >
                         <MenuItem value={10}>10</MenuItem>
@@ -343,15 +449,30 @@ export default function AdminCategoriasPage() {
                   <Button
                     variant="outlined"
                     onClick={toggleSortOrder}
-                    startIcon={sortOrder === 'asc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                    startIcon={
+                      sortOrder === 'asc'
+                        ? <ArrowDownIcon sx={{ fontSize: 18 }} />
+                        : <ArrowUpIcon sx={{ fontSize: 18 }} />
+                    }
+                    size="small"
                     sx={{
-                      textTransform: "none",
-                      bgcolor: "background.paper",
-                      borderColor: "#2a3441",
-                      color: "text.primary",
-                      "&:hover": {
-                        bgcolor: "#141926",
-                        borderColor: "#4a90e2",
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderColor: "#4b5563",
+                      color: "white",
+                      minWidth: 80,
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: { xs: "0.95rem", sm: "1rem" },
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                      textTransform: 'none',
+                      '& .MuiButton-startIcon': {
+                        marginRight: 0.7,
+                      },
+                      '&:hover': {
+                        backgroundColor: "#374151",
+                        borderColor: "#6b7280",
                       },
                     }}
                   >
@@ -362,17 +483,18 @@ export default function AdminCategoriasPage() {
                   <Button
                     variant="contained"
                     onClick={() => setAddModalOpen(true)}
-                    startIcon={<CategoryIcon />}
                     sx={{
                       background: "#3a7bd5",
                       color: "white",
                       fontWeight: "bold",
-                      px: 3,
-                      py: 1.5,
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 1, sm: 1.5 },
                       borderRadius: 2,
                       textTransform: "none",
                       boxShadow: "none",
                       transition: "all 0.3s ease",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      width: { xs: "100%", sm: "auto" },
                       "&:hover": {
                         background: "#2c5aa0",
                         boxShadow: "none",
@@ -396,7 +518,7 @@ export default function AdminCategoriasPage() {
                   </Typography>
                 </Box>
               ) : (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", mx: "auto" }}>
                   {paginatedCategorias.map((categoria) => (
                     <Card
                       key={categoria.id}
@@ -404,18 +526,40 @@ export default function AdminCategoriasPage() {
                         bgcolor: "#1e2532",
                         borderRadius: 2,
                         border: "1px solid #2a3441",
-                        p: 3,
+                        p: { xs: 2, sm: 3 },
+                        width: "100%",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
+                        "&:hover": {
+                          borderColor: "#374151",
+                        },
+                        transition: "border-color 0.2s",
                       }}
                     >
                       <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 3, flex: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: { xs: "column", md: "row" },
+                            alignItems: { xs: "flex-start", md: "center" },
+                            gap: { xs: 2, sm: 3 },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                              width: { xs: "100%", md: "auto" },
+                            }}
+                          >
                             <Box sx={{ 
                               flex: 1, 
                               display: { xs: 'flex', md: 'grid' }, 
                               flexDirection: { xs: 'column', md: 'unset' },
                               gridTemplateColumns: { md: '200px 1fr' }, 
-                              gap: 3 
+                              gap: { xs: 1.5, sm: 3 },
+                              textAlign: { xs: 'center', md: 'left' }
                             }}>
                               <Box>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
@@ -440,20 +584,56 @@ export default function AdminCategoriasPage() {
                             </Box>
                           </Box>
 
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            startIcon={<DeleteIcon />}
-                            onClick={() => handleDeleteCategory(categoria.id)}
+                          <Box
                             sx={{
-                              bgcolor: '#dc2626',
-                              '&:hover': { bgcolor: '#b91c1c' },
-                              textTransform: 'none',
+                              display: "flex",
+                              gap: 1.5,
+                              justifyContent: { xs: "center", md: "flex-end" },
+                              alignItems: "center",
+                              width: { xs: "100%", md: "auto" },
+                              flexShrink: 0,
+                              ml: { md: "auto" }
                             }}
                           >
-                            Eliminar
-                          </Button>
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              startIcon={<EditIcon />}
+                              onClick={() => handleEditCategory(categoria)}
+                              sx={{
+                                borderColor: "#4a90e2",
+                                color: "#4a90e2",
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1.5, sm: 2 },
+                                "&:hover": {
+                                  backgroundColor: "rgba(74, 144, 226, 0.1)",
+                                  borderColor: "#357abd",
+                                },
+                              }}
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDeleteCategory(categoria.id)}
+                              sx={{
+                                bgcolor: '#dc2626',
+                                '&:hover': { bgcolor: '#b91c1c' },
+                                textTransform: 'none',
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 2, sm: 2.5 },
+                                py: { xs: 1, sm: 0.75 },
+                                width: { xs: "100%", sm: "auto" },
+                                minWidth: { md: 120 }
+                              }}
+                            >
+                              Eliminar
+                            </Button>
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>
@@ -461,11 +641,13 @@ export default function AdminCategoriasPage() {
 
                   {/* Paginación moderna */}
                   {filteredCategorias.length > 0 && (
-                    <ModernPagination
-                      currentPage={page}
-                      totalPages={totalPages}
-                      onPageChange={setPage}
-                    />
+                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+                      <ModernPagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                      />
+                    </Box>
                   )}
                 </Box>
               )}
@@ -475,12 +657,13 @@ export default function AdminCategoriasPage() {
         <Footer />
       </Box>
 
-      {/* Modal para agregar categoría */}
+      {/* Modal para agregar/editar categoría */}
       <CategoryModal
         open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleAddCategory}
+        onClose={handleCloseModal}
+        onSave={handleSaveCategory}
         loading={addLoading}
+        editingCategory={editingCategory}
       />
 
       {/* Modal de confirmación para eliminar categoría */}

@@ -94,6 +94,34 @@ export async function createCompany(token: string, companyData: { nombre: string
   }
 }
 
+// Servicio para actualizar una compañía existente (solo admin)
+export async function updateCompany(token: string, companiaId: number, companyData: { nombre: string; detalle: string }): Promise<Company> {
+  try {
+    const response = await fetch(buildApiUrl(`/compania/${companiaId}`), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(companyData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error response: ${response.status} - ${errorText}`);
+      const error: Error & { status?: number } = new Error(`HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    const json = await response.json();
+    return json.data as Company;
+  } catch (error) {
+    console.error('Error en updateCompany:', error);
+    throw error;
+  }
+}
+
 export const companyService = {
   async getAll(): Promise<Company[]> {
     const res = await api.get<CompanyListResponse>('/compania');
