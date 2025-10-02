@@ -374,10 +374,10 @@ export default function AdminComprasPage() {
           >
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 700, color: "white", mb: 1 }}>
-                Gestión de Compras
+                Gestión de Ventas
               </Typography>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Mostrando {paginatedCompras.length} de {filteredCompras.length} compras registradas
+                Mostrando {paginatedCompras.length} de {filteredCompras.length} ventas registradas
               </Typography>
             </Box>
             <Chip
@@ -598,7 +598,7 @@ export default function AdminComprasPage() {
                             sx={{ fontWeight: 600, borderRadius: 2 }}
                           />
                           <Chip
-                            label={`Compra #${venta.id}`}
+                            label={`Venta #${venta.id}`}
                             variant="outlined"
                             sx={{
                               borderColor: "rgba(255,255,255,0.2)",
@@ -618,7 +618,7 @@ export default function AdminComprasPage() {
 
                       <Box sx={{ textAlign: { xs: "left", md: "right" } }}>
                         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                          Fecha de compra
+                          Fecha de venta
                         </Typography>
                         <Typography variant="body1" sx={{ fontWeight: 600, color: "white" }}>
                           {formatDate(venta.fecha)}
