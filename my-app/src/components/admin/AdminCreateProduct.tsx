@@ -668,7 +668,7 @@ export default function AdminCreateProductPage() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              p: 3,
+              p: { xs: 2, sm: 3 },
             }}
           >
             <CardContent sx={{ textAlign: "center" }}>
@@ -692,7 +692,7 @@ export default function AdminCreateProductPage() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              p: 3,
+              p: { xs: 2, sm: 3 },
             }}
           >
             <CardContent sx={{ textAlign: "center" }}>
@@ -716,7 +716,7 @@ export default function AdminCreateProductPage() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              p: 3,
+              p: { xs: 2, sm: 3 },
             }}
           >
             <CardContent sx={{ textAlign: "center" }}>
@@ -735,19 +735,17 @@ export default function AdminCreateProductPage() {
   )
 
    const renderJuegoForm = () => (
-    <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 3 }, width: "100%", maxWidth: "100%" }}>
+    <Container maxWidth="md" sx={{ py: 4, px: { xs: 1, sm: 3 } }}>
       <Paper sx={{ 
-        p: { xs: 2, sm: 3, md: 4 }, 
+        p: { xs: 1.5, sm: 3, md: 4 }, 
         borderRadius: 3, 
         bgcolor: "background.paper",
-        width: "100%",
-        maxWidth: "100%",
         boxSizing: "border-box"
       }}>
         <Box sx={{ 
           background: "linear-gradient(135deg, #4a90e2 0%, #357abd 100%)",
           color: "white",
-          p: 3,
+          p: { xs: 2, sm: 3 },
           mb: 4,
           borderRadius: 3,
           position: "relative",
@@ -761,7 +759,7 @@ export default function AdminCreateProductPage() {
             background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
           },
         }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2, sm: 3 } }}>
             <Box sx={{ 
               p: 2, 
               bgcolor: "rgba(255,255,255,0.1)", 
@@ -786,7 +784,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -800,7 +798,7 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
                 Información Básica
               </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 } }}>
               <TextField
                 label="Nombre del Juego"
                 value={juegoForm.nombre}
@@ -808,7 +806,7 @@ export default function AdminCreateProductPage() {
                 required
                 sx={{ 
                   flex: "1 1 300px", 
-                  minWidth: "300px",
+                  minWidth: { xs: "100%", sm: "300px" },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#141926",
                     "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -828,7 +826,7 @@ export default function AdminCreateProductPage() {
                 required
                 sx={{ 
                   flex: "1 1 200px", 
-                  minWidth: "200px",
+                  minWidth: { xs: "100%", sm: "200px" },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#141926",
                     "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -847,7 +845,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -892,7 +890,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -906,8 +904,8 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
               Compañía y Categorización
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 } }}>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Compañía</InputLabel>
                 <Select
                   value={juegoForm.compania}
@@ -931,7 +929,7 @@ export default function AdminCreateProductPage() {
                 </Select>
               </FormControl>
 
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Categorías</InputLabel>
                 <Select
                   multiple
@@ -1058,7 +1056,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1072,8 +1070,8 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
               Detalles del Lanzamiento
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 } }}>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }}>
                 <FormLabel sx={{ color: "#b0b0b0", mb: 1, fontSize: "0.875rem" }}>Fecha de Lanzamiento</FormLabel>
                 <DatePicker
                   value={juegoForm.fechaLanzamiento ? dayjs(juegoForm.fechaLanzamiento) : null}
@@ -1103,7 +1101,7 @@ export default function AdminCreateProductPage() {
                 />
               </FormControl>
 
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }} required>
                 <FormLabel sx={{ color: "#b0b0b0", mb: 1, fontSize: "0.875rem" }}>Clasificación por Edad</FormLabel>
                 <Select
                   value={juegoForm.edadPermitida}
@@ -1129,7 +1127,7 @@ export default function AdminCreateProductPage() {
             </Box>
           </Box>
 
-          <Box sx={{ display: "flex", gap: 3, justifyContent: "center", pt: 2 }}>
+          <Box sx={{ display: "flex", gap: { xs: 2, sm: 3 }, justifyContent: "center", pt: 2 }}>
             {isEditMode && (
               <Button
                 variant="contained"
@@ -1207,13 +1205,13 @@ export default function AdminCreateProductPage() {
   )
 
   const renderServicioForm = () => (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper sx={{ p: 4, borderRadius: 3, bgcolor: "background.paper" }}>
+    <Container maxWidth="md" sx={{ py: 4, px: { xs: 1, sm: 3 } }}>
+      <Paper sx={{ p: { xs: 1.5, sm: 3, md: 4 }, borderRadius: 3, bgcolor: "background.paper", boxSizing: "border-box" }}>
         <Box component="form" onSubmit={handleSubmitServicio}>
           <Box sx={{ 
             background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
             color: "white",
-            p: 3,
+            p: { xs: 2, sm: 3 },
             mb: 4,
             borderRadius: 3,
             position: "relative",
@@ -1227,7 +1225,7 @@ export default function AdminCreateProductPage() {
               background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
             },
           }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2, sm: 3 } }}>
               <Box sx={{ 
                 p: 2, 
                 bgcolor: "rgba(255,255,255,0.1)", 
@@ -1249,7 +1247,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1263,7 +1261,7 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
               Información Básica
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 } }}>
               <TextField
                 label="Nombre del Servicio"
                 value={servicioForm.nombre}
@@ -1271,7 +1269,7 @@ export default function AdminCreateProductPage() {
                 required
                 sx={{ 
                   flex: "1 1 300px", 
-                  minWidth: "300px",
+                  minWidth: { xs: "100%", sm: "300px" },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#141926",
                     "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -1291,7 +1289,7 @@ export default function AdminCreateProductPage() {
                 required
                 sx={{ 
                   flex: "1 1 200px", 
-                  minWidth: "200px",
+                  minWidth: { xs: "100%", sm: "200px" },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#141926",
                     "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -1310,7 +1308,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1349,7 +1347,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1363,8 +1361,8 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
               Compañía y Categorización
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 } }}>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Compañía</InputLabel>
                 <Select
                   value={servicioForm.compania}
@@ -1388,7 +1386,7 @@ export default function AdminCreateProductPage() {
                 </Select>
               </FormControl>
 
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Categorías</InputLabel>
                 <Select
                   multiple
@@ -1512,7 +1510,7 @@ export default function AdminCreateProductPage() {
           </Box>
           {/* ...resto del formulario Servicio... */}
 
-          <Box sx={{ display: "flex", gap: 3, justifyContent: "center", pt: 2 }}>
+          <Box sx={{ display: "flex", gap: { xs: 2, sm: 3 }, justifyContent: "center", pt: 2 }}>
               {isEditMode && (
                 <Button
                   variant="contained"
@@ -1590,13 +1588,13 @@ export default function AdminCreateProductPage() {
   )
 
   const renderComplementoForm = () => (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper sx={{ p: 4, borderRadius: 3, bgcolor: "background.paper" }}>
+    <Container maxWidth="md" sx={{ py: 4, px: { xs: 1, sm: 3 } }}>
+      <Paper sx={{ p: { xs: 1.5, sm: 3, md: 4 }, borderRadius: 3, bgcolor: "background.paper", boxSizing: "border-box" }}>
         <Box component="form" onSubmit={handleSubmitComplemento}>
         <Box sx={{ 
           background: "linear-gradient(135deg, #34d399 0%, #059669 100%)",
           color: "white",
-          p: 3,
+          p: { xs: 2, sm: 3 },
           mb: 4,
           borderRadius: 3,
           position: "relative",
@@ -1610,7 +1608,7 @@ export default function AdminCreateProductPage() {
             background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
           },
         }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2, sm: 3 } }}>
             <Box sx={{ 
               p: 2, 
               bgcolor: "rgba(255,255,255,0.1)", 
@@ -1633,7 +1631,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1647,7 +1645,7 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
               Información Básica
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 } }}>
               <TextField
                 label="Nombre del Complemento"
                 value={complementoForm.nombre}
@@ -1655,7 +1653,7 @@ export default function AdminCreateProductPage() {
                 required
                 sx={{ 
                   flex: "1 1 300px", 
-                  minWidth: "300px",
+                  minWidth: { xs: "100%", sm: "300px" },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#141926",
                     "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -1675,7 +1673,7 @@ export default function AdminCreateProductPage() {
                 required
                 sx={{ 
                   flex: "1 1 200px", 
-                  minWidth: "200px",
+                  minWidth: { xs: "100%", sm: "200px" },
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#141926",
                     "& fieldset": { borderColor: "#2a3441", borderWidth: "2px" },
@@ -1694,7 +1692,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1734,7 +1732,7 @@ export default function AdminCreateProductPage() {
           <Box
             sx={{
               mb: 4,
-              p: 3,
+              p: { xs: 2, sm: 3 },
               bgcolor: "#1e2532",
               borderRadius: 3,
               border: "1px solid #2a3441",
@@ -1748,8 +1746,8 @@ export default function AdminCreateProductPage() {
             <Typography variant="h6" sx={{ color: "white", mb: 3, fontWeight: "bold" }}>
               Relaciones y Clasificación
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, mb: 3 }}>
-              <FormControl sx={{ flex: "1 1 250px", minWidth: "250px" }} required>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2, sm: 3 }, mb: 3 }}>
+              <FormControl sx={{ flex: "1 1 250px", minWidth: { xs: "100%", sm: "250px" } }} required>
                 <InputLabel sx={{ color: "#b0b0b0" }}>Juego Base</InputLabel>
                 <Select
                   value={complementoForm.juego}
@@ -1929,7 +1927,7 @@ export default function AdminCreateProductPage() {
             )}
           </Box>
 
-          <Box sx={{ display: "flex", gap: 3, justifyContent: "center", pt: 2 }}>
+          <Box sx={{ display: "flex", gap: { xs: 2, sm: 3 }, justifyContent: "center", pt: 2 }}>
             {isEditMode && (
               <Button
                 variant="contained"
@@ -2045,7 +2043,7 @@ export default function AdminCreateProductPage() {
         <CssBaseline />
         {/* Reutilizamos NavBar igual que otros componentes admin */}
         <NavBar />
-        <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 8 }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 8, overflowX: "hidden" }}>
           {!selectedType && renderTypeSelector()}
           {selectedType === "juego" && renderJuegoForm()}
           {selectedType === "servicio" && renderServicioForm()}
@@ -2055,3 +2053,5 @@ export default function AdminCreateProductPage() {
     </LocalizationProvider>
   ) 
 }
+
+
