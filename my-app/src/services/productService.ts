@@ -177,10 +177,6 @@ export const productService = {
     const res = await api.get<ApiResponse<ComplementoDetail>>(`/complemento/${id}`)
     return res.data.data
   },
-  async getFotos(tipo: 'juego'|'complemento'|'servicio', id: number): Promise<Foto[]> {
-    const res = await api.get<ApiResponse<Foto[]>>(`/foto-producto/${tipo}/${id}`)
-    return res.data.data
-  },
 
   // Helper method to get all juegos for complemento selection
   async getAllJuegos(): Promise<JuegoDetail[]> {
