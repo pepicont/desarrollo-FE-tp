@@ -100,18 +100,43 @@ export default function AboutUs() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Box sx={{ flexGrow: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          backgroundColor: "background.default",
+          minHeight: "100vh",
+          width: "100vw",
+          overflowX: "hidden",
+          boxSizing: "border-box",
+        }}
+      >
         {/* Header */}
         <NavBar />
 
         {/* Hero Section */}
-        <Container maxWidth="lg" sx={{ pt: 15, pb: 8 }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            pt: 15,
+            pb: 8,
+            maxWidth: "100vw !important",
+            overflowX: "hidden",
+            boxSizing: "border-box",
+          }}
+        >
           <Box sx={{ textAlign: "center", mb: 8 }}>
             <Box
               component="img"
               src={Logo}
               alt="Portal Videojuegos"
-              sx={{ width: 120, height: 120, mx: "auto", mb: 4 }}
+              sx={{
+                width: 120,
+                height: 120,
+                mx: "auto",
+                mb: 4,
+                maxWidth: "100%",
+                display: "block",
+              }}
             />
             <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: "bold", color: "#FFFFFF" }}>
               Sobre Nosotros
@@ -141,7 +166,17 @@ export default function AboutUs() {
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Paper elevation={3} sx={{ p: 4, backgroundColor: "#1e2532" }}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 4,
+                  backgroundColor: "#1e2532",
+                  overflowX: "hidden",
+                  boxSizing: "border-box",
+                  width: "100%",
+                  maxWidth: "100vw",
+                }}
+              >
                 {/* Stats */}
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                   {statsData.map((stat, index) => (
@@ -160,7 +195,17 @@ export default function AboutUs() {
           </Box>
 
           {/* Features Grid */}
-          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4, mb: 10 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 4,
+              mb: 10,
+              overflowX: "auto",
+              maxWidth: "100vw",
+              boxSizing: "border-box",
+            }}
+          >
             {features.map((feature, index) => (
               <Box key={index} sx={{ flex: 1 }}>
                 <Card sx={{ height: "100%", backgroundColor: "#1e2532", p: 3 }}>
@@ -179,7 +224,18 @@ export default function AboutUs() {
           </Box>
 
           {/* Services Section */}
-          <Paper elevation={3} sx={{ p: 6, backgroundColor: "#1e2532", mb: 10 }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 6,
+              backgroundColor: "#1e2532",
+              mb: 10,
+              overflowX: "hidden",
+              boxSizing: "border-box",
+              width: "100%",
+              maxWidth: "100vw",
+            }}
+          >
             <Typography
               variant="h3"
               component="h2"
@@ -198,7 +254,7 @@ export default function AboutUs() {
                       {service.title}
                     </Typography>
                   </Box>
-                  <Box component="ul" sx={{ pl: 2, m: 0 }}>
+                  <Box component="ul" sx={{ pl: 2, m: 0, wordBreak: "break-word", boxSizing: "border-box" }}>
                     {service.items.map((item, itemIndex) => (
                       <Typography component="li" key={itemIndex} sx={{ color: "#B0BEC5", mb: 1, fontSize: "1rem" }}>
                         {item}
