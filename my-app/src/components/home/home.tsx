@@ -281,7 +281,6 @@ const SLIDE_DURATION = 7000
 
 
 export default function Home() {
-  /*const [cartOpen, setCartOpen] = React.useState(false)*/
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const [progress, setProgress] = React.useState(0)
   const navigate = useNavigate()
@@ -294,30 +293,6 @@ export default function Home() {
   const touchDeltaX = React.useRef(0)
   const touchStartTime = React.useRef<number | null>(null)
 
-  /*const cartItems = [
-    {
-      id: 1,
-      title: "Cyberpunk 2077: Phantom Liberty",
-      price: "$29.99",
-  image: cyberpunkImg,
-      quantity: 1,
-    },
-    {
-      id: 2,
-      title: "FIFA 24",
-      price: "$59.99",
-  image: fifaImg,
-      quantity: 1,
-    },
-    {
-      id: 3,
-      title: "Spider-Man 2",
-      price: "$49.99",
-  image: mw3Img,
-      quantity: 1,
-    },
-  ]
-*/
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length)
@@ -425,87 +400,6 @@ export default function Home() {
   <CssBaseline />
   <Box sx={{ flexGrow: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
    <NavBar />
-    {/*<NavBar onCartClick={handleCartToggle} cartCount={cartCount} />
-
-        <Drawer anchor="right" open={cartOpen} onClose={handleCartToggle}>
-          <Box sx={{ width: 350, backgroundColor: "#1E2A3A", height: "100%" }}>
-            <Box
-              sx={{
-                p: 2,
-                borderBottom: "1px solid #2A3441",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography variant="h6" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                Carrito de Compras
-              </Typography>
-              <IconButton onClick={handleCartToggle} sx={{ color: "#FFFFFF" }}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-
-            <Box sx={{ p: 2 }}>
-              {cartItems.length === 0 ? (
-                <Typography sx={{ color: "#B0BEC5", textAlign: "center", mt: 4 }}>Tu carrito está vacío</Typography>
-              ) : (
-                <>
-                  {cartItems.map((item) => (
-                    <Box
-                      key={item.id}
-                      sx={{ display: "flex", mb: 2, p: 2, backgroundColor: "#141926", borderRadius: 2 }}
-                    >
-                      <Box
-                        component="img"
-                        src={item.image}
-                        alt={item.title}
-                        sx={{ width: 60, height: 60, objectFit: "cover", borderRadius: 1, mr: 2 }}
-                      />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ color: "#FFFFFF", fontWeight: "bold", mb: 1 }}>
-                          {item.title}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: "#4A90E2", fontWeight: "bold" }}>
-                          {item.price}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: "#B0BEC5" }}>
-                          Cantidad: {item.quantity}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-
-                  <Box sx={{ mt: 3, pt: 2, borderTop: "1px solid #2A3441" }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                      <Typography variant="h6" sx={{ color: "#FFFFFF" }}>
-                        Total:
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: "#4A90E2", fontWeight: "bold" }}>
-                        $139.97
-                      </Typography>
-                    </Box>
-                    <Button variant="contained" fullWidth size="large" sx={{ textTransform: "none", mb: 1 }}>
-                      Proceder al Pago
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      size="large"
-                      sx={{ textTransform: "none", borderColor: "#4A90E2", color: "#4A90E2" }}
-                      onClick={handleCartToggle}
-                    >
-                      Seguir Comprando
-                    </Button>
-                  </Box>
-                </>
-              )}
-            </Box>
-          </Box>
-        </Drawer>
-
-  {/* Profile menu and left drawer now handled by NavBar */}
-
   <Box sx={{ pt: 12, pb: 4, px: { xs: 2, sm: 3, md: 4 }, backgroundColor: "background.default", width: "100%" }}>
           <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "#FFFFFF" }}>
             Atravesá el Portal y disfrutá de 
@@ -787,7 +681,7 @@ export default function Home() {
             <Typography variant="body1" sx={{ lineHeight: 1.8, color: "#B0BEC5" }}>
               Somos tu portal de confianza para videojuegos, donde encontrarás los mejores títulos, DLC exclusivos y
               membresías premium para servicios de streaming y gaming. Nuestro sistema de códigos de cupón te
-              permite acceder instantáneamente a tus compras, mientras que nuestra comunidad de jugadores comparte
+              permite acceder instantáneamente a tus juegos y complementos en Steam y a los servicios en sus plataformas, mientras que nuestra comunidad de jugadores comparte
               reseñas auténticas para ayudarte a tomar las mejores decisiones.
             </Typography>
             <Button
