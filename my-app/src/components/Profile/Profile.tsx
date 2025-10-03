@@ -21,6 +21,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Snackbar,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -105,6 +106,9 @@ export default function Profile() {
   const [showEmailWarning, setShowEmailWarning] = useState(false)
   const [pendingEmailChange, setPendingEmailChange] = useState("")
   const [emailWarningShown, setEmailWarningShown] = useState(false)
+
+  const feedbackMessage = error || successMessage
+  const feedbackSeverity = error ? 'error' : 'success'
 
   const [userData, setUserData] = useState({
     username: "",
@@ -200,6 +204,26 @@ export default function Profile() {
         return
       }
 
+      const hasProfileChanges =
+        editData.realName !== userData.realName ||
+        editData.username !== userData.username ||
+        editData.email !== userData.email ||
+        editData.birthDate !== userData.birthDate ||
+        selectedAvatar !== userData.avatarUrl
+
+      const hasPasswordChanges = showPasswordFields && Boolean(newPassword)
+
+      if (!hasProfileChanges && !hasPasswordChanges) {
+        setIsEditing(false)
+        setEditData(userData)
+        setShowPasswordFields(false)
+        setNewPassword("")
+        setConfirmNewPassword("")
+        setNewPasswordError("")
+        setConfirmNewPasswordError("")
+        return
+      }
+
       const updateData = {
         nombre: editData.realName,
         nombreUsuario: editData.username,
@@ -249,9 +273,6 @@ export default function Profile() {
       setNewPasswordError("");
       setConfirmNewPasswordError("");
       setShowPasswordFields(false);
-      setTimeout(() => {
-        setSuccessMessage('');
-      }, 3000);
 
       // Actualizar la variable 'user' en localStorage o sessionStorage
       const storage = localStorage.getItem('user') ? localStorage : sessionStorage.getItem('user') ? sessionStorage : null;
@@ -336,6 +357,18 @@ export default function Profile() {
     setEmailWarningShown(false) // Resetear para permitir mostrar la advertencia de nuevo
   }
 
+  const handleFeedbackClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    if (error) {
+      setError('')
+    }
+    if (successMessage) {
+      setSuccessMessage('')
+    }
+  }
+
   const formatDate = (dateString: string) => {
     // Crear fecha asegurándose de que se interprete correctamente
     const date = new Date(dateString + 'T00:00:00')
@@ -384,22 +417,25 @@ export default function Profile() {
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
         <NavBar />
         <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+          <Snackbar
+            open={Boolean(feedbackMessage)}
+            autoHideDuration={error ? 3000 : 3000}
+            onClose={handleFeedbackClose}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            sx={{ mt: { xs: 7, sm: 7 } }}
+          >
+            <Alert
+              onClose={handleFeedbackClose}
+              severity={feedbackSeverity}
+              variant="filled"
+              sx={{ minWidth: { xs: '100%', sm: 400 } }}
+            >
+              {feedbackMessage}
+            </Alert>
+          </Snackbar>
           <Typography variant="h4" sx={{ color: "white", fontWeight: "bold", mb: 4 }}>
             Mi Perfil
           </Typography>
-
-          {/* Mensajes de error y éxito */}
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
-          
-          {successMessage && (
-            <Alert severity="success" sx={{ mb: 3 }}>
-              {successMessage}
-            </Alert>
-          )}
 
           <Box
             sx={{

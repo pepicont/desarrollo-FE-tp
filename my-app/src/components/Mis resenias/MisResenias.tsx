@@ -18,6 +18,7 @@ import {
   MenuItem,
   TextField,
   InputAdornment,
+  Snackbar,
 } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
@@ -114,8 +115,7 @@ export default function MisResenasPage() {
   const [itemsPerPage, setItemsPerPage] = useState(15)
 
   // Estados para alertas de éxito y eliminación
-  const [successAlert, setSuccessAlert] = useState(false);
-  const [deleteAlert, setDeleteAlert] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
   const [page, setPage] = useState(1);
 
@@ -188,8 +188,7 @@ export default function MisResenasPage() {
   // Mostrar alerta si viene de misCompras
   useEffect(() => {
     if (location.state && location.state.created) {
-      setSuccessAlert(true);
-      setTimeout(() => setSuccessAlert(false), 4000);
+      setToast({ type: 'success', message: 'Reseña creada con éxito' });
       // Limpiar el estado para evitar mostrar la alerta en recarga
       navigate(location.pathname, { replace: true });
     }
@@ -341,8 +340,10 @@ export default function MisResenasPage() {
             : r
         )
       );
-      setSuccessAlert(true);
-      setTimeout(() => setSuccessAlert(false), 4000);
+      setToast({
+        type: 'success',
+        message: reviewModalMode === 'create' ? 'Reseña creada con éxito' : 'Reseña modificada con éxito',
+      });
       handleReviewModalClose();
     } catch (error) {
       console.error('Error al guardar la reseña:', error);
@@ -391,8 +392,7 @@ export default function MisResenasPage() {
       }
       await deleteResenia(token, reseniaId);
       setResenias((prev) => prev.filter((r) => r.id !== reseniaId));
-      setDeleteAlert(true);
-      setTimeout(() => setDeleteAlert(false), 4000);
+  setToast({ type: 'error', message: 'Se eliminó la reseña' });
       handleReviewModalClose();
     } catch (error) {
       console.error('Error al eliminar la reseña:', error);
@@ -521,12 +521,25 @@ export default function MisResenasPage() {
           }}
         >
           {/* Alertas de éxito y eliminación */}
-          {successAlert && (
-            <Alert severity="success" sx={{ mb: 2, fontWeight: 'bold' }}>Reseña modificada con éxito</Alert>
-          )}
-          {deleteAlert && (
-            <Alert severity="error" sx={{ mb: 2, fontWeight: 'bold' }}>Se eliminó la reseña</Alert>
-          )}
+          <Snackbar
+            open={Boolean(toast)}
+            autoHideDuration={4000}
+            onClose={(_event, reason) => {
+              if (reason === 'clickaway') return;
+              setToast(null);
+            }}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            sx={{ mt: { xs: 8, md: 9 } }}
+          >
+            <Alert
+              severity={toast?.type ?? 'success'}
+              variant="filled"
+              onClose={() => setToast(null)}
+              sx={{ minWidth: { xs: '100%', sm: 360 } }}
+            >
+              {toast?.message ?? ''}
+            </Alert>
+          </Snackbar>
           {/* Mensaje de agradecimiento */}
           <Box sx={{ mb: 4, textAlign: "left" }}>
             <Typography variant="h5" sx={{ color: "primary.main", fontWeight: "bold" }}>
