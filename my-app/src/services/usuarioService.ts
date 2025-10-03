@@ -53,25 +53,6 @@ export async function deleteUsuario(token: string, usuarioId: number): Promise<v
   }
 }
 
-// Servicio para obtener un usuario específico (solo admin)
-export async function getUsuarioById(token: string, usuarioId: number): Promise<Usuario> {
-  const response = await fetch(buildApiUrl(`/usuario/${usuarioId}`), {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw { status: response.status, ...error }
-  }
-
-  const data = await response.json()
-  return data.data
-}
-
 // Servicio para actualizar un usuario (solo admin)
 export async function updateUsuario(token: string, usuarioId: number, usuarioData: Partial<Usuario>): Promise<Usuario> {
   const response = await fetch(buildApiUrl(`/usuario/${usuarioId}`), {

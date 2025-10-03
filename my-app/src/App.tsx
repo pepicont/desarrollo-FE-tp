@@ -13,7 +13,7 @@ import BuscarProductos from './components/BuscarProductos/BuscarProductos.tsx'
 import AboutUs from './components/aboutUs/aboutUs.tsx';
 import AdminUsuarios from './components/admin/AdminUsuarios.tsx';
 import AdminResenias from './components/admin/AdminResenias.tsx';
-import AdminCompras from './components/admin/AdminCompras.tsx';
+import AdminVentas from './components/admin/AdminVentas.tsx';
 import AdminCompanias from './components/admin/AdminCompanias.tsx';
 import AdminCategorias from './components/admin/AdminCategorias.tsx';
 import AdminCreateProduct from './components/admin/AdminCreateProduct.tsx';
@@ -67,9 +67,9 @@ function App() {
             <AdminResenias />
           </ProtectedAdminRoute>
         } />
-        <Route path="/admin/compras" element={
+        <Route path="/admin/ventas" element={
           <ProtectedAdminRoute>
-            <AdminCompras />
+            <AdminVentas />
           </ProtectedAdminRoute>
         } />
         <Route path="/admin/companias" element={

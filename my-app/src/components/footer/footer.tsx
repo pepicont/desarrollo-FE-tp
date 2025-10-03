@@ -83,6 +83,7 @@ export default function Footer() {
               </>
             ) : (
               <>
+                <NavLink to="/admin/ventas" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Ventas</NavLink>
                 <NavLink to="/admin/usuarios" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Usuarios</NavLink>
                 <NavLink to="/admin/resenias" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Reseñas</NavLink>
                 <NavLink to="/admin/companias" className={({ isActive }) => isActive ? 'footer-link active-footer-link' : 'footer-link'}>Compañías</NavLink>
