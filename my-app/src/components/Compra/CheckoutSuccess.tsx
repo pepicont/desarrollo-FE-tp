@@ -126,6 +126,16 @@ export default function CheckoutSuccess() {
         <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
           <Typography variant="h4" fontWeight={700} gutterBottom>¡Compra exitosa!</Typography>
           <Typography color="text.secondary" sx={{ mb: 2 }}>Gracias por tu compra. Aquí está tu comprobante.</Typography>
+          {(() => {
+            const tipo = ((state?.tipo ?? persisted?.tipo ?? '').toLowerCase());
+            if (tipo === 'juego' || tipo === 'complemento') {
+              return <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 2 }}>Recuerda: los Juegos y Complementos se canjean en el apartado Canjear Productos de Steam</Typography>;
+            }
+            if (tipo === 'servicio') {
+              return <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 2 }}>Recuerda dirigirte a la página del servicio adquirido y canjear este código en el apartado Canjear Productos</Typography>;
+            }
+            return null;
+          })()}
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {noParams && (
@@ -140,7 +150,7 @@ export default function CheckoutSuccess() {
                 <Box component="img" src={state.imageUrl || persisted?.imageUrl || '/vite.svg'} alt={state.nombre || persisted?.nombre || 'Producto'} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }} sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625' }} />
                 <Box sx={{ flex: 1 }}>
                   <Typography fontWeight={700}>{state?.nombre || persisted?.nombre || `${(state?.tipo ?? persisted?.tipo) || '—'} #${(state?.id ?? persisted?.id) ?? '—'}`}</Typography>
-                    <Typography color="text.secondary">{state?.tipo ?? persisted?.tipo ?? '—'}</Typography>
+                    <Typography color="text.secondary">{((state?.tipo ?? persisted?.tipo ?? '—') as string).charAt(0).toUpperCase() + ((state?.tipo ?? persisted?.tipo ?? '—') as string).slice(1)}</Typography>
                 </Box>
                 <Typography fontWeight={800} variant="h6">{typeof state.precio === 'number' ? `US$${state.precio}` : (typeof persisted?.precio === 'number' ? `US$${persisted?.precio}` : '-')}</Typography>
               </Box>

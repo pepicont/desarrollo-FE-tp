@@ -80,7 +80,6 @@ const services = [
     title: "Videojuegos",
     items: [
       "Catálogo completo de títulos AAA e indies",
-      "Información detallada de requisitos del sistema",
       "Reseñas y puntuaciones de la comunidad",
       "Datos de desarrolladoras y editoras",
     ],
