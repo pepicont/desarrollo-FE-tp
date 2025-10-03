@@ -108,6 +108,11 @@ export default function Producto() {
     }
   }, [heroImage])
 
+  // Scroll al inicio cuando se carga el componente
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [parsedTipo, parsedId])
+
   // Verificar si el usuario es admin
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -211,7 +216,7 @@ export default function Producto() {
                 <Box sx={{ position: 'relative', mb: 2 }}>
                   <Button
                     component={Link}
-                    to="/"
+                    to="/productos"
                     variant="contained"
                     color="primary"
                     size="small"
