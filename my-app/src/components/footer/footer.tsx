@@ -25,31 +25,33 @@ export default function Footer() {
   };
 
   return (
-    <Box
-      component="footer"
-      sx={{
-        bgcolor: '#000',
-        color: '#fff',
-        py: 4,
-        px: { xs: 2, md: 4 },
-        width: '100%',
-        mt: 'auto',
-        boxShadow: '0 -2px 8px rgba(0,0,0,0.2)',
-        overflowX: 'hidden',
-      }}
-    >
+    <>
+      <Box component="div" sx={{ height: 40, pointerEvents: 'none' }} aria-hidden />
       <Box
+        component="footer"
         sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 4,
-          maxWidth: '1200px',
-          mx: 'auto',
+          bgcolor: '#000',
+          color: '#fff',
+          py: 4,
+          px: { xs: 2, md: 4 },
           width: '100%',
+          mt: 'auto',
+          boxShadow: '0 -2px 8px rgba(0,0,0,0.2)',
+          overflowX: 'hidden',
         }}
       >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 4,
+            maxWidth: '1200px',
+            mx: 'auto',
+            width: '100%',
+          }}
+        >
         {/* Izquierda: Contacto */}
         <Stack spacing={1} sx={{ minWidth: 180, alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
           <Box display="flex" alignItems="center" gap={1}>
@@ -92,11 +94,12 @@ export default function Footer() {
           </Box>
         </Box>
         {/* Derecha: Marca y copyright */}
-        <Box display="flex" flexDirection="column" alignItems={{ xs: 'flex-start', md: 'center' }} minWidth={180} sx={{ alignSelf: 'center' }}>
+          <Box display="flex" flexDirection="column" alignItems={{ xs: 'flex-start', md: 'center' }} minWidth={180} sx={{ alignSelf: 'center' }}>
           <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>Portal Videojuegos</Typography>
           <Typography variant="caption" color="grey.400">&copy; 2025 Todos los derechos reservados</Typography>
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 }

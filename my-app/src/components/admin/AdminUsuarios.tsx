@@ -233,12 +233,12 @@ export default function UsuariosPage() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
+      <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default", overflowX: "hidden" }}>
         {/* NavBar compartida */}
         <NavBar />
         
         {/* Contenido principal */}
-  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 0.5, sm: 2, md: 4 } }}>
+  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 2, sm: 2, md: 4 } }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -258,8 +258,8 @@ export default function UsuariosPage() {
                 </Alert>
               )}
               {/* Barra de búsqueda */}
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ maxWidth: 600 }}>
+              <Box sx={{ mb: 3, width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <Box sx={{ width: '100%', maxWidth: 600 }}>
                   <TextField
                     fullWidth
                     placeholder="Buscar usuarios..."
@@ -489,11 +489,13 @@ export default function UsuariosPage() {
 
                             <Box sx={{ 
                               flex: 1, 
+                              width: '100%',
                               display: { xs: 'flex', md: 'grid' }, 
                               flexDirection: { xs: 'column', md: 'unset' },
-                              gridTemplateColumns: { md: '1fr 1fr 1fr' }, 
+                              gridTemplateColumns: { md: 'minmax(180px, 1fr) minmax(240px, 1.3fr) minmax(180px, 1fr)' }, 
                               gap: { xs: 1.5, sm: 3 },
-                              textAlign: { xs: 'center', md: 'left' }
+                              textAlign: { xs: 'center', md: 'left' },
+                              justifyItems: { md: 'start' }
                             }}>
                               <Box>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
@@ -504,21 +506,21 @@ export default function UsuariosPage() {
                                 </Typography>
                               </Box>
 
-                              <Box>
+                              <Box sx={{ width: '100%', minWidth: 0 }}>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
                                   Email
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: "white" }}>
+                                <Typography variant="body1" sx={{ color: "white", wordBreak: "break-word", overflowWrap: "break-word" }}>
                                   {usuario.mail}
                                 </Typography>
                               </Box>
 
-                              <Box>
+                              <Box sx={{ width: '100%' }}>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
                                   Fecha de creación
                                 </Typography>
-                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: { xs: "center", md: "flex-start" }, justifyContent: "center" }}>
-                                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: "center" }}>
+                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: { xs: "center", md: "flex-start" }, justifyContent: { xs: "center", md: "flex-start" } }}>
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: { xs: "center", md: "flex-start" } }}>
                                     <CalendarIcon sx={{ fontSize: 16, color: "#6b7280" }} />
                                     <Typography variant="body1" sx={{ color: "white" }}>
                                       {formatDate(usuario.fechaCreacion)}
@@ -597,8 +599,9 @@ export default function UsuariosPage() {
             bgcolor: "#141926",
             border: "2px solid #ef4444",
             borderRadius: 3,
-            m: { xs: 2, sm: 4 },
-            width: { xs: "calc(100% - 32px)", sm: "auto" },
+            m: { xs: 1, sm: 4 },
+            width: { xs: "calc(100vw - 16px)", sm: "auto" },
+            maxWidth: { xs: "calc(100vw - 16px)", sm: "600px" },
           },
         }}
       >
@@ -630,7 +633,13 @@ export default function UsuariosPage() {
           placeholder="Opcional: Motivos del borrado"
           value={deleteReason}
           onChange={e => setDeleteReason(e.target.value)}
-          sx={{ mt: 2, mb: 1 }}
+          sx={{ 
+            mt: 2, 
+            mb: 1,
+            '& .MuiInputBase-root': {
+              fontSize: { xs: '0.875rem', sm: '1rem' }
+            }
+          }}
         />
         </DialogContent>
         <DialogActions sx={{

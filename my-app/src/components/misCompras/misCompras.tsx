@@ -522,7 +522,7 @@ export default function MisComprasPage() {
               mb: 3,
             }}
           >
-            <Box sx={{ width: "100%" }}>
+            <Box>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
                 Mis compras
               </Typography>
@@ -538,7 +538,6 @@ export default function MisComprasPage() {
                 alignItems: "center",
                 flexWrap: "wrap",
                 justifyContent: { xs: "flex-start", md: "flex-end" },
-                width: "100%",
               }}
             >
               {/* Selector de items per page */}

@@ -528,7 +528,7 @@ export default function MisResenasPage() {
             <Alert severity="error" sx={{ mb: 2, fontWeight: 'bold' }}>Se eliminó la reseña</Alert>
           )}
           {/* Mensaje de agradecimiento */}
-          <Box sx={{ mb: 4, textAlign: "center" }}>
+          <Box sx={{ mb: 4, textAlign: "left" }}>
             <Typography variant="h5" sx={{ color: "primary.main", fontWeight: "bold" }}>
               Gracias por contribuir a la comunidad
             </Typography>
@@ -577,8 +577,6 @@ export default function MisResenasPage() {
               sx={{
                 color: "white",
                 fontWeight: "bold",
-                flexGrow: { md: 1 },
-                width: { xs: "100%", md: "auto" },
               }}
             >
               Mis reseñas

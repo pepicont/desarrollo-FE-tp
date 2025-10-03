@@ -506,7 +506,7 @@ export default function Home() {
 
   {/* Profile menu and left drawer now handled by NavBar */}
 
-  <Box sx={{ pt: 12, pb: 4, px: { xs: 2, sm: 3, md: 4 }, backgroundColor: "background.paper", width: "100%" }}>
+  <Box sx={{ pt: 12, pb: 4, px: { xs: 2, sm: 3, md: 4 }, backgroundColor: "background.default", width: "100%" }}>
           <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "#FFFFFF" }}>
             Atravesá el Portal y disfrutá de 
           </Typography>
