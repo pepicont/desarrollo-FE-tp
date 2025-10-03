@@ -39,6 +39,14 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(2.5),
   gap: theme.spacing(2),
   margin: "auto",
+  borderRadius: '24px',
+  backdropFilter: 'blur(20px)',
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? 'rgba(255, 255, 255, 0.05)' 
+    : 'rgba(255, 255, 255, 0.9)',
+  border: theme.palette.mode === 'dark'
+    ? '1px solid rgba(255, 255, 255, 0.1)'
+    : '1px solid rgba(255, 255, 255, 0.3)',
   [theme.breakpoints.up("sm")]: {
     maxWidth: 480,
     padding: theme.spacing(3),
@@ -50,15 +58,20 @@ const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.up("xl")]: {
     maxWidth: 600,
   },
-  boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), 0 2px 8px 0 rgba(31, 38, 135, 0.1)',
   ...theme.applyStyles("dark", {
-    boxShadow: "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
+    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.3)',
   }),
 }))
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100dvh",
-  position: "relative",
+  minWidth: '100vw',
+  height: '100%',
+  width: '100%',
+  position: 'fixed',
+  top: 0,
+  left: 0,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -69,10 +82,9 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.up("md")]: {
     padding: theme.spacing(4),
   },
-  backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
-  backgroundRepeat: "no-repeat",
+  backgroundColor: 'hsl(210, 100%, 97%)',
   ...theme.applyStyles("dark", {
-    backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+    backgroundColor: 'hsl(220, 30%, 8%)',
   }),
 }))
 
