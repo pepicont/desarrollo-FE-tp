@@ -207,7 +207,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               <FormLabel htmlFor="email">Correo Electrónico</FormLabel>
               <TextField
                 error={emailError}
-                helperText={emailErrorMessage}
+                helperText={emailError ? emailErrorMessage : ' '}
                 id="email"
                 type="email"
                 name="email"
@@ -219,13 +219,19 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 variant="outlined"
                 disabled={isLoading}
                 color={emailError ? 'error' : 'primary'}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Contraseña</FormLabel>
               <TextField
                 error={passwordError}
-                helperText={passwordErrorMessage}
+                helperText={passwordError ? passwordErrorMessage : ' '}
                 name="password"
                 placeholder="••••••"
                 type="password"
@@ -236,6 +242,12 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 variant="outlined"
                 disabled={isLoading}
                 color={passwordError ? 'error' : 'primary'}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControlLabel control={<Checkbox value="remember" name="rememberMe" color="primary" />} label="Recordarme" />

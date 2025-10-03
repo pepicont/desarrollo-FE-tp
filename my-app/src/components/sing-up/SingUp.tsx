@@ -373,7 +373,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
               <FormLabel htmlFor="email">Correo Electrónico</FormLabel>
               <TextField
                 error={emailError}
-                helperText={emailErrorMessage}
+                helperText={emailError ? emailErrorMessage : " "}
                 id="email"
                 type="email"
                 name="email"
@@ -387,13 +387,19 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={emailError ? "error" : "primary"}
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Contraseña</FormLabel>
               <TextField
                 error={passwordError}
-                helperText={passwordErrorMessage}
+                helperText={passwordError ? passwordErrorMessage : " "}
                 name="password"
                 placeholder="••••••"
                 type="password"
@@ -406,13 +412,19 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={passwordError ? "error" : "primary"}
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="confirmPassword">Confirmar Contraseña</FormLabel>
               <TextField
                 error={confirmPasswordError}
-                helperText={confirmPasswordErrorMessage}
+                helperText={confirmPasswordError ? confirmPasswordErrorMessage : " "}
                 name="confirmPassword"
                 placeholder="••••••"
                 type="password"
@@ -424,6 +436,12 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={confirmPasswordError ? "error" : "primary"}
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControlLabel
@@ -459,13 +477,14 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                   </Link>
                 </Box>
               }
-              sx={{ color: termsError ? 'error.main' : 'inherit' }}
             />
-            {termsError && (
-              <Typography variant="caption" color="error">
-                Debes aceptar los términos y condiciones
-              </Typography>
-            )}
+            <Box sx={{ minHeight: '1.5em' }}>
+              {termsError && (
+                <Typography variant="caption" color="error">
+                  Debes aceptar los términos y condiciones
+                </Typography>
+              )}
+            </Box>
           </>
         )
       case 1:
@@ -475,7 +494,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
               <FormLabel htmlFor="username">Nombre de Usuario</FormLabel>
               <TextField
                 error={usernameError && (fieldsTouched.username || hasAttemptedSubmit)}
-                helperText={(fieldsTouched.username || hasAttemptedSubmit) && usernameError ? usernameErrorMessage : ""}
+                helperText={(fieldsTouched.username || hasAttemptedSubmit) && usernameError ? usernameErrorMessage : " "}
                 id="username"
                 name="username"
                 placeholder="mi_usuario"
@@ -487,13 +506,19 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={usernameError && (fieldsTouched.username || hasAttemptedSubmit) ? "error" : "primary"}
                 value={formData.username}
                 onChange={(e) => handleInputChange("username", e.target.value)}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="name">Nombre Completo</FormLabel>
               <TextField
                 error={nameError && (fieldsTouched.name || hasAttemptedSubmit)}
-                helperText={(fieldsTouched.name || hasAttemptedSubmit) && nameError ? nameErrorMessage : ""}
+                helperText={(fieldsTouched.name || hasAttemptedSubmit) && nameError ? nameErrorMessage : " "}
                 id="name"
                 name="name"
                 placeholder="Tu nombre completo"
@@ -505,6 +530,12 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={nameError && (fieldsTouched.name || hasAttemptedSubmit) ? "error" : "primary"}
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
+                FormHelperTextProps={{
+                  sx: {
+                    minHeight: '1.5em',
+                    margin: 0,
+                  },
+                }}
               />
             </FormControl>
             <FormControl>
@@ -519,13 +550,19 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 slotProps={{
                   textField: {
                     error: birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit),
-                    helperText: (fieldsTouched.birthDate || hasAttemptedSubmit) && birthDateError ? birthDateErrorMessage : "",
+                    helperText: (fieldsTouched.birthDate || hasAttemptedSubmit) && birthDateError ? birthDateErrorMessage : " ",
                     fullWidth: true,
                     variant: "outlined",
                     required: true,
                     name: "birthDate",
                     id: "birthDate",
-                    color: birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit) ? "error" : "primary"
+                    color: birthDateError && (fieldsTouched.birthDate || hasAttemptedSubmit) ? "error" : "primary",
+                    FormHelperTextProps: {
+                      sx: {
+                        minHeight: '1.5em',
+                        margin: 0,
+                      },
+                    },
                   }
                 }}
                 format="DD/MM/YYYY"
