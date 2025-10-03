@@ -52,23 +52,3 @@ export async function deleteUsuario(token: string, usuarioId: number): Promise<v
     throw { status: response.status, ...errorData }
   }
 }
-
-// Servicio para actualizar un usuario (solo admin)
-export async function updateUsuario(token: string, usuarioId: number, usuarioData: Partial<Usuario>): Promise<Usuario> {
-  const response = await fetch(buildApiUrl(`/usuario/${usuarioId}`), {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(usuarioData),
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw { status: response.status, ...error }
-  }
-
-  const data = await response.json()
-  return data.data
-}
