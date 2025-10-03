@@ -605,7 +605,11 @@ export default function AdminCategoriasPage() {
                                 borderColor: "#4a90e2",
                                 color: "#4a90e2",
                                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                                px: { xs: 1.5, sm: 2 },
+                                px: { xs: 2, sm: 2.5 },
+                                py: { xs: 1, sm: 0.75 },
+                                width: { xs: "100%", sm: "auto" },
+                                minWidth: { md: 120 },
+                                textTransform: 'none',
                                 "&:hover": {
                                   backgroundColor: "rgba(74, 144, 226, 0.1)",
                                   borderColor: "#357abd",

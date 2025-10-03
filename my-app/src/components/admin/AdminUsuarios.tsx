@@ -233,12 +233,12 @@ export default function UsuariosPage() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
+      <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default", overflowX: "hidden" }}>
         {/* NavBar compartida */}
         <NavBar />
         
         {/* Contenido principal */}
-  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 0.5, sm: 2, md: 4 } }}>
+  <Container maxWidth="lg" sx={{ py: 4, mt: 8, px: { xs: 2, sm: 2, md: 4 } }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -506,11 +506,11 @@ export default function UsuariosPage() {
                                 </Typography>
                               </Box>
 
-                              <Box sx={{ width: '100%' }}>
+                              <Box sx={{ width: '100%', minWidth: 0 }}>
                                 <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
                                   Email
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: "white" }}>
+                                <Typography variant="body1" sx={{ color: "white", wordBreak: "break-word", overflowWrap: "break-word" }}>
                                   {usuario.mail}
                                 </Typography>
                               </Box>
@@ -599,8 +599,9 @@ export default function UsuariosPage() {
             bgcolor: "#141926",
             border: "2px solid #ef4444",
             borderRadius: 3,
-            m: { xs: 2, sm: 4 },
-            width: { xs: "calc(100% - 32px)", sm: "auto" },
+            m: { xs: 1, sm: 4 },
+            width: { xs: "calc(100vw - 16px)", sm: "auto" },
+            maxWidth: { xs: "calc(100vw - 16px)", sm: "600px" },
           },
         }}
       >
@@ -632,7 +633,13 @@ export default function UsuariosPage() {
           placeholder="Opcional: Motivos del borrado"
           value={deleteReason}
           onChange={e => setDeleteReason(e.target.value)}
-          sx={{ mt: 2, mb: 1 }}
+          sx={{ 
+            mt: 2, 
+            mb: 1,
+            '& .MuiInputBase-root': {
+              fontSize: { xs: '0.875rem', sm: '1rem' }
+            }
+          }}
         />
         </DialogContent>
         <DialogActions sx={{
