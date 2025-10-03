@@ -105,7 +105,7 @@ export default function AboutUs() {
           flexGrow: 1,
           backgroundColor: "background.default",
           minHeight: "100vh",
-          width: "100vw",
+          width: "100%",
           overflowX: "hidden",
           boxSizing: "border-box",
         }}
@@ -116,15 +116,17 @@ export default function AboutUs() {
         {/* Hero Section */}
         <Container
           maxWidth="lg"
+          disableGutters
           sx={{
-            pt: 15,
-            pb: 8,
-            maxWidth: "100vw !important",
+            pt: { xs: 10, sm: 12, md: 15 },
+            pb: { xs: 4, sm: 6, md: 8 },
+            width: "100%",
             overflowX: "hidden",
             boxSizing: "border-box",
+            mx: 0,
           }}
         >
-          <Box sx={{ textAlign: "center", mb: 8 }}>
+          <Box sx={{ textAlign: "center", mb: { xs: 4, md: 8 }, px: { xs: 1, sm: 2, md: 0 } }}>
             <Box
               component="img"
               src={Logo}
@@ -149,7 +151,16 @@ export default function AboutUs() {
 
           {/* Mission Section */}
           <Box
-            sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 6, alignItems: "center", mb: 10 }}
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: { xs: 2, md: 6 },
+              alignItems: "center",
+              mb: { xs: 4, md: 10 },
+              px: { xs: 1, sm: 2, md: 0 },
+              width: "100%",
+              boxSizing: "border-box",
+            }}
           >
             <Box sx={{ flex: 1 }}>
               <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: "bold", color: "#FFFFFF" }}>
@@ -169,12 +180,12 @@ export default function AboutUs() {
               <Paper
                 elevation={3}
                 sx={{
-                  p: 4,
+                  p: { xs: 2, sm: 3, md: 4 },
                   backgroundColor: "#1e2532",
                   overflowX: "hidden",
                   boxSizing: "border-box",
                   width: "100%",
-                  maxWidth: "100vw",
+                  mx: 0,
                 }}
               >
                 {/* Stats */}
@@ -199,11 +210,12 @@ export default function AboutUs() {
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
-              gap: 4,
-              mb: 10,
+              gap: { xs: 2, md: 4 },
+              mb: { xs: 4, md: 10 },
               overflowX: "auto",
-              maxWidth: "100vw",
+              width: "100%",
               boxSizing: "border-box",
+              px: { xs: 1, sm: 2, md: 0 },
             }}
           >
             {features.map((feature, index) => (
@@ -227,13 +239,13 @@ export default function AboutUs() {
           <Paper
             elevation={3}
             sx={{
-              p: 6,
+              p: { xs: 2, sm: 4, md: 6 },
               backgroundColor: "#1e2532",
-              mb: 10,
+              mb: { xs: 4, md: 10 },
               overflowX: "hidden",
               boxSizing: "border-box",
               width: "100%",
-              maxWidth: "100vw",
+              mx: 0,
             }}
           >
             <Typography
@@ -245,7 +257,7 @@ export default function AboutUs() {
               Nuestros Servicios
             </Typography>
             {/* Services */}
-            <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 6 }}>
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: { xs: 2, md: 6 }, width: "100%", boxSizing: "border-box" }}>
               {services.map((service, index) => (
                 <Box key={index} sx={{ flex: 1 }}>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -254,7 +266,7 @@ export default function AboutUs() {
                       {service.title}
                     </Typography>
                   </Box>
-                  <Box component="ul" sx={{ pl: 2, m: 0, wordBreak: "break-word", boxSizing: "border-box" }}>
+                  <Box component="ul" sx={{ pl: 2, m: 0, wordBreak: "break-word", boxSizing: "border-box", width: "100%" }}>
                     {service.items.map((item, itemIndex) => (
                       <Typography component="li" key={itemIndex} sx={{ color: "#B0BEC5", mb: 1, fontSize: "1rem" }}>
                         {item}
@@ -267,7 +279,7 @@ export default function AboutUs() {
           </Paper>
 
           {/* CTA Section */}
-          <Box sx={{ textAlign: "center", mb: 8 }}>
+          <Box sx={{ textAlign: "center", mb: { xs: 4, md: 8 }, px: { xs: 1, sm: 2, md: 0 } }}>
             <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: "bold", color: "#FFFFFF" }}>
               ¿Listo para comenzar?
             </Typography>
