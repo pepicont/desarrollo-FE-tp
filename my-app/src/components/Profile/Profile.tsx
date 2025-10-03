@@ -200,10 +200,6 @@ export default function Profile() {
         return
       }
 
-      // Primero obtenemos el ID del usuario actual
-      // Usar getUserProfile para obtener el id
-      const profile = await getUserProfile(token)
-      const userId = profile.id
       const updateData = {
         nombre: editData.realName,
         nombreUsuario: editData.username,
@@ -222,7 +218,7 @@ export default function Profile() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let result: any = null;
       try {
-        result = await updateUserProfile(token, userId, updateData);
+        result = await updateUserProfile(token, updateData);
       } catch (err) {
         error = err;
       }

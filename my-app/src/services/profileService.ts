@@ -13,8 +13,8 @@ export async function getUserProfile(token: string) {
   return data;
 }
 
-export async function updateUserProfile(token: string, userId: number, updateData: unknown) {
-  const response = await fetch(buildApiUrl(`/usuario/${userId}`), {
+export async function updateUserProfile(token: string, updateData: unknown) {
+  const response = await fetch(buildApiUrl(`/usuario`), {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
