@@ -130,8 +130,6 @@ Escenario integral de compra:
 5. Usa cy.request para re-llamar /checkout/start y luego /checkout/simulate-success , extrayendo sessionId, ventaId y codActivacion.
 6. Visita manualmente /checkout/success con el venta_id y valida la UI ( Compra exitosa , código de activación).
 
-_Mezcla acciones UI con llamadas directas para estabilizar el flujo.
-
-__Foto éxito:_
+_Foto éxito:_
 
 <img src="./my-app/src/assets/fotos-tests/checkout.test.cy.ts.png" alt="Foto test" width="500" />
