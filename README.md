@@ -124,10 +124,14 @@ _Foto éxito:_
 
 Escenario integral de compra:
 1. Hace login reutilizando una función auxiliar.
-2. Intercepta GET **/api/search/top-sellers para elegir un producto (prioriza tipo juego ).
-3. Navega al detalle, inicia el checkout y espera la creación de sesión ( POST /api/checkout/start ).
+2. Visita directamente el detalle de un producto conocido del seed e intercepta su carga para continuar el flujo.
+3. Inicia el checkout y espera la creación de sesión ( POST /api/checkout/start ).
 4. Mockea POST /api/checkout/mp/start para evitar MercadoPago real.
 5. Usa cy.request para re-llamar /checkout/start y luego /checkout/simulate-success , extrayendo sessionId, ventaId y codActivacion.
 6. Visita manualmente /checkout/success con el venta_id y valida la UI ( Compra exitosa , código de activación).
 
-_Mezcla acciones UI con llamadas directas para estabilizar el flujo._
+_Mezcla acciones UI con llamadas directas para estabilizar el flujo.
+
+__Foto éxito:_
+
+<img src="./my-app/src/assets/fotos-tests/checkout.test.cy.ts.png" alt="Foto test" width="500" />
