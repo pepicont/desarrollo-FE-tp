@@ -1,5 +1,6 @@
-// Seleccionaremos dinámicamente un producto de /api/search/top-sellers
+// Usamos un producto conocido del seed 
 const USUARIO = { email: 'gamer@gmail.com', password: '123456' };
+const PRODUCTO_TEST = { id: 11, tipo: 'servicio', nombre: 'WoW Time' } as const;
 
 function login() {
   cy.visit('/login');
@@ -14,27 +15,13 @@ describe('Checkout - flujo simulando pago exitoso', () => {
     // 1. Login
     login();
 
-    // 2. Ir a home (en caso de que no haya redirigido) e interceptar carga de destacados
-    cy.intercept('GET', '**/api/search/top-sellers*').as('topSellers');
-    cy.visit('/');
-    cy.wait('@topSellers').then(interception => {
-      interface ProductoResp { id: number; tipo: string; nombre: string }
-      const body = interception.response?.body as { data?: ProductoResp[] } | undefined;
-      const productos = body?.data as ProductoResp[] | undefined;
-      if (!Array.isArray(productos) || productos.length === 0) {
-        throw new Error('Lista de top-sellers vacía o no válida');
-      }
-      // Elegimos preferentemente un juego, si no cualquiera
-      const elegido = productos.find((p) => p.tipo === 'juego') || productos[0];
-      if (!elegido?.nombre || !elegido?.id || !elegido?.tipo) {
-        throw new Error('Producto seleccionado carece de campos requeridos (nombre/id/tipo)');
-      }
-      cy.wrap(elegido).as('productoSeleccionado');
-  
-  cy.contains('h3', elegido.nombre, { timeout: 10000 }).click();
-    });
+    // 2. Ir directo al detalle de un producto conocido
+    cy.wrap(PRODUCTO_TEST).as('productoSeleccionado');
+    cy.intercept('GET', `**/api/${PRODUCTO_TEST.tipo}/${PRODUCTO_TEST.id}`).as('detalleProducto');
+    cy.visit(`/producto/${PRODUCTO_TEST.tipo}/${PRODUCTO_TEST.id}`);
 
-    cy.contains('button', /comprar|adquirir|pagar|agregar/i).first().click();
+    cy.wait('@detalleProducto', { timeout: 10000 });
+    cy.contains('button', /comprar/i, { timeout: 10000 }).first().click();
 
     
     cy.location('pathname', { timeout: 10000 }).should('match', /checkout$/);
@@ -75,26 +62,26 @@ describe('Checkout - flujo simulando pago exitoso', () => {
           body: { tipo: p.tipo, id: p.id },
           headers: { Authorization: `Bearer ${token}` }
         }).then(startResp => {
-  const sessionId = startResp.body?.data?.data?.sessionId || startResp.body?.data?.sessionId;
-  if (!sessionId) throw new Error('No se pudo extraer sessionId del start');
-        // Simular éxito
-        cy.request({
-          method: 'POST',
-          url: 'http://localhost:3000/api/checkout/simulate-success',
-          body: { sessionId },
-          headers: { Authorization: `Bearer ${token}` }
-        }).then(simResp => {
-          expect(simResp.status).to.eq(200);
-          const ventaId = simResp.body?.data?.data?.venta?.id || simResp.body?.data?.venta?.id;
-          const cod = simResp.body?.data?.data?.venta?.codActivacion || simResp.body?.data?.venta?.codActivacion;
-          if (!ventaId) throw new Error('ventaId no presente en simulate-success');
-          if (!cod) throw new Error('codActivacion no presente en simulate-success');
-          cy.visit('/checkout/success', {
-            qs: { venta_id: ventaId },
+          const sessionId = startResp.body?.data?.data?.sessionId || startResp.body?.data?.sessionId;
+          if (!sessionId) throw new Error('No se pudo extraer sessionId del start');
+          // Simular éxito
+          cy.request({
+            method: 'POST',
+            url: 'http://localhost:3000/api/checkout/simulate-success',
+            body: { sessionId },
+            headers: { Authorization: `Bearer ${token}` }
+          }).then(simResp => {
+            expect(simResp.status).to.eq(200);
+            const ventaId = simResp.body?.data?.data?.venta?.id || simResp.body?.data?.venta?.id;
+            const cod = simResp.body?.data?.data?.venta?.codActivacion || simResp.body?.data?.venta?.codActivacion;
+            if (!ventaId) throw new Error('ventaId no presente en simulate-success');
+            if (!cod) throw new Error('codActivacion no presente en simulate-success');
+            cy.visit('/checkout/success', {
+              qs: { venta_id: ventaId },
+            });
           });
         });
       });
-    });
     });
 
     // 9. Validar pantalla de éxito
@@ -103,6 +90,3 @@ describe('Checkout - flujo simulando pago exitoso', () => {
     cy.contains(/código de activación/i).should('be.visible');
   });
 });
-
-// NOTA: Este test mezcla acciones UI y llamadas directas cy.request para estabilizar el flujo.
-//       Cuando quieras probar MP real, crea un segundo spec sin mocks ni simulate-success.
