@@ -105,10 +105,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [loginError, setLoginError] = React.useState('');
   const [loginSuccess, setLoginSuccess] = React.useState(false);
 
-  // Debug opcional
-  React.useEffect(() => {
-    // console.log('isLoading estado:', isLoading);
-  }, [isLoading]);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {

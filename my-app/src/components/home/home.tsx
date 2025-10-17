@@ -5,7 +5,6 @@ import {
   IconButton,
   Typography,
   Box,
-  /*Drawer,*/
   Card,
   CardContent,
   CardMedia,
@@ -17,14 +16,10 @@ import {
 import CssBaseline from "@mui/material/CssBaseline"
 
 import {
-  /*Close as CloseIcon,*/
   ArrowBackIos,
   ArrowForwardIos,
 } from "@mui/icons-material"
 import styled from "@emotion/styled"
-// import cyberpunkImg from "../../assets/cyberpunk.jpg"
-// import fifaImg from "../../assets/fifa24.jpg"
-// import mw3Img from "../../assets/mw3.jpg"
 import NavBar from "../navBar/navBar"
 import juegos from "../../assets/carousel-juegos.png"
 import servicios from "../../assets/carousel-servicios.jpg"
@@ -276,15 +271,11 @@ const carouselItems = [
 
 const SLIDE_DURATION = 7000
 
-// Reemplazamos destacados hardcodeados por top sellers reales
-
-
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const [progress, setProgress] = React.useState(0)
   const navigate = useNavigate()
-  /*const [cartCount] = React.useState(3)*/
   const [topSellers, setTopSellers] = React.useState<TopSeller[]>([])
   const [loadingTop, setLoadingTop] = React.useState<boolean>(true)
   const [errorTop, setErrorTop] = React.useState<string | null>(null)
@@ -391,9 +382,6 @@ export default function Home() {
     touchStartTime.current = null
   }
 
-  /*const handleCartToggle = () => {
-    setCartOpen(!cartOpen)
-  }*/
 
   return (
     <ThemeProvider theme={darkTheme}>

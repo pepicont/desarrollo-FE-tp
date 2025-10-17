@@ -67,19 +67,19 @@ interface Resenia {
     juego?: {
       id: number
       nombre: string
-      imagen?: string // legacy opcional
+      imagen?: string 
       fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
     }
     servicio?: {
       id: number
       nombre: string
-      imagen?: string // legacy opcional
+      imagen?: string 
       fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
     }
     complemento?: {
       id: number
       nombre: string
-      imagen?: string // legacy opcional
+      imagen?: string 
       fotos?: Array<{ id: number; url: string; esPrincipal?: boolean }>
     }
   }
@@ -499,8 +499,6 @@ export default function MisResenasPage() {
               {error}
             </Alert>
           </Container>
-          {/* Footer compartido */}
-          {/* <Footer /> */}
         </Box>
       </ThemeProvider>
     )

@@ -47,7 +47,7 @@ export type ComplementoDetail = {
 
 type ApiResponse<T> = { message: string; data: T }
 
-// Types for creating products
+// Tipos para creación de productos
 export type CreateJuegoData = {
   nombre: string
   detalle: string

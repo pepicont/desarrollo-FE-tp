@@ -10,7 +10,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  /*Badge,*/
   Avatar,
   Menu,
   MenuItem,
@@ -25,7 +24,6 @@ import {
   Menu as MenuIcon,
   Search as SearchIcon,
   Info as InfoIcon,
-  /*ShoppingCart as ShoppingCartIcon,*/
   ShoppingBag as ShoppingBagIcon,
   RateReview as ReviewIcon,
   ContactMail as ContactIcon,
@@ -88,14 +86,10 @@ const adminMenuItems = [
   { text: "Cerrar sesión", icon: <LogoutIcon />, href: "__logout__", isLogout: true },
 ]
 
-/*type NavBarProps = {
-  onCartClick?: () => void
-  cartCount?: number
-}*/
 
 
 
-export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) {
+export default function NavBar() {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [searchModalOpen, setSearchModalOpen] = React.useState(false)
@@ -407,15 +401,8 @@ export default function NavBar(/*{ onCartClick, cartCount = 0 }: NavBarProps*/) 
             </IconButton>
           </Box>
 
-          {/* Right: cart (optional) + profile */}
+          {/* Right: profile */}
           {isLoggedIn && <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexShrink: 0 }}>
-            {/* {onCartClick && (
-              <IconButton color="inherit" sx={{ mr: 1 }} onClick={onCartClick} aria-label="Abrir carrito">
-                <Badge badgeContent={cartCount} color="error">
-                  <ShoppingCartIcon />
-                </Badge>
-              </IconButton>
-            )} */}
             <Typography variant="body1" className="hide-on-mobile" sx={{ mr: 1 }}>
               Hola, {getNombreUsuario()}!
             </Typography>

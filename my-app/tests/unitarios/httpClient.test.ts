@@ -47,7 +47,4 @@ describe('buildApiUrl - Construcción de URLs de API', () => {
     expect(result).toBe(`${API_BASE_URL}/`)
   })
 
-  it('debe manejar rutas complejas con múltiples segmentos', () => {
-    // ...existing code...
-  })
 })
