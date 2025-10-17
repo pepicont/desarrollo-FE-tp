@@ -148,9 +148,9 @@ export default function Producto() {
         } else {
           setHeroImage(null)
         }
-      } catch (e) {
-        console.error(e)
-        setError('No se pudo cargar el producto')
+      } catch (e: any) {
+        if (e.status === 404) setError('El producto al que intenta acceder no existe')
+        else setError('No se pudo cargar el producto debido a un problema en el servidor')
       }
     }
     load()
@@ -201,7 +201,7 @@ export default function Producto() {
         {error ? (
           <Container maxWidth="sm" sx={{ py: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
             <Alert severity="error" sx={{ fontSize: 20, mb: 4, p: 4, textAlign: 'center' }}>
-              En este momento este producto no está disponible.
+              {error}
             </Alert>
             <Button variant="contained" color="primary" size="large" onClick={() => navigate('/productos')}>
               Volver al catálogo
