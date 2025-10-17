@@ -58,6 +58,8 @@ export async function mpResult(paymentId: string) {
 
 // Nuevo: obtener una venta por id (público en este backend)
 export async function getVenta(ventaId: number) {
-  const res = await API.get(`/venta/${ventaId}`)
+  const token = authService.getToken()
+  if (!token) throw new Error('No autenticado')
+  const res = await API.get(`/venta/${ventaId}`, { headers: { Authorization: `Bearer ${token}` } })
   return res.data.data as VentaMinimal
 }

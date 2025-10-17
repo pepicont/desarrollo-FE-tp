@@ -68,9 +68,10 @@ export default function CheckoutSuccess() {
           return
         }
         setError('No se recibieron identificadores válidos')
-      } catch (e: unknown) {
+      } catch (e: any) {
         const err = e as Error
-        setError(err?.message || 'No se pudo confirmar el pago')
+        if (e.status === 404) setError('No se pudo recuperar una venta con ese identificador')
+          else setError(err?.message || 'No se pudo confirmar el pago')
       } finally {
         setLoading(false)
       }
@@ -124,27 +125,40 @@ export default function CheckoutSuccess() {
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
         <NavBar />
         <Container maxWidth="sm" sx={{ py: 4, mt: 8 }}>
-          <Typography variant="h4" fontWeight={700} gutterBottom>¡Compra exitosa!</Typography>
-          <Typography color="text.secondary" sx={{ mb: 2 }}>Gracias por tu compra. Aquí está tu comprobante.</Typography>
-          {(() => {
-            const tipo = ((state?.tipo ?? persisted?.tipo ?? '').toLowerCase());
-            if (tipo === 'juego' || tipo === 'complemento') {
-              return <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 2 }}>Recuerda: los Juegos y Complementos se canjean en el apartado Canjear Productos de Steam</Typography>;
-            }
-            if (tipo === 'servicio') {
-              return <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 2 }}>Recuerda dirigirte a la página del servicio adquirido y canjear este código en el apartado Canjear Productos</Typography>;
-            }
-            return null;
-          })()}
+          {!error ? (
+            <>
+              <Typography variant="h4" fontWeight={700} gutterBottom>¡Compra exitosa!</Typography>
+              <Typography color="text.secondary" sx={{ mb: 2 }}>Gracias por tu compra. Aquí está tu comprobante.</Typography>
+              {(() => {
+                const tipo = ((state?.tipo ?? persisted?.tipo ?? '').toLowerCase());
+                if (tipo === 'juego' || tipo === 'complemento') {
+                  return <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 2 }}>Recuerda: los Juegos y Complementos se canjean en el apartado Canjear Productos de Steam</Typography>;
+                }
+                if (tipo === 'servicio') {
+                  return <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 2 }}>Recuerda dirigirte a la página del servicio adquirido y canjear este código en el apartado Canjear Productos</Typography>;
+                }
+                return null;
+              })()}
+            </>
+          ) : (
+            <>
+              <Typography variant="h4" fontWeight={700} gutterBottom>Ocurrió un error en tu compra</Typography>
+              <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+              {noParams && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  No recibimos identificadores de pago en la URL. Si venís de Mercado Pago, verificá que el pago haya finalizado y que el botón “Volver al sitio” te redirija aquí.
+                </Alert>
+              )}
+            </>
+          )}
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {noParams && (
             <Alert severity="info" sx={{ mb: 2 }}>
               No recibimos identificadores de pago en la URL. Si venís de Mercado Pago, verificá que el pago haya finalizado y que el botón “Volver al sitio” te redirija aquí.
             </Alert>
           )}
 
-          <Card>
+          {!error && (<Card>
             <CardContent>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
                 <Box component="img" src={state.imageUrl || persisted?.imageUrl || '/vite.svg'} alt={state.nombre || persisted?.nombre || 'Producto'} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }} sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625' }} />
@@ -172,7 +186,7 @@ export default function CheckoutSuccess() {
                 )}
               </Box>
             </CardContent>
-          </Card>
+          </Card>)}
 
           <Box
             sx={{
