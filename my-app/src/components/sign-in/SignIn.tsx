@@ -29,6 +29,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(2.5),
   gap: theme.spacing(2),
   margin: 'auto',
+  my: 2,
   borderRadius: '24px',
   backdropFilter: 'blur(20px)',
   backgroundColor: theme.palette.mode === 'dark' 
@@ -59,15 +60,12 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignInContainer = styled(Stack)(({ theme }) => ({
   minHeight: '100dvh',
   minWidth: '100vw',
-  height: '100%',
   width: '100%',
-  position: 'fixed',
-  top: 0,
-  left: 0,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   padding: theme.spacing(2),
+  overflowY: 'auto',
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(3),
   },
