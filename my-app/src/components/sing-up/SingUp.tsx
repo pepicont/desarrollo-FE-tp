@@ -38,8 +38,9 @@ const Card = styled(MuiCard)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(2.5),
   gap: theme.spacing(2),
-  margin: "auto",
-  my: 2,
+  margin: "0 auto",
+  maxHeight: `calc(100vh - ${theme.spacing(4)})`,
+  overflowY: 'auto',
   borderRadius: '24px',
   backdropFilter: 'blur(20px)',
   backgroundColor: theme.palette.mode === 'dark' 
@@ -63,22 +64,38 @@ const Card = styled(MuiCard)(({ theme }) => ({
   ...theme.applyStyles("dark", {
     boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.3)',
   }),
+  '@media (max-height: 820px)': {
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(2),
+  },
+  '@media (max-height: 720px)': {
+    gap: theme.spacing(1.25),
+    padding: theme.spacing(1.75),
+  },
 }))
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-  minHeight: "100dvh",
-  minWidth: '100vw',
-  width: '100%',
+  position: 'fixed',
+  inset: 0,
+  width: '100vw',
+  height: '100vh',
+  boxSizing: 'border-box',
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   padding: theme.spacing(2),
-  overflowY: 'auto',
+  overflow: 'hidden',
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(3),
   },
   [theme.breakpoints.up("md")]: {
     padding: theme.spacing(4),
+  },
+  '@media (max-height: 820px)': {
+    padding: theme.spacing(1.5),
+  },
+  '@media (max-height: 720px)': {
+    padding: theme.spacing(1),
   },
   backgroundColor: 'hsl(210, 100%, 97%)',
   ...theme.applyStyles("dark", {
