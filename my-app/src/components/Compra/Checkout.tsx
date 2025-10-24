@@ -128,19 +128,17 @@ export default function Checkout() {
           <Card sx={{ mb: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Resumen</Typography>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 2 }}>
                 <Box
                   component="img"
                   src={imageUrl || '/vite.svg'}
                   alt={nombre || 'Producto'}
                   onError={(e: React.SyntheticEvent<HTMLImageElement>) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }}
-                  sx={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625', display: 'block' }}
+                  sx={{ width: 160, height: 100, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625', display: 'block', mb: 1 }}
                 />
-                <Box sx={{ flex: 1, minWidth: 200 }}>
-                  <Typography fontWeight={600}>{nombre || `${tipo} #${id}`}</Typography>
-                  <Typography color="text.secondary">Tipo: {tipo}</Typography>
-                </Box>
-                <Box>
+                <Typography fontWeight={600} align="center">{nombre || `${tipo} #${id}`}</Typography>
+                <Typography color="text.secondary" align="center">Tipo: {tipo}</Typography>
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
                   <Typography color="text.secondary">Total</Typography>
                   <Typography fontWeight={800} variant="h6">{typeof precio === 'number' ? `US$${precio}` : '-'}</Typography>
                 </Box>
