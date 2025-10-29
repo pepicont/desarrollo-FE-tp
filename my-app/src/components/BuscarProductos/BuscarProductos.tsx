@@ -355,7 +355,7 @@ export default function BuscarProductos() {
                   <Box sx={{ position: "relative" }}>
                     <Box
                       component="img"
-                      src={product.imageUrl || '/vite.svg'}
+                      src={product.imageUrl || '/producto-sin-foto.png'}
                       alt={product.nombre}
                       onError={(e: React.SyntheticEvent<HTMLImageElement>) => { (e.currentTarget as HTMLImageElement).src = '/vite.svg' }}
                       sx={{ width: '100%', height: 200, objectFit: 'cover', display: 'block', borderTopLeftRadius: 12, borderTopRightRadius: 12, backgroundColor: '#0f1625' }}

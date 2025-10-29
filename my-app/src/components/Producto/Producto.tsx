@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Chip, Avatar, Rating, Alert } from '@mui/material'
+import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, Card, CardContent, Button, Chip, Avatar, Rating, Alert, CircularProgress } from '@mui/material'
 import { ArrowBack, Person, CalendarMonth, Category, Edit } from '@mui/icons-material'
 import NavBar from '../navBar/navBar'
 import { Link, useParams, useNavigate } from 'react-router-dom'
@@ -60,7 +60,8 @@ export default function Producto() {
   const [, setReviewsTotal] = useState(0)
   const reviewsPerPage = 5
   const [heroImage, setHeroImage] = useState<string | null>(null)
-  const [displayImage, setDisplayImage] = useState<string>('/vite.svg')
+  const [displayImage, setDisplayImage] = useState<string>('')
+  const [isImageLoading, setIsImageLoading] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const imageTimeoutRef = useRef<number | null>(null)
   
@@ -77,36 +78,48 @@ export default function Producto() {
 
   
   useEffect(() => {
-    if (!heroImage) {
-      setDisplayImage('/vite.svg')
+    // Si no hay heroImage pero el producto aún no se cargó, mantener loading
+    if (!heroImage && !data) {
       return
     }
-    let cancelled = false
-    const img = new Image()
-
     
+    // Si no hay heroImage y el producto ya se cargó, mostrar placeholder
+    if (!heroImage && data) {
+      setDisplayImage('/producto-sin-foto.png')
+      setIsImageLoading(false)
+      return
+    }
+    
+    // Si hay heroImage, intentar cargarla
+    setIsImageLoading(true)
+    setDisplayImage('')
+    let cancelled = false
+    const img = new window.Image()
     if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
     imageTimeoutRef.current = window.setTimeout(() => {
-      if (!cancelled) setDisplayImage('/vite.svg')
-    }, 2000) 
-
+      if (!cancelled) {
+        setIsImageLoading(false)
+        setDisplayImage('/producto-sin-foto.png')
+      }
+    }, 2000)
     img.onload = () => {
       if (cancelled) return
       if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
-      setDisplayImage(heroImage)
+      setIsImageLoading(false)
+      setDisplayImage(heroImage!)
     }
     img.onerror = () => {
       if (cancelled) return
       if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
-      setDisplayImage('/vite.svg')
+      setIsImageLoading(false)
+      setDisplayImage('/producto-sin-foto.png')
     }
-    img.src = heroImage
-
+    img.src = heroImage!
     return () => {
       cancelled = true
       if (imageTimeoutRef.current) window.clearTimeout(imageTimeoutRef.current)
     }
-  }, [heroImage])
+  }, [heroImage, data])
 
   // Scroll al inicio cuando se carga el componente
   useEffect(() => {
@@ -225,13 +238,22 @@ export default function Producto() {
                   >
                     Volver
                   </Button>
-                  <Box
-                    component="img"
-                    src={displayImage}
-                    alt={data?.nombre ?? 'Producto'}
-                    sx={{ width: '100%', height: 400, objectFit: 'cover', borderRadius: 2, bgcolor: '#0f1625', display: 'block' }}
-                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
-                  />
+                  <Box sx={{ width: '100%', height: 400, borderRadius: 2, bgcolor: '#0f1625', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    {isImageLoading && (
+                      <Box sx={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 2 }}>
+                        <CircularProgress size={64} thickness={4} />
+                      </Box>
+                    )}
+                    {displayImage && (
+                      <Box
+                        component="img"
+                        src={displayImage}
+                        alt={data?.nombre ?? 'Producto'}
+                        sx={{ width: '100%', height: 400, objectFit: 'cover', borderRadius: 2, display: 'block' }}
+                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = '/vite.svg' }}
+                      />
+                    )}
+                  </Box>
                   {tipo && (
                     <Chip
                       label={tipo.charAt(0).toUpperCase() + tipo.slice(1)}
