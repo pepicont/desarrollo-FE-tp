@@ -235,10 +235,10 @@ export default function MisComprasPage() {
     const pick = (fotos?: Array<{ url: string; esPrincipal?: boolean }>) =>
       fotos?.find(f => f.esPrincipal)?.url || fotos?.[0]?.url
 
-    if (venta.juego) return pick(venta.juego.fotos) || '/vite.svg'
-    if (venta.servicio) return pick(venta.servicio.fotos) || '/vite.svg'
-    if (venta.complemento) return pick(venta.complemento.fotos) || '/vite.svg'
-    return '/vite.svg'
+    if (venta.juego) return pick(venta.juego.fotos) || '/producto-sin-foto.png'
+    if (venta.servicio) return pick(venta.servicio.fotos) || '/producto-sin-foto.png'
+    if (venta.complemento) return pick(venta.complemento.fotos) || '/producto-sin-foto.png'
+    return '/producto-sin-foto.png'
   }
 
   const formatDate = (dateString: string) => {
