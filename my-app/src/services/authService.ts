@@ -28,6 +28,17 @@ export interface VerifyTokenResponse {
   };
 }
 
+export interface SignupResponse {
+  message?: string;
+  user: {
+    id: number;
+    mail: string;
+    nombre: string;
+    tipoUsuario: string;
+    urlFoto: string;
+  };
+}
+
 // Servicio de autenticación
 export const authService = {
   // Función para hacer login
@@ -41,6 +52,27 @@ export const authService = {
     }
   },
 
+  async signupUser({ email, password, name, username, birthDate }: {
+    email: string;
+    password: string;
+    name: string;
+    username: string;
+    birthDate: string;
+  }) {
+    try {
+      const response = await apiClient.post<SignupResponse>('/auth/register', {
+        mail: email,
+        contrasenia: password,
+        nombre: name,
+        nombreUsuario: username,
+        fechaNacimiento: birthDate,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error en registro:', error);
+      throw error;
+    }
+  },
   // Función para verificar token 
   async verifyToken(token: string): Promise<VerifyTokenResponse> {
     try {
@@ -116,6 +148,5 @@ export const authService = {
     const user = await this.getCurrentUser();
     return user?.tipoUsuario === 'admin';
   },
-
   
 };

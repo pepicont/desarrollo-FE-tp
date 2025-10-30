@@ -27,8 +27,7 @@ import dayjs from 'dayjs'
 import AppTheme from '../shared-theme/AppTheme'
 import { SitemarkIcon } from "../sign-in/components/CustomIcons"
 import { useEffect } from "react"
-import { authService } from "../../services/authService.ts"
-import { signupUser } from '../../services/profileService';
+import { authService } from '../../services/authService';
 import { mailService } from '../../services/mailService';
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -350,8 +349,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     try {
       console.log("Registration attempt:", formData)
 
-      // Usar el servicio migrado
-      const result = await signupUser({
+      const result = await authService.signupUser({
         email: formData.email,
         password: formData.password,
         name: formData.name,
