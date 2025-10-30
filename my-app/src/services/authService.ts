@@ -148,5 +148,12 @@ export const authService = {
     const user = await this.getCurrentUser();
     return user?.tipoUsuario === 'admin';
   },
+
+  // Función para verificar si el usuario es usuario
+  async isUsuario(): Promise<boolean> {
+    const user = await this.getCurrentUser();
+    return user?.tipoUsuario === 'usuario';
+  },
+
   
 };
