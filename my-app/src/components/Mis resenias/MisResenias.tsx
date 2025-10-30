@@ -279,10 +279,10 @@ export default function MisResenasPage() {
   const getProductImage = (venta: Resenia["venta"]) => {
     const pick = (fotos?: Array<{ url: string; esPrincipal?: boolean }>) =>
       fotos?.find(f => f.esPrincipal)?.url || fotos?.[0]?.url
-    if (venta.juego) return venta.juego.imagen || pick(venta.juego.fotos) || '/vite.svg'
-    if (venta.servicio) return venta.servicio.imagen || pick(venta.servicio.fotos) || '/vite.svg'
-    if (venta.complemento) return venta.complemento.imagen || pick(venta.complemento.fotos) || '/vite.svg'
-    return '/vite.svg'
+    if (venta.juego) return venta.juego.imagen || pick(venta.juego.fotos) || '/producto-sin-foto.png'
+    if (venta.servicio) return venta.servicio.imagen || pick(venta.servicio.fotos) || '/producto-sin-foto.png'
+    if (venta.complemento) return venta.complemento.imagen || pick(venta.complemento.fotos) || '/producto-sin-foto.png'
+    return '/producto-sin-foto.png'
   }
 
   const handleProductClick = (ventaId: number) => {
