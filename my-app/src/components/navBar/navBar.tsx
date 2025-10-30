@@ -111,7 +111,9 @@ export default function NavBar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [searchOpen]);
+
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
+  
   const [isLoggedIn, setIsLoggedIn] = React.useState(() => {
     const user = localStorage.getItem("user");
     const token = localStorage.getItem("authToken");
