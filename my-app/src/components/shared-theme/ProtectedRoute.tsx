@@ -10,13 +10,21 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUsuario, setIsUsuario] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
         const authenticated = await authService.isAuthenticated();
         setIsAuthenticated(authenticated);
-      } catch (error) {
+        if (authenticated) {
+          const userStatus = await authService.isUsuario();
+          setIsUsuario(userStatus);
+        } else {
+          setIsUsuario(false);
+        }
+      }
+       catch (error) {
         console.error('Error checking authentication:', error);
         setIsAuthenticated(false);
       } finally {
@@ -44,6 +52,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+  if (!isUsuario) {
+      return <Navigate to="/" replace />;
+    }
+
 
   return <>{children}</>;
 };
