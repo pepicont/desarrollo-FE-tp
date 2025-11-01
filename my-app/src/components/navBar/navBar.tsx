@@ -338,7 +338,7 @@ export default function NavBar() {
     const parsed = JSON.parse(user);
     userEmail = parsed.mail || parsed.email || "";
     avatarUrl = parsed.avatarUrl || parsed.urlFoto;
-  } catch {console.log("Error parsing user data")}
+  } catch { /* error de parseo de user */ }
             }
 
   return (

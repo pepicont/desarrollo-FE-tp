@@ -347,7 +347,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     setIsLoading(true)
 
     try {
-      console.log("Registration attempt:", formData)
+      
 
       const result = await authService.signupUser({
         email: formData.email,
